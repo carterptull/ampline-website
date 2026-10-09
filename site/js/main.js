@@ -3,6 +3,7 @@ import { createAmpline } from './runtime/ampline.js';
 import { mountEqualizer } from './equalizer.js';
 import { wireCopy } from './copy.js';
 import { startHero } from './hero.js';
+import { renderTour, watchScrollable } from './tour.js';
 
 const amp = createAmpline({ columns: 120 });
 document.getElementById('ampVersion').textContent = amp.version;
@@ -15,7 +16,9 @@ const heroVu = mountEqualizer(document.getElementById('heroVu'), wheel, { size: 
 wireCopy(document.getElementById('copyBtn'), 'npx ampline-claude --install', document.getElementById('copyStatus'));
 startHero({ amp, equalizer: heroVu, body: document.getElementById('heroBody'), line: document.getElementById('heroSl') });
 
-// Wiring that later tasks add here, each with its own import:
-//   tour.js       renderTour({ amp: createAmpline({ columns: 500 }), mount: #tour })
-//                 (its own instance: the tour reconfigures segments per card, and shared
-//                 config would leak into the hero's cycling line)
+// The tour reconfigures segments/columns per card, so it gets its own instance: shared mutable config would leak into the hero's cycling line.
+const tour = document.getElementById('tour');
+renderTour({ amp: createAmpline({ columns: 500 }), mount: tour });
+watchScrollable(tour);
+
+// Phase 2 wiring lands here, each with its own import: playground.js, install-demo.js.

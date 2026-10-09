@@ -57,7 +57,7 @@ code { font: inherit }
 .install { display: inline-flex; align-items: center; gap: 16px; max-width: 100%; margin-top: 30px; border: 1px solid var(--line-2); border-radius: 10px;
   padding: 12px 12px 12px 18px; background: #0a0a0a; font-family: var(--mono); font-size: calc(15px * var(--mk)); color: var(--white) }
 .install code { min-width: 0; overflow-x: auto; white-space: pre }
-.prompt-sym { color: var(--quiet) }
+.prompt-sym { color: var(--quiet); -webkit-user-select: none; user-select: none } /* copy/selection gets the command only, not the "$ " */
 .copy { flex: none; font-family: var(--sans); font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--line-2); border-radius: 7px; padding: 5px 11px; cursor: pointer }
 .copy:hover { color: var(--white); border-color: #444 }
 .meta { margin: 16px 0 0; font-family: var(--mono); font-size: calc(12px * var(--mk)); color: var(--quiet) }
@@ -92,7 +92,7 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 34px }
 .card { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--surface) }
 .card h3 { font-size: 14px; font-weight: 600; color: var(--white); margin: 0 0 10px }
-.card .d { font-size: 13px; color: #7a7a7a; line-height: 1.5; margin: 12px 0 0 }
+.card .d { font-size: 13px; color: var(--quiet); line-height: 1.5; margin: 12px 0 0 }
 .card .s { font-family: var(--mono); font-size: calc(13px * var(--mk)); line-height: 1.5; background: var(--surface-2); border: 1px solid #161616; border-radius: 8px;
   padding: 9px 11px; white-space: pre; overflow-x: auto; color: #ddd }
 .span2 { grid-column: span 2 }
@@ -179,6 +179,7 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
 @media (pointer: coarse) {
   .links a, .copy, .seg-toggles button, .ctl select, .btn, .footer-links a, .brand {
     min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center }
+  .card .s a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center } /* PR / MR links */
   .pill { min-height: 44px; padding: 0 18px }
   .ctl input[type=range] { height: 44px }
   .copy { padding: 0 16px }
