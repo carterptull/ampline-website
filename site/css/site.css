@@ -5,8 +5,9 @@
   /* "ampline mono" (Iosevka Fixed) advances 0.5em against the mockup mono's 0.6em and reads
      smaller at the same size, so mono text is scaled up to keep the mockup's visual size. */
   --mk: 1.15;
-  /* quiet text: the darkest gray that still clears 4.5:1 on black (the mockup's #666/#555/#4a4a4a don't) */
-  --quiet: #777;
+  /* quiet text: the darkest gray that still clears 4.5:1 on every surface it sits on (#0a0a0a, #0b0b0b,
+     #070707; the mockup's #666/#555/#4a4a4a and a plain #777 don't) */
+  --quiet: #7a7a7a;
   --nav-h: 58px;
 }
 
