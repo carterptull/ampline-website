@@ -12,16 +12,23 @@ const globalHeaders = vercel.headers.find((h) => h.source === '/(.*)').headers;
 const port = Number(process.env.PORT) || 4173;
 
 createServer(async (req, res) => {
-  let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-  if (path.endsWith('/')) path += 'index.html';
-  const file = normalize(join(ROOT, path));
-  if (!file.startsWith(normalize(ROOT))) { res.writeHead(403).end(); return; }
+  // Security headers go on every response, including 400/403/404/500.
   for (const { key, value } of globalHeaders) res.setHeader(key, value);
   try {
+    let path;
+    try { path = decodeURIComponent(new URL(req.url, 'http://x').pathname); } catch { res.writeHead(400).end(); return; }
+    if (path.endsWith('/')) path += 'index.html';
+    const file = normalize(join(ROOT, path));
+    if (!file.startsWith(normalize(ROOT))) { res.writeHead(403).end(); return; }
     const target = (await stat(file).catch(() => null))?.isFile() ? file
       : (await stat(file + '.html').catch(() => null))?.isFile() ? file + '.html' : null;
-    if (!target) { res.writeHead(404, { 'content-type': TYPES['.html'] }); res.end(await readFile(join(ROOT, '404.html'))); return; }
-    res.writeHead(200, { 'content-type': TYPES[extname(target)] || 'application/octet-stream', 'cache-control': 'no-store' });
-    res.end(await readFile(target));
-  } catch { res.writeHead(500).end(); }
+    if (!target) {
+      const body = await readFile(join(ROOT, '404.html')).catch(() => null);
+      if (body) res.writeHead(404, { 'content-type': TYPES['.html'] }).end(body);
+      else res.writeHead(404, { 'content-type': TYPES['.txt'] }).end('Not found');
+      return;
+    }
+    const body = await readFile(target); // read first: a failure must not follow writeHead(200)
+    res.writeHead(200, { 'content-type': TYPES[extname(target)] || 'application/octet-stream', 'cache-control': 'no-store' }).end(body);
+  } catch { if (!res.headersSent) res.writeHead(500).end(); else res.destroy(); }
 }).listen(port, () => console.log(`ampline-website dev server: http://localhost:${port} (production headers applied)`));
