@@ -89,13 +89,13 @@ ampline-website/
 ├── scripts/
 │   ├── sync-ampline.mjs         node_modules/ampline-claude/lib → site/js/runtime/factories.generated.js
 │   ├── serve.mjs                zero-dep static server for site/ that applies vercel.json headers
-│   └── make-wordmark.mjs        one-off: Michroma TTF → site/assets/wordmark.svg (uses a temp opentype.js)
+│   └── make-wordmark.mjs        one-off: Michroma TTF → site/assets/wordmark.v1.svg (uses a temp opentype.js)
 ├── site/                        ← Vercel output directory (the website)
 │   ├── index.html
 │   ├── 404.html
 │   ├── robots.txt  sitemap.xml  site.webmanifest
 │   ├── favicon.ico  icon.svg  apple-touch-icon.png  og.png
-│   ├── assets/  wordmark.svg  fonts/mono-400.v1.woff2  fonts/mono-700.v1.woff2  fonts/OFL.txt
+│   ├── assets/  wordmark.v1.svg  fonts/mono-400.v1.woff2  fonts/mono-700.v1.woff2  fonts/OFL.txt
 │   ├── css/  tokens.css  site.css
 │   └── js/
 │       ├── main.js              entry: wires everything after DOMContentLoaded

@@ -1,8 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 
 const SITE = new URL('../site/', import.meta.url);
+const PKG = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const pages = ['index.html', '404.html'].map((f) => [f, readFileSync(new URL(f, SITE), 'utf8')]);
 const css = readdirSync(new URL('css/', SITE)).map((f) => readFileSync(new URL(`css/${f}`, SITE), 'utf8')).join('\n');
 const js = readdirSync(new URL('js/', SITE), { recursive: true }).filter((f) => f.endsWith('.js'))
@@ -34,7 +35,33 @@ for (const [name, html] of pages) {
   test(`${name}: target=_blank links carry rel=noopener`, () => {
     for (const a of html.match(/<a\b[^>]*target="_blank"[^>]*>/gi) || []) assert.match(a, /rel="noopener noreferrer"/);
   });
+  test(`${name}: footer shows the site version from package.json`, () => {
+    const m = html.match(/<span class="ver" id="siteVersion">([^<]*)<\/span>/);
+    assert.ok(m, 'footer site version missing');
+    assert.equal(m[1], `v${PKG.version}`);
+  });
+  test(`${name}: static ampline-claude version matches the pinned devDependency`, () => {
+    // main.js overwrites it from the runtime; this is what shows without JS (and on 404.html)
+    const m = html.match(/<span id="ampVersion">([^<]*)<\/span>/);
+    assert.ok(m, 'ampVersion missing');
+    assert.equal(m[1], PKG.devDependencies['ampline-claude']);
+  });
+  test(`${name}: every same-origin resource it loads exists in site/`, () => {
+    for (const tag of html.match(/<(link|script|img|source)\b[^>]*>/gi) || []) {
+      const ref = tag.match(/\b(?:href|src)="(\/[^/"][^"]*)"/);
+      if (!ref) continue;
+      assert.ok(existsSync(new URL(`.${ref[1]}`, SITE)), `missing file for ${tag}`);
+    }
+  });
 }
+
+const footerOf = (html) => (html.match(/<footer\b[\s\S]*?<\/footer>/) || [''])[0];
+
+test('404.html footer mirrors index.html footer exactly', () => {
+  const index = footerOf(pages[0][1]);
+  assert.ok(index.includes('https://buymeacoffee.com/paymonsoftware'), 'Buy Me a Beer pill missing');
+  assert.equal(footerOf(pages[1][1]), index);
+});
 
 test('index.html: SEO + social meta present', () => {
   const html = pages[0][1];
@@ -46,6 +73,7 @@ test('index.html: SEO + social meta present', () => {
   const data = JSON.parse(ld[1]);
   assert.equal(data['@type'], 'SoftwareApplication');
   assert.equal(data.aggregateRating, undefined); // never invent ratings
+  assert.equal(data.operatingSystem, undefined); // no OS claim until macOS is verified
 });
 
 test('CSS loads no remote resources', () => {

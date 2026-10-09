@@ -20,7 +20,10 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image:alt" content="The ampline wordmark above a color-graded Claude Code statusline.">
   <link rel="icon" href="data:,">
+  <link rel="preload" href="/assets/fonts/mono-400.v1.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <script type="module" src="/js/main.js"></script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ampline","applicationCategory":"DeveloperApplication",
    "offers":{"@type":"Offer","price":0,"priceCurrency":"USD"},
@@ -30,11 +33,94 @@
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
+  <nav class="nav" aria-label="Primary">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="ampline, back to top">
+        <img class="brand-wm" src="/assets/wordmark.v1.svg" alt="" width="96" height="19">
+        <span class="vu vu-nav" id="navVu" aria-hidden="true"></span>
+      </a>
+      <div class="links">
+        <a class="hide-narrow" href="#features">Features</a>
+        <a class="hide-narrow" href="#playground">Playground</a>
+        <a class="hide-narrow" href="#how">How it works</a>
+        <a href="https://github.com/carterptull/ampline-claude" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+        <a href="https://www.npmjs.com/package/ampline-claude" target="_blank" rel="noopener noreferrer">npm ↗</a>
+      </div>
+    </div>
+  </nav>
+
   <main id="main">
-    <h1>ampline</h1>
+    <header class="wrap hero" id="top">
+      <h1 class="hero-wm"><img src="/assets/wordmark.v1.svg" alt="ampline" width="560" height="109"></h1>
+      <div class="vu vu-hero" id="heroVu" aria-hidden="true"></div>
+      <p class="slogan">Amplify your status bar.</p>
+      <p class="sub">A zero-dependency <b>Node.js</b> statusline for Claude Code. Model, effort, context, usage limits, git, cost and PRs, color-coded on one line.</p>
+      <div class="install">
+        <code id="installCmd"><span class="prompt-sym" aria-hidden="true">$ </span>npx ampline-claude --install</code>
+        <button class="copy" id="copyBtn" type="button">Copy</button>
+      </div>
+      <p class="meta">Node.js ≥ 24 · 0 dependencies · no network · no credentials · MIT</p>
+      <p class="sr-status" id="copyStatus" role="status" aria-live="polite"></p>
+      <figure class="term term-hero">
+        <div class="chrome" aria-hidden="true"><i></i><i></i><i></i><span class="title">claude · ~/code/widgets</span></div>
+        <div class="term-body" id="heroBody"></div>
+        <div class="sl sl-off" id="heroSl" aria-hidden="true"></div>
+        <figcaption class="visually-hidden" id="heroCaption">A Claude Code session with the ampline statusline along the bottom.</figcaption>
+      </figure>
+    </header>
+
+    <section class="wrap section" id="features" aria-labelledby="features-h">
+      <p class="eyebrow">What it shows</p>
+      <h2 id="features-h">Every signal, one line.</h2>
+      <p class="lead">Each segment drops out cleanly when its data isn't there. On a narrow terminal the line splits into two instead of being cut off.</p>
+      <div class="grid" id="tour"></div>
+      <p class="note">5-hour and weekly bars need a Claude.ai subscription. Requires a truecolor terminal.</p>
+    </section>
+
+    <section class="wrap section" id="playground" aria-labelledby="playground-h">
+      <p class="eyebrow">Playground</p>
+      <h2 id="playground-h">Turn it up.</h2>
+      <p class="lead">This is ampline's own renderer, running in your browser. Push the meters into the red.</p>
+      <div id="playMount"><!-- Phase 1: static preview rendered by tour.js; Phase 2: playground.js --></div>
+    </section>
+
+    <section class="wrap section" id="how" aria-labelledby="how-h">
+      <p class="eyebrow">Under the hood</p>
+      <h2 id="how-h">Loud on screen. Quiet everywhere else.</h2>
+      <div class="cards4">
+        <article class="card hood hood-1"><p class="n">01</p><h3>Zero dependencies</h3><p>One Node.js script. Nothing to audit but ampline itself.</p></article>
+        <article class="card hood hood-2"><p class="n">02</p><h3>No network, no credentials</h3><p>Reads only the JSON Claude Code pipes in. Never touches your tokens or calls an API.</p></article>
+        <article class="card hood hood-3"><p class="n">03</p><h3>Never breaks your session</h3><p>Every segment fails silently. Cached git state, a hard timeout, always exits 0.</p></article>
+        <article class="card hood hood-4"><p class="n">04</p><h3>Escape-safe</h3><p>Branch names, todos and repo config are sanitized before they reach your terminal.</p></article>
+      </div>
+      <div class="more">
+        <a class="btn" href="https://github.com/carterptull/ampline-claude#faq" target="_blank" rel="noopener noreferrer">FAQ ↗</a>
+        <a class="btn" href="https://github.com/carterptull/ampline-claude#configuration" target="_blank" rel="noopener noreferrer">Configuration ↗</a>
+        <a class="btn" href="https://github.com/carterptull/ampline-claude/blob/main/SECURITY.md" target="_blank" rel="noopener noreferrer">Security ↗</a>
+        <a class="btn" href="https://github.com/carterptull/ampline-claude/tree/main/diagrams" target="_blank" rel="noopener noreferrer">Architecture diagrams ↗</a>
+      </div>
+    </section>
   </main>
+
   <footer class="footer">
-    <p>ampline is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anthropic, PBC. Claude and Claude Code are trademarks of Anthropic, PBC.</p>
+    <div class="wrap footer-inner">
+      <div class="footer-row">
+        <img class="footer-wm" src="/assets/wordmark.v1.svg" alt="ampline" width="84" height="16">
+        <a class="pill" href="https://buymeacoffee.com/paymonsoftware" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">🍺</span> Buy Me a Beer</a>
+        <div class="footer-links">
+          <a href="https://github.com/carterptull/ampline-claude" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://www.npmjs.com/package/ampline-claude" target="_blank" rel="noopener noreferrer">npm</a>
+          <a href="https://github.com/carterptull/ampline-claude/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+          <a href="https://github.com/carterptull/ampline-claude/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a>
+        </div>
+      </div>
+      <div class="footer-base">
+        <p>MIT · © 2026 Paymon Software</p>
+        <span class="ver" id="siteVersion">v0.1.0</span>
+      </div>
+      <p>Demos rendered by ampline-claude <span id="ampVersion">0.6.0</span>'s own code · This page: 0 trackers, 0 third-party requests</p>
+      <p class="disc">ampline is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anthropic, PBC. Claude and Claude Code are trademarks of Anthropic, PBC.</p>
+    </div>
   </footer>
 </body>
 </html>
