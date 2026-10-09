@@ -1,0 +1,21 @@
+{
+  "name": "ampline-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Website for ampline, the zero-dependency Node.js statusline for Claude Code. Live at ampline.js.org.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Carter Tull (Paymon Software)",
+  "homepage": "https://ampline.js.org",
+  "repository": { "type": "git", "url": "git+https://github.com/carterptull/ampline-website.git" },
+  "engines": { "node": ">=24.0.0" },
+  "scripts": {
+    "sync": "node scripts/sync-ampline.mjs",
+    "sync:check": "node scripts/sync-ampline.mjs --check",
+    "dev": "node scripts/serve.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "devDependencies": {
+    "ampline-claude": "0.6.0"
+  }
+}
