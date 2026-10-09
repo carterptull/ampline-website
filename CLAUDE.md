@@ -95,7 +95,7 @@ ampline-website/
 │   ├── 404.html
 │   ├── robots.txt  sitemap.xml  site.webmanifest
 │   ├── favicon.ico  icon.svg  apple-touch-icon.png  og.png
-│   ├── assets/  wordmark.svg  fonts/jbmono-400.v1.woff2  fonts/jbmono-700.v1.woff2  fonts/OFL.txt
+│   ├── assets/  wordmark.svg  fonts/mono-400.v1.woff2  fonts/mono-700.v1.woff2  fonts/OFL.txt
 │   ├── css/  tokens.css  site.css
 │   └── js/
 │       ├── main.js              entry: wires everything after DOMContentLoaded

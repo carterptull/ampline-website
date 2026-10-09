@@ -1,3 +1,10 @@
+Iosevka Fixed (https://github.com/be5invis/Iosevka), release v34.9.0.
+The files in this directory (mono-400.v1.woff2, mono-700.v1.woff2) are subsets of
+IosevkaFixed-Regular and IosevkaFixed-Bold, used under the license below.
+License text copied from https://github.com/be5invis/Iosevka/blob/v34.9.0/LICENSE.md
+
+----------------------------------------------------------------------
+
 Copyright (c) 2015-2026, Renzhi Li (aka. Belleve Invis, belleve@typeof.net)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.

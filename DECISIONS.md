@@ -71,7 +71,7 @@ considered instead. Reversing any of them is cheap unless noted.
 
 ### D9. Self-hosted, subset Iosevka Fixed (renamed "ampline mono")
 
-**Decision:** The monospace face is Iosevka Fixed Regular and Bold v34.9.0 (SIL OFL), subset to Latin plus the statusline glyphs, self-hosted as `jbmono-400.v1.woff2` and `jbmono-700.v1.woff2` and exposed as the `"ampline mono"` family. The file names keep the original `jbmono` prefix.
+**Decision:** The monospace face is Iosevka Fixed Regular and Bold v34.9.0 (SIL OFL), subset to Latin plus the statusline glyphs, self-hosted as `mono-400.v1.woff2` and `mono-700.v1.woff2` and exposed as the `"ampline mono"` family.
 
 **Why:** Every glyph in the bars must come from one font, or the bars misalign; iOS has no suitable mono, so it has to be shipped. JetBrains Mono v2.304 was the first choice but lacks `↺` (U+21BA), `⎇` (U+2387) and `↳` (U+21B3); DejaVu Sans Mono has `↺` and `↳` but not `⎇`. Iosevka Fixed has all 14 statusline glyphs at the same advance as `M`. Subsetting keeps each file near 12 KB, and self-hosting keeps the page at zero third-party requests.
 

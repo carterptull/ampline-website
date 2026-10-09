@@ -10,6 +10,6 @@ const path = font.getPath('ampline', 0, size * 0.8, size, { kerning: true, lette
 const bb = path.getBoundingBox();
 const w = Math.ceil(bb.x2 - bb.x1), h = Math.ceil(bb.y2 - bb.y1);
 path.commands.forEach((c) => { for (const k of ['x', 'x1', 'x2']) if (k in c) c[k] -= bb.x1; for (const k of ['y', 'y1', 'y2']) if (k in c) c[k] -= bb.y1; });
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="ampline"><title>ampline</title><path fill="currentColor" d="${path.toPathData(2)}"/></svg>\n`;
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="ampline"><title>ampline</title><path fill="#ffffff" d="${path.toPathData(2)}"/></svg>\n`;
 writeFileSync(new URL('../site/assets/wordmark.svg', import.meta.url), svg);
 console.log(`wordmark.svg ${w}x${h}`);
