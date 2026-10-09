@@ -69,13 +69,13 @@ considered instead. Reversing any of them is cheap unless noted.
 
 **Alternatives:** a two-column hero with the demo beside the text (cramped at phone widths).
 
-### D9. Self-hosted, subset JetBrains Mono
+### D9. Self-hosted, subset Iosevka Fixed (renamed "ampline mono")
 
-**Decision:** The monospace face is JetBrains Mono Regular and Bold (SIL OFL), subset to Latin plus the statusline glyphs, self-hosted and renamed when changed (`jbmono-400.v1.woff2`).
+**Decision:** The monospace face is Iosevka Fixed Regular and Bold v34.9.0 (SIL OFL), subset to Latin plus the statusline glyphs, self-hosted as `jbmono-400.v1.woff2` and `jbmono-700.v1.woff2` and exposed as the `"ampline mono"` family. The file names keep the original `jbmono` prefix.
 
-**Why:** Every glyph in the bars must come from one font, or the bars misalign; iOS has no JetBrains Mono, so it has to be shipped. Subsetting keeps it small, and self-hosting keeps the page at zero third-party requests.
+**Why:** Every glyph in the bars must come from one font, or the bars misalign; iOS has no suitable mono, so it has to be shipped. JetBrains Mono v2.304 was the first choice but lacks `↺` (U+21BA), `⎇` (U+2387) and `↳` (U+21B3); DejaVu Sans Mono has `↺` and `↳` but not `⎇`. Iosevka Fixed has all 14 statusline glyphs at the same advance as `M`. Subsetting keeps each file near 12 KB, and self-hosting keeps the page at zero third-party requests.
 
-**Alternatives:** a system monospace stack (glyph fallback breaks bar alignment); a font CDN (a third-party request).
+**Alternatives:** JetBrains Mono (three glyphs would fall back to another font and break alignment); DejaVu Sans Mono (no `⎇`); a system monospace stack (glyph fallback breaks bar alignment); a font CDN (a third-party request). Iosevka is narrower than JetBrains Mono, so `ch`-based widths are 500/1000 em instead of 600/1000.
 
 ### D10. No analytics
 

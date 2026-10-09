@@ -1,1 +1,48 @@
-:root{color-scheme:dark;--bg:#000}
+/* Design tokens (A5) and the self-hosted mono font. */
+@font-face {
+  font-family: "ampline mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/assets/fonts/jbmono-400.v1.woff2) format("woff2");
+}
+@font-face {
+  font-family: "ampline mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/assets/fonts/jbmono-700.v1.woff2) format("woff2");
+}
+
+:root {
+  color-scheme: dark;
+
+  --bg: #000;
+  --surface: #070707;
+  --surface-2: #0b0b0b;
+  --line: #1a1a1a;
+  --line-2: #262626;
+  --text: #e8e8e8;
+  --muted: #8a8a8a;
+  --faint: #555;
+  --white: #fff;
+
+  /* danger ramp, calm to critical */
+  --danger-1: #60C878;
+  --danger-2: #F5C43D;
+  --danger-3: #EF9F27;
+  --danger-4: #E8433D;
+  --danger-5: #A32D2D;
+
+  --gold: #E8B23D;
+
+  --mono: "ampline mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --maxw: 1040px;
+  --gutter: 24px;
+}
+
+@media (max-width: 399px) {
+  :root { --gutter: 16px; }
+}
