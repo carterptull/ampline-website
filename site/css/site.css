@@ -79,7 +79,7 @@ code { font: inherit }
 .sl.sl-off { filter: brightness(.18) saturate(0) }
 .seg-in { animation: segin .45s ease-out both }
 @keyframes segin { from { opacity: 0; filter: blur(3px) } to { opacity: 1; filter: none } }
-.ansi-dim { opacity: .5 }
+.ansi-dim { color: var(--muted) } /* solid gray, not opacity: 5.70:1 on the terminal #0b0b0b */
 
 /* sections */
 .section { padding-top: 110px }
