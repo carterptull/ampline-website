@@ -4,7 +4,9 @@ Start here. The ampline website is a plain static site: HTML, CSS and native ES 
 `site/`, served by Vercel with no build step. There is no server code, no database, no API and
 no analytics. The visitor's browser downloads the files from one origin and runs everything
 locally, including the real ampline renderer that draws the demo statuslines. Every box below
-is expanded in its own diagram (see the table at the bottom).
+is expanded in its own diagram (see the table at the bottom). The Vercel and js.org setup shown
+here is the **intended** deployment, not a claim that the site is live yet. See
+[`deployment-security.md`](deployment-security.md).
 
 ```mermaid
 flowchart TB

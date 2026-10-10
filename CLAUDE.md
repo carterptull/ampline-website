@@ -122,8 +122,7 @@ ampline-website/
     ├── ansi.test.mjs
     ├── payloads.test.mjs
     ├── html-contract.test.mjs   CSP-safety + required meta/disclaimer in site/*.html (og-card.html: CSP-safety only)
-    ├── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
-    └── fixtures/real-captures.json   real binary captures used as parity fixtures
+    └── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
 ```
 
 ## Frozen interfaces

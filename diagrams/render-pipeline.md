@@ -18,6 +18,7 @@ flowchart LR
     rt -->|"ANSI string"| parse["ansi.js parseAnsi"]
     parse -->|"tokens"| dom["ansi.js renderAnsi<br/>DOM nodes + CSSOM colors"]
     dom --> page["hero.js · tour.js · play-preview.js"]
+    dom --> card["og-card.js<br/>renders the social card"]
     plan["playground.js<br/>planned (Phase 2)"] -.-> dom
 
     style gen fill:transparent,stroke:#2E7D32,stroke-width:2px
@@ -45,8 +46,9 @@ own registry. These requests do not reach the vendored code as written:
 **The page uses several instances on purpose.** `main.js` makes a 120-column instance for the
 hero, a separate 500-column one for the tour (which reconfigures segments per card) and another
 120-column one for the playground preview, so config set for one never leaks into another.
-`NO_COLOR` is read once when `colors.js` loads, which is why color and no-color are separate
-instances.
+`createAmpline({ noColor })` exists in the runtime API because `colors.js` reads `NO_COLOR`
+once when it loads, so no-color output needs its own instance. The site does not create one
+today.
 
 ## How it is kept honest
 
@@ -86,8 +88,8 @@ fakes get updated by hand.
 
 **The last step has its own tests.** `ansi.test.mjs` covers `parseAnsi` and `renderAnsi`,
 `payloads.test.mjs` covers the wheel index and the demo payload builders, and `tour.test.mjs`
-checks each tour card against the renderer's real single-segment output. The page-level contract (CSP-safe HTML, no third-party resources) is
-`html-contract.test.mjs`.
+checks each tour card against the renderer's real single-segment output. The page-level
+contract (CSP-safe HTML, no third-party resources) is `html-contract.test.mjs`.
 
 ---
 _Last verified: 2026-10-09 · site 0.1.0_

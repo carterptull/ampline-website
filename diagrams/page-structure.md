@@ -12,7 +12,7 @@ flowchart TB
     nav --> hero["Hero (#top)<br/>wordmark, wave, slogan,<br/>install command + Copy button,<br/>fake Claude Code terminal"]
     hero --> features["What it shows (#features)<br/>segment tour cards"]
     features --> play["Playground (#playground)<br/>Phase 1: static preview<br/>interactive controls planned (Phase 2)"]
-    play --> how["Under the hood (#how)<br/>four static cards,<br/>FAQ · Configuration · Security links"]
+    play --> how["Under the hood (#how)<br/>four static cards,<br/>FAQ · Configuration · Security ·<br/>Architecture diagrams links"]
     how --> footer["Footer<br/>Buy Me a Beer pill, GitHub · npm ·<br/>Issues · Changelog, copyright,<br/>versions, Anthropic disclaimer"]
 
     style play fill:transparent,stroke:#888,stroke-width:1px,stroke-dasharray: 4 3
