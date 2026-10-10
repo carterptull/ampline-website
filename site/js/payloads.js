@@ -58,7 +58,7 @@ export function subagentPayload({ columns = 100 } = {}) {
     tasks: [
       { status: 'running', label: 'Explore the cache layer', model: 'claude-haiku-5-5', tokenCount: 8421 },
       { status: 'running', label: 'Review the diff', model: 'claude-sonnet-5-5', tokenCount: 120400 },
-      { status: 'pending', label: 'Write tests', model: 'claude-opus-5-5', tokenCount: 2400000 },
+      { status: 'queued', label: 'Write tests', model: 'claude-opus-5-5' }, // not started yet: no tokens
     ],
   };
 }

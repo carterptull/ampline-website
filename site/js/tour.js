@@ -9,7 +9,7 @@ const CARDS = [
   { seg: 'git', title: 'Git', desc: 'Branch, ahead / behind and dirty state, from one cached git call.', payload: {} },
   { seg: 'cost', title: 'Cost + lines', desc: "Claude Code's own client-side estimate of the session cost, plus lines changed. Not your bill.", payload: {} },
   { seg: 'pr', title: 'PR / MR', desc: 'PR/MR data comes from Claude Code (ampline runs neither gh nor glab). Colored by review state, clickable in terminals that support links; on a GitLab MR, green means mergeable.', payloads: [{ pr: { number: 1234, review_state: 'approved' } }, { pr: { kind: 'mr', number: 42, review_state: 'pending' } }] },
-  { seg: 'task', title: 'Current task', desc: 'The todo Claude is working on right now.', payload: {} },
+  { seg: 'task', title: 'Current task', desc: "What Claude is working on right now: the in-progress item from its todo list, read locally from your Claude config folder and cut at 40 characters. Hidden when there isn't one.", payload: {} },
 ];
 
 function card(doc, id, title, desc, lineFragments, wide) {
@@ -35,7 +35,7 @@ export function renderTour({ amp, mount, doc = document }) {
   }
   amp.setConfig({});
   const sub = amp.renderSubagentLine(subagentPayload({ columns: 100 }));
-  mount.appendChild(card(doc, `tour-h-${n}`, 'Subagents get their own lines', 'One row per subagent, colored by status: running, queued, done, failed.', [frag(sub)], true));
+  mount.appendChild(card(doc, `tour-h-${n}`, 'Subagents get their own lines', "Shown in Claude Code's subagent panel while subagents run (the installer sets that up too). One row per subagent: arrow and label colored by status (running, queued, failed; done is dim), model colored by family.", [frag(sub)], true));
 }
 
 // Samples keep their exact columns and scroll inside their own box; flag the ones that overflow so the

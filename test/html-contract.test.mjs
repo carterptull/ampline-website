@@ -116,3 +116,8 @@ test('touch: every tour sample is at least 44px tall (an overflowing one is a fo
   const site = readFileSync(new URL('css/site.css', SITE), 'utf8');
   assert.match(atBlock(site, '@media (pointer: coarse)'), /(^|[\s}])\.card \.s \{[^}]*min-height: 44px/);
 });
+
+test('index.html: the features section says which samples use stand-in data', () => {
+  const html = pages[0][1];
+  assert.match(html, /<p class="note">Git and task samples use stand-in data with the real formatting; every other segment runs ampline's own code on a sample payload\.<\/p>/);
+});

@@ -81,7 +81,7 @@ test('each card sample is exactly what the real renderer prints for that single 
   assert.equal(texts[4], '$1.87 +156/-23');
   assert.equal(texts[5], '#1234   !42');
   assert.equal(texts[6], 'Refactor the bar renderer');
-  assert.equal(texts[7], '↳ Explore the cache layer haiku 8.4k\n↳ Review the diff sonnet 120.4k\n↳ Write tests opus 2.4M');
+  assert.equal(texts[7], '↳ Explore the cache layer haiku 8.4k\n↳ Review the diff sonnet 120.4k\n↳ Write tests opus');
 });
 
 test('PR and MR render as safe, colored links; no other card has links', () => {
@@ -118,6 +118,8 @@ test('descriptions state the accuracy rules', () => {
   assert.match(d[2], /Claude\.ai subscription/); assert.match(d[2], /countdown/);
   assert.match(d[4], /estimate/); assert.match(d[4], /not your bill/i);
   assert.match(d[5], /Claude Code/); assert.match(d[5], /gh/); assert.match(d[5], /glab/); assert.match(d[5], /mergeable/);
+  assert.match(d[6], /in-progress item/); assert.match(d[6], /40 characters/); assert.match(d[6], /Hidden when/);
+  assert.match(d[7], /subagent panel/); assert.match(d[7], /while subagents run/); assert.match(d[7], /model colored by family/);
   for (const t of d) assert.doesNotMatch(t, /official|endorsed/i);
 });
 

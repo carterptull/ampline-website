@@ -87,6 +87,7 @@ code { font: inherit }
 h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: clamp(28px, 4vw, 40px); margin: 10px 0 12px }
 .lead { color: var(--muted); font-size: 16px; line-height: 1.6; max-width: 640px; margin: 0 }
 .note { margin: 16px 0 0; font-size: 13px; color: var(--quiet); line-height: 1.5 }
+.note + .note { margin-top: 6px }
 
 /* segment tour */
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 34px }

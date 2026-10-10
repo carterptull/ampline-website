@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { statusPayload, wheelIndex, HERO_CYCLE, FAMILIES } from '../site/js/payloads.js';
+import { statusPayload, subagentPayload, wheelIndex, HERO_CYCLE, FAMILIES } from '../site/js/payloads.js';
 import { createAmpline } from '../site/js/runtime/ampline.js';
 
 test('wheelIndex maps family x effort onto the 20-step wheel', () => {
@@ -29,4 +29,12 @@ test('rateLimits:false yields an API-key-style line without H/W bars', () => {
   const amp = createAmpline({ columns: 200 });
   const out = amp.stripAnsi(amp.renderStatusline(statusPayload({ rateLimits: false })));
   assert.doesNotMatch(out, /\bH\d+|\bW\d+/);
+});
+
+test('subagent sample is believable: a task that has not started carries no token count', () => {
+  const { tasks } = subagentPayload();
+  const waiting = tasks.filter((t) => t.status === 'queued' || t.status === 'pending');
+  assert.ok(waiting.length >= 1);
+  for (const t of waiting) assert.equal(t.tokenCount, undefined);
+  for (const t of tasks.filter((x) => x.status === 'running')) assert.ok(t.tokenCount > 0 && t.tokenCount < 1_000_000);
 });
