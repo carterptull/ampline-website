@@ -101,3 +101,18 @@ test('site JS never writes markup or style attributes', () => {
     assert.doesNotMatch(src, /\beval\(|new Function\(/, `${name} uses eval`);
   }
 });
+
+// The body of an at-rule block, by brace matching (no CSS parser).
+const atBlock = (src, header) => {
+  const start = src.indexOf(header);
+  assert.ok(start >= 0, `${header} block missing`);
+  let i = src.indexOf('{', start) + 1, depth = 1;
+  const from = i;
+  while (depth && i < src.length) { if (src[i] === '{') depth++; else if (src[i] === '}') depth--; i++; }
+  return src.slice(from, i - 1);
+};
+
+test('touch: every tour sample is at least 44px tall (an overflowing one is a focusable scroll region)', () => {
+  const site = readFileSync(new URL('css/site.css', SITE), 'utf8');
+  assert.match(atBlock(site, '@media (pointer: coarse)'), /(^|[\s}])\.card \.s \{[^}]*min-height: 44px/);
+});

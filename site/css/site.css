@@ -184,6 +184,7 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
 @media (pointer: coarse) {
   .links a, .copy, .seg-toggles button, .ctl select, .btn, .footer-links a, .brand {
     min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center }
+  .card .s { min-height: 44px } /* a one-line sample that overflows is a focusable scroll region (42.4px tall otherwise) */
   .card .s a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center } /* PR / MR links */
   .pill { min-height: 44px; padding: 0 18px }
   .ctl input[type=range] { height: 44px }
