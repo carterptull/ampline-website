@@ -1,0 +1,19 @@
+/* The 1200x630 social-card render target (og-card.html). Same tokens and components as the site;
+   the wave is frozen at its snapshot heights so the PNG is deterministic. */
+.og { width: 1200px; height: 630px; overflow: hidden; background: var(--bg) }
+.og-card { width: 1200px; height: 630px; padding: 0 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center }
+.og-wm { display: block; width: 300px; height: auto }
+
+/* static wave: no animation, full opacity, bars at the snapshot heights; the held stop glows */
+.og .vu > span { animation: none; opacity: 1 }
+.og .vu-hero { width: 640px; height: 60px; gap: 5px; margin: 30px 0 0 }
+.og .vu > span.hold { filter: drop-shadow(0 0 8px var(--c)) }
+
+.og .slogan { font-size: 84px; line-height: 1; margin: 38px 0 0 }
+.og-sub { margin: 18px 0 0; font-size: 25px; line-height: 1.3; color: var(--muted) }
+
+.og .term { width: 100%; max-width: none; margin: 40px 0 0; box-shadow: none }
+.og .chrome { padding: 11px 16px }
+.og .chrome i { width: 11px; height: 11px }
+.og .chrome .title { font-size: calc(13px * var(--mk)) }
+.og .sl { padding: 14px 20px 16px; font-size: calc(17px * var(--mk)); line-height: 1.6; overflow: hidden }

@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # Routine version updates, on top of the repo-level security alerts already enabled.
+  # Never merge these PRs (that would add dependabot[bot] as a contributor). Re-apply the bump
+  # on a Carter branch, then close the bot PR. See "Git & GitHub rules" and DECISIONS.md.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
