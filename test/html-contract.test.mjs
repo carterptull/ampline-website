@@ -131,3 +131,11 @@ test('index.html: under-the-hood copy does not overclaim what ampline reads', ()
   assert.ok(html.includes('Reads the JSON Claude Code pipes in, plus local git and todo files. Never reads credentials, never makes a network request.'));
   assert.ok(html.includes('Branch names, todo text and labels are sanitized before they reach your terminal.'));
 });
+
+test('index.html: the hero figcaption says what the statusline contains', () => {
+  const html = pages.find(([n]) => n === 'index.html')[1];
+  const cap = html.match(/<figcaption[^>]*id="heroCaption"[^>]*>([^<]*)<\/figcaption>/)?.[1] || '';
+  for (const word of ['model and effort', 'context', '5-hour and weekly usage', 'git branch', 'session cost', 'current task']) {
+    assert.ok(cap.includes(word), `heroCaption should mention "${word}"`);
+  }
+});
