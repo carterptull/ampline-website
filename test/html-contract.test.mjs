@@ -139,3 +139,12 @@ test('index.html: the hero figcaption says what the statusline contains', () => 
     assert.ok(cap.includes(word), `heroCaption should mention "${word}"`);
   }
 });
+
+// #heroSl is an aria-hidden scroll box. Chrome makes overflowing scrollers keyboard-focusable
+// (it did at 390px), which would put an aria-hidden element in the tab order.
+test('index.html: the decorative hero statusline is out of the tab order', () => {
+  const html = pages.find(([n]) => n === 'index.html')[1];
+  const tag = html.match(/<div\b[^>]*id="heroSl"[^>]*>/)?.[0] || '';
+  assert.match(tag, /\btabindex="-1"/);
+  assert.match(tag, /\baria-hidden="true"/);
+});
