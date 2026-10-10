@@ -148,3 +148,12 @@ test('index.html: the decorative hero statusline is out of the tab order', () =>
   assert.match(tag, /\btabindex="-1"/);
   assert.match(tag, /\baria-hidden="true"/);
 });
+
+test('index.html: a noscript note tells no-JS visitors the demos need JavaScript', () => {
+  const html = pages.find(([n]) => n === 'index.html')[1];
+  const m = html.match(/<noscript>([\s\S]*?)<\/noscript>/);
+  assert.ok(m, 'missing <noscript>');
+  assert.ok(m[1].includes("ampline's demos run in your browser and need JavaScript. The page text below still works without it."));
+  assert.ok(html.indexOf('<noscript>') > html.indexOf('<main'), 'noscript note lives inside <main>');
+  assert.ok(html.indexOf('<noscript>') < html.indexOf('id="features"'), 'and near the top of it');
+});
