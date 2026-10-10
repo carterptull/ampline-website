@@ -121,3 +121,13 @@ test('index.html: the features section says which samples use stand-in data', ()
   const html = pages[0][1];
   assert.match(html, /<p class="note">Git and task samples use stand-in data with the real formatting; every other segment runs ampline's own code on a sample payload\.<\/p>/);
 });
+
+// Accuracy of the under-the-hood copy: ampline also runs one cached `git status`, reads .git/HEAD,
+// its own config and the session todo file, so "reads only the JSON" would be false.
+test('index.html: under-the-hood copy does not overclaim what ampline reads', () => {
+  const html = pages.find(([n]) => n === 'index.html')[1];
+  assert.doesNotMatch(html, /Reads only the JSON/);
+  assert.doesNotMatch(html, /repo config/);
+  assert.ok(html.includes('Reads the JSON Claude Code pipes in, plus local git and todo files. Never reads credentials, never makes a network request.'));
+  assert.ok(html.includes('Branch names, todo text and labels are sanitized before they reach your terminal.'));
+});
