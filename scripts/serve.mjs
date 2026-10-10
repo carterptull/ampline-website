@@ -15,6 +15,7 @@ const pathRules = vercel.headers.filter((h) => h.source !== '/(.*)').map((h) => 
 const pathHeaders = (path) => Object.fromEntries(pathRules.filter((r) => r.re.test(path))
   .flatMap((r) => r.headers.map(({ key, value }) => [key.toLowerCase(), value])));
 const port = Number(process.env.PORT) || 4173;
+const host = process.env.HOST || '127.0.0.1'; // localhost only unless HOST says otherwise
 
 createServer(async (req, res) => {
   // Security headers go on every response, including 400/403/404/500.
@@ -37,4 +38,4 @@ createServer(async (req, res) => {
     // vercel.json's cache headers where it sets them; anything else is never cached while developing.
     res.writeHead(200, { 'content-type': TYPES[extname(target)] || 'application/octet-stream', 'cache-control': 'no-store', ...pathHeaders(path) }).end(body);
   } catch { if (!res.headersSent) res.writeHead(500).end(); else res.destroy(); }
-}).listen(port, () => console.log(`ampline-website dev server: http://localhost:${port} (production headers applied)`));
+}).listen(port, host, () => console.log(`ampline-website dev server: http://${host}:${port} (production headers applied)`));

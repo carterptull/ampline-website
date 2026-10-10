@@ -23,10 +23,12 @@ Every statusline on the page is produced by the real ampline renderer, not typed
 
 ```sh
 npm install
-npm run dev     # http://localhost:4173
+npm run dev     # http://127.0.0.1:4173
 ```
 
-The dev server serves `site/` with the same security headers as production.
+The dev server serves `site/` with the same security headers as production. It listens on 127.0.0.1 only.
+
+`HOST=0.0.0.0 npm run dev` (PowerShell: `$env:HOST='0.0.0.0'; npm run dev`) exposes it to your network and is only for testing from a phone on the same network. Even then it will not work well: the production CSP includes `upgrade-insecure-requests`, so a browser that opens the dev server by LAN IP rewrites its subresource requests to https and they fail. Use the deployed preview for phone testing.
 
 ## Test
 

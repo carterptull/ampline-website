@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const SERVE = fileURLToPath(new URL('../scripts/serve.mjs', import.meta.url));
 const port = 20000 + Math.floor(Math.random() * 30000);
 let child;
+let out = '';
 
 // Raw request so odd paths (e.g. "/%") reach the server exactly as written.
 const get = (path) => new Promise((resolve, reject) => {
@@ -19,10 +20,10 @@ const get = (path) => new Promise((resolve, reject) => {
 });
 
 before(async () => {
-  child = spawn(process.execPath, [SERVE], { env: { ...process.env, PORT: String(port) }, stdio: ['ignore', 'pipe', 'inherit'] });
+  child = spawn(process.execPath, [SERVE], { env: { ...process.env, PORT: String(port), HOST: '' }, stdio: ['ignore', 'pipe', 'inherit'] });
   await new Promise((resolve, reject) => {
     child.once('exit', (code) => reject(new Error(`dev server exited early (${code})`)));
-    child.stdout.on('data', (d) => { if (String(d).includes('dev server')) resolve(); });
+    child.stdout.on('data', (d) => { out += String(d); if (out.includes('dev server')) resolve(); });
   });
 });
 
@@ -75,4 +76,9 @@ test('server survives all of the above', async () => {
   assert.equal(child.exitCode, null, 'dev server process died');
   const r = await get('/');
   assert.equal(r.status, 200);
+});
+
+test('binds to localhost by default and says so in the log line', () => {
+  assert.ok(out.includes(`http://127.0.0.1:${port}`), out);
+  assert.ok(out.includes('(production headers applied)'), out);
 });
