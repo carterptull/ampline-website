@@ -32,7 +32,8 @@ function showPromptDone(body) {
 export function startHero({ amp, equalizer, body, line }) {
   let i = 0, timer = null;
   const cycle = () => { i = (i + 1) % HERO_CYCLE.length; paintLine(amp, line, HERO_CYCLE[i], equalizer); };
-  const start = () => { if (!timer && !reduce()) timer = setInterval(cycle, 2600); };
+  // A page opened in a background tab powers up hidden: the cycle waits for the first visibilitychange.
+  const start = () => { if (!timer && !reduce() && !document.hidden) timer = setInterval(cycle, 2600); };
   const stop = () => { clearInterval(timer); timer = null; };
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
 
