@@ -6,9 +6,13 @@ const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').match
 
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
 
+// The hero line is decorative (aria-hidden), so it never contains links: a focusable <a> in there would be a
+// keyboard trap for screen readers and a tiny tap target. The PR number renders as a plain colored span.
+const NO_LINKS = () => null;
+
 function paintLine(amp, line, [family, effort], equalizer) {
   const ansi = amp.renderStatusline(statusPayload({ family, effort }));
-  line.replaceChildren(renderAnsi(parseAnsi(ansi), document, { safeLinkUrl: amp.safeLinkUrl }));
+  line.replaceChildren(renderAnsi(parseAnsi(ansi), document, { safeLinkUrl: NO_LINKS }));
   line.classList.toggle('is-scrollable', line.scrollWidth > line.clientWidth);
   equalizer.hold(wheelIndex(family, effort));
 }

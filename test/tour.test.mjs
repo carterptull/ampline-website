@@ -2,7 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createAmpline } from '../site/js/runtime/ampline.js';
 import { renderTour, watchScrollable } from '../site/js/tour.js';
-import { statusPayload } from '../site/js/payloads.js';
+import { parseAnsi } from '../site/js/ansi.js';
+import { statusPayload, subagentPayload } from '../site/js/payloads.js';
 
 // Minimal DOM stand-in: just what tour.js and ansi.renderAnsi call.
 function makeDoc() {
@@ -128,14 +129,44 @@ test('the tour leaves its dedicated instance back on the default config', () => 
   assert.equal(plain(amp, amp.renderStatusline(input)), plain(fresh, fresh.renderStatusline(input)));
 });
 
-test('watchScrollable flags overflowing samples (fade + keyboard focus) and re-checks on resize', () => {
-  const mk = (sw, cw) => { const a = new Set(); const at = {}; return { scrollWidth: sw, clientWidth: cw, a, at, classList: { toggle: (c, on) => (on ? a.add(c) : a.delete(c)) }, setAttribute: (k, v) => { at[k] = v; }, removeAttribute: (k) => { delete at[k]; } }; };
-  const wide = mk(336, 283); const narrow = mk(200, 283);
-  const listeners = {};
-  const win = { addEventListener: (t, f) => { listeners[t] = f; }, document: {} };
+test('every card heading has a stable unique id', () => {
+  const { mount } = run();
+  const ids = mount.children.map((c) => find(c, (e) => e.tag === 'h3')[0].attrs.id);
+  assert.deepEqual(ids, ['tour-h-0', 'tour-h-1', 'tour-h-2', 'tour-h-3', 'tour-h-4', 'tour-h-5', 'tour-h-6', 'tour-h-7']);
+});
+
+test('no tour card has a token that is both dim and colored (dim is a solid class color that inline color would override)', () => {
+  const amp = createAmpline({ columns: 500 });
+  const lines = [];
+  const seg = (s, p) => { amp.setConfig({ segments: s, line2From: s[0] }); lines.push(amp.renderStatusline(statusPayload(p))); };
+  seg(['model'], { family: 'opus', effort: 'xhigh' }); seg(['context'], { context: 63 }); seg(['fiveHour', 'weekly'], { fiveHour: 24, weekly: 41 });
+  seg(['git'], {}); seg(['cost'], {}); seg(['pr'], { pr: { number: 1234, review_state: 'approved' } });
+  seg(['pr'], { pr: { kind: 'mr', number: 42, review_state: 'pending' } }); seg(['task'], {});
+  amp.setConfig({}); lines.push(amp.renderSubagentLine(subagentPayload({ columns: 100 })));
+  let tokens = 0;
+  for (const l of lines) for (const t of parseAnsi(l)) { tokens++; assert.ok(!(t.dim && t.fg), `dim+fg token: ${JSON.stringify(t)}`); }
+  assert.ok(tokens > 20);
+});
+
+test('watchScrollable flags overflowing samples (fade, focus, name) and re-checks on resize, one frame at a time', () => {
+  const mk = (sw, cw, hid) => {
+    const a = new Set(); const at = {};
+    return { scrollWidth: sw, clientWidth: cw, a, at, previousElementSibling: { id: hid },
+      classList: { toggle: (c, on) => (on ? a.add(c) : a.delete(c)) }, setAttribute: (k, v) => { at[k] = v; }, removeAttribute: (k) => { delete at[k]; } };
+  };
+  const wide = mk(336, 283, 'tour-h-2'); const narrow = mk(200, 283, 'tour-h-3');
+  const listeners = {}; const frames = [];
+  const win = { addEventListener: (t, f) => { listeners[t] = f; }, requestAnimationFrame: (f) => { frames.push(f); return frames.length; }, document: {} };
   watchScrollable({ querySelectorAll: () => [wide, narrow] }, win);
-  assert.ok(wide.a.has('is-scrollable')); assert.equal(wide.at.tabindex, '0');
-  assert.ok(!narrow.a.has('is-scrollable')); assert.equal(narrow.at.tabindex, undefined);
-  wide.clientWidth = 400; listeners.resize();
-  assert.ok(!wide.a.has('is-scrollable')); assert.equal(wide.at.tabindex, undefined);
+  assert.ok(wide.a.has('is-scrollable'));
+  assert.deepEqual(wide.at, { tabindex: '0', role: 'group', 'aria-labelledby': 'tour-h-2' });
+  assert.ok(!narrow.a.has('is-scrollable')); assert.deepEqual(narrow.at, {});
+  wide.clientWidth = 400;
+  listeners.resize(); listeners.resize(); listeners.resize();
+  assert.equal(frames.length, 1, 'resize bursts schedule a single frame');
+  assert.ok(wide.a.has('is-scrollable'), 'not re-measured before the frame runs');
+  frames.shift()();
+  assert.ok(!wide.a.has('is-scrollable')); assert.deepEqual(wide.at, {}, 'tabindex, role and name removed together');
+  listeners.resize();
+  assert.equal(frames.length, 1, 'a new frame can be scheduled after the previous ran');
 });
