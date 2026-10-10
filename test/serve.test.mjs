@@ -35,6 +35,19 @@ test('GET / is 200 with the CSP header', async () => {
   assert.equal(r.headers['cache-control'], 'no-store');
 });
 
+test('path-specific vercel.json cache headers apply (fonts immutable, icons a day)', async () => {
+  const font = await get('/assets/fonts/mono-400.v1.woff2');
+  assert.equal(font.status, 200);
+  assert.equal(font.headers['cache-control'], 'public, max-age=31536000, immutable');
+  assert.ok(font.headers['content-security-policy']);
+  for (const p of ['/og.png', '/favicon.ico', '/icon.svg', '/apple-touch-icon.png']) {
+    const r = await get(p);
+    assert.equal(r.status, 200, p);
+    assert.equal(r.headers['cache-control'], 'public, max-age=86400', p);
+  }
+  assert.equal((await get('/js/main.js')).headers['cache-control'], 'no-store');
+});
+
 test('malformed percent-escape is a 400 with security headers', async () => {
   const r = await get('/%');
   assert.equal(r.status, 400);

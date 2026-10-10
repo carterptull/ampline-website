@@ -9,6 +9,11 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 
   '.png': 'image/png', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.txt': 'text/plain', '.xml': 'application/xml',
   '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
 const globalHeaders = vercel.headers.find((h) => h.source === '/(.*)').headers;
+// Path-specific rules (the long cache on /assets/*, the day-long one on the icons), matched the way
+// Vercel's path-to-regexp sources match: the source is a regex over the whole request path.
+const pathRules = vercel.headers.filter((h) => h.source !== '/(.*)').map((h) => ({ re: new RegExp(`^${h.source}$`), headers: h.headers }));
+const pathHeaders = (path) => Object.fromEntries(pathRules.filter((r) => r.re.test(path))
+  .flatMap((r) => r.headers.map(({ key, value }) => [key.toLowerCase(), value])));
 const port = Number(process.env.PORT) || 4173;
 
 createServer(async (req, res) => {
@@ -29,6 +34,7 @@ createServer(async (req, res) => {
       return;
     }
     const body = await readFile(target); // read first: a failure must not follow writeHead(200)
-    res.writeHead(200, { 'content-type': TYPES[extname(target)] || 'application/octet-stream', 'cache-control': 'no-store' }).end(body);
+    // vercel.json's cache headers where it sets them; anything else is never cached while developing.
+    res.writeHead(200, { 'content-type': TYPES[extname(target)] || 'application/octet-stream', 'cache-control': 'no-store', ...pathHeaders(path) }).end(body);
   } catch { if (!res.headersSent) res.writeHead(500).end(); else res.destroy(); }
 }).listen(port, () => console.log(`ampline-website dev server: http://localhost:${port} (production headers applied)`));
