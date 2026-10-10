@@ -124,3 +124,11 @@ considered instead. Reversing any of them is cheap unless noted.
 **Why:** Browsers sniff image content rather than trusting the extension, so a PNG named `favicon.ico` works wherever `/favicon.ico` is requested by default (feed readers, older crawlers). Hand-building a multi-size ICO container, or adding an image library, would buy nothing for a site with no build step and no dependencies.
 
 **Alternatives:** a real multi-resolution ICO (needs a converter dependency or a hand-built binary); no `favicon.ico` (default `/favicon.ico` requests would 404).
+
+### D16. The hero's statusline is an inert picture; the product colors stay as they are
+
+**Decision:** The hero statusline's segments are rendered inside an `inert` wrapper, within the line that is already `aria-hidden`. The line itself stays a normal scroll box, so a swipe still scrolls it sideways on a phone. The figure's visually hidden caption is the text alternative. The product colors are not changed, and the tour cards and the playground preview are left alone because every color they show clears 4.5:1.
+
+**Why:** The hero is a moving picture of the product, not text to read. It powers up with a fade-in and then cycles through the wheel, and some wheel stops are below 4.5:1 on the terminal background by design (Fable/max `#8000c0` is 2.51:1). Those colors are the product's identity, so they can't be lightened for the page. Lighthouse's contrast check (axe) still measures `aria-hidden` text and ignores roles, so it failed whenever its snapshot caught a half-faded segment or the Fable frame. It skips inert content, which keeps Accessibility at 100. Putting `inert` on the line itself would also stop touch scrolling, because inert content is not hit-tested, so it goes on an inner wrapper instead.
+
+**Alternatives:** lighter colors on the page (no longer the real renderer's output); `role="img"` with an `aria-label` on the figure (tried: axe still flags the text inside); no fade-in and no Fable frame in the cycle (hides part of the product); accepting a sub-100 Accessibility score.
