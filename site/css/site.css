@@ -58,8 +58,9 @@ code { font: inherit }
   padding: 12px 12px 12px 18px; background: #0a0a0a; font-family: var(--mono); font-size: calc(15px * var(--mk)); color: var(--white) }
 .install code { min-width: 0; overflow-x: auto; white-space: pre }
 .prompt-sym { color: var(--quiet); -webkit-user-select: none; user-select: none } /* copy/selection gets the command only, not the "$ " */
-.copy { flex: none; font-family: var(--sans); font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--line-2); border-radius: 7px; padding: 5px 11px; cursor: pointer }
+.copy { flex: none; font-family: var(--sans); font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--line-2); border-radius: 7px; padding: 5px 11px; min-width: 6em; cursor: pointer; transition: color .15s, border-color .15s } /* 6em = 72px: "Copy" and "Copied" (38px text) share one width, so the label swap never shifts the layout */
 .copy:hover { color: var(--white); border-color: #444 }
+.copy.is-copied, .copy.is-copied:hover { color: var(--danger-1); border-color: var(--danger-1) } /* after :hover so the green state wins */
 .meta { margin: 16px 0 0; font-family: var(--mono); font-size: calc(12px * var(--mk)); color: var(--quiet) }
 
 /* faux terminal */
@@ -189,7 +190,7 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
   .card .s a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center } /* PR / MR links */
   .pill { min-height: 44px; padding: 0 18px }
   .ctl input[type=range] { height: 44px }
-  .copy { padding: 0 16px }
+  .copy { padding: 0 16px; min-width: 6em } /* 72px: fits "Copied" (72px at this padding) without squeezing the command at 360px */
   .seg-toggles button { padding: 0 14px }
   .footer-links { gap: 8px 14px }
 }
@@ -200,4 +201,5 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
   .seg-in { animation: none }
   .sl { transition: none }
   .pill { transition: none }
+  .copy { transition: none }
 }

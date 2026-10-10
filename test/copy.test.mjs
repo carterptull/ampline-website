@@ -8,7 +8,9 @@ let state;
 
 function makeButton() {
   const handlers = {};
-  return { textContent: 'Copy', addEventListener: (type, fn) => { handlers[type] = fn; }, click: () => handlers.click() };
+  const classes = new Set();
+  const classList = { add: (c) => classes.add(c), remove: (c) => classes.delete(c), contains: (c) => classes.has(c) };
+  return { textContent: 'Copy', classList, addEventListener: (type, fn) => { handlers[type] = fn; }, click: () => handlers.click() };
 }
 
 function install({ clipboard, secure = true } = {}) {
@@ -47,6 +49,7 @@ test('clipboard available in a secure context: writes the exact text and confirm
   assert.equal(button.textContent, 'Copied');
   assert.equal(status.textContent, 'Install command copied to clipboard.');
   assert.equal(state.selection.ranges.length, 0, 'no fallback selection on success');
+  assert.ok(button.classList.contains('is-copied'), 'green state on success');
 });
 
 test('writeText rejects: falls back to selecting the command', async () => {
@@ -60,6 +63,7 @@ test('writeText rejects: falls back to selecting the command', async () => {
   assert.deepEqual(state.selection.ranges, [state.ranges[0]]);
   assert.equal(button.textContent, 'Selected');
   assert.equal(status.textContent, 'Command selected. Press and hold, or Ctrl+C, to copy.');
+  assert.ok(!button.classList.contains('is-copied'), 'rejection fallback stays neutral');
 });
 
 test('no navigator.clipboard: fallback without calling writeText', () => {
@@ -70,6 +74,7 @@ test('no navigator.clipboard: fallback without calling writeText', () => {
   assert.equal(button.textContent, 'Selected');
   assert.equal(status.textContent, 'Command selected. Press and hold, or Ctrl+C, to copy.');
   assert.equal(state.ranges[0].selected, state.code);
+  assert.ok(!button.classList.contains('is-copied'), 'no-clipboard fallback stays neutral');
 });
 
 test('insecure context: fallback without calling writeText', () => {
@@ -80,9 +85,10 @@ test('insecure context: fallback without calling writeText', () => {
   button.click();
   assert.equal(called, 0);
   assert.equal(button.textContent, 'Selected');
+  assert.ok(!button.classList.contains('is-copied'), 'insecure fallback stays neutral');
 });
 
-test('timers reset the button text and the status', async () => {
+test('timers reset the button text, the status and the green state', async () => {
   mock.timers.enable({ apis: ['setTimeout'] });
   try {
     install({ clipboard: { writeText: () => Promise.resolve() } });
@@ -90,10 +96,13 @@ test('timers reset the button text and the status', async () => {
     wireCopy(button, CMD, status);
     button.click(); await flush();
     assert.equal(button.textContent, 'Copied');
-    mock.timers.tick(1599);
+    assert.ok(button.classList.contains('is-copied'));
+    mock.timers.tick(2999);
     assert.equal(button.textContent, 'Copied');
+    assert.ok(button.classList.contains('is-copied'));
     mock.timers.tick(1);
     assert.equal(button.textContent, 'Copy');
+    assert.ok(!button.classList.contains('is-copied'));
     assert.equal(status.textContent, '');
 
     install({});
@@ -101,11 +110,60 @@ test('timers reset the button text and the status', async () => {
     wireCopy(b2, CMD, s2);
     b2.click();
     assert.equal(b2.textContent, 'Selected');
+    assert.ok(!b2.classList.contains('is-copied'));
     mock.timers.tick(2499);
     assert.equal(b2.textContent, 'Selected');
     mock.timers.tick(1);
     assert.equal(b2.textContent, 'Copy');
+    assert.ok(!b2.classList.contains('is-copied'));
     assert.equal(s2.textContent, '');
+  } finally {
+    mock.timers.reset();
+  }
+});
+
+test('two quick clicks: the first timer is cancelled, so the second confirmation is not cut short', async () => {
+  mock.timers.enable({ apis: ['setTimeout'] });
+  try {
+    install({ clipboard: { writeText: () => Promise.resolve() } });
+    const button = makeButton(); const status = { textContent: '' };
+    wireCopy(button, CMD, status);
+    button.click(); await flush();
+    mock.timers.tick(2000);
+    button.click(); await flush();
+    mock.timers.tick(1000); // 3000 ms after the first click: its timer would have fired
+    assert.equal(button.textContent, 'Copied');
+    assert.ok(button.classList.contains('is-copied'));
+    assert.equal(status.textContent, 'Install command copied to clipboard.');
+    mock.timers.tick(1999);
+    assert.equal(button.textContent, 'Copied');
+    mock.timers.tick(1); // 3000 ms after the second click
+    assert.equal(button.textContent, 'Copy');
+    assert.ok(!button.classList.contains('is-copied'));
+    assert.equal(status.textContent, '');
+  } finally {
+    mock.timers.reset();
+  }
+});
+
+test('a fallback click after a success cancels the pending green reset and stays neutral', async () => {
+  mock.timers.enable({ apis: ['setTimeout'] });
+  try {
+    let fail = false;
+    install({ clipboard: { writeText: () => (fail ? Promise.reject(new Error('denied')) : Promise.resolve()) } });
+    const button = makeButton(); const status = { textContent: '' };
+    wireCopy(button, CMD, status);
+    button.click(); await flush();
+    assert.ok(button.classList.contains('is-copied'));
+    fail = true;
+    mock.timers.tick(1000);
+    button.click(); await flush();
+    assert.equal(button.textContent, 'Selected');
+    assert.ok(!button.classList.contains('is-copied'), 'fallback after success drops the green state');
+    mock.timers.tick(2000); // 3000 ms after the success: its timer must not fire
+    assert.equal(button.textContent, 'Selected');
+    mock.timers.tick(500); // 2500 ms after the fallback
+    assert.equal(button.textContent, 'Copy');
   } finally {
     mock.timers.reset();
   }

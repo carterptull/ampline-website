@@ -21,3 +21,4 @@ All notable changes to this project are documented here. The format follows
 - Self-hosted subset mono font, the wordmark SVG, an Open Graph card, a favicon set and a web manifest.
 - Hand-maintained Mermaid architecture diagrams.
 - CI on Node 24 (sync check and tests) and Dependabot configuration.
+- The install Copy button turns green while it confirms "Copied".
