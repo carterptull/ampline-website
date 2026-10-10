@@ -29,3 +29,24 @@ test('icon.svg: four wheel-colored bars (45/70/100/80%) on a black rounded squar
   assert.deepEqual(bars.map((b) => b[2]), ['#7DB8E8', '#E8B23D', '#D8203D', '#8000C0']);
   assert.deepEqual(bars.map((b) => Math.round((Number(b[1]) / 40) * 100)), [45, 70, 100, 80]);
 });
+
+const png = (f) => {
+  const b = readFileSync(new URL(`../site/${f}`, import.meta.url));
+  return { sig: b.subarray(1, 4).toString(), w: b.readUInt32BE(16), h: b.readUInt32BE(20), bytes: b.length };
+};
+
+test('og.png is a 1200x630 PNG under 600KB (the size the og:image meta declares)', () => {
+  const p = png('og.png');
+  assert.equal(p.sig, 'PNG');
+  assert.deepEqual([p.w, p.h], [1200, 630]);
+  assert.ok(p.bytes < 600 * 1024, `og.png is ${p.bytes} bytes`);
+});
+
+test('apple-touch-icon.png is 180x180 and favicon.ico is a 32x32 PNG (D15)', () => {
+  const a = png('apple-touch-icon.png');
+  assert.equal(a.sig, 'PNG');
+  assert.deepEqual([a.w, a.h], [180, 180]);
+  const f = png('favicon.ico');
+  assert.equal(f.sig, 'PNG');
+  assert.deepEqual([f.w, f.h], [32, 32]);
+});

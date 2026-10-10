@@ -116,3 +116,11 @@ considered instead. Reversing any of them is cheap unless noted.
 **Why:** It matches blitzcast's footer button and the Paymon Software brand, and one clear support action is enough. Gold is `#E8B23D`, the Sonnet-max color on the wheel, so the "color only from the wheel" rule holds.
 
 **Alternatives:** a Star on GitHub pill (the original plan); several support links (clutters the footer and splits the brand).
+
+### D15. `favicon.ico` is a 32x32 PNG with an `.ico` name
+
+**Decision:** `site/favicon.ico` is a 32x32 PNG file saved under the `.ico` name. `icon.svg` is the primary icon, and `apple-touch-icon.png` is `icon.svg` rendered at 180x180 on solid black. All three raster files are rendered from `icon.svg` in Chrome, so no image tool is needed.
+
+**Why:** Browsers sniff image content rather than trusting the extension, so a PNG named `favicon.ico` works wherever `/favicon.ico` is requested by default (feed readers, older crawlers). Hand-building a multi-size ICO container, or adding an image library, would buy nothing for a site with no build step and no dependencies.
+
+**Alternatives:** a real multi-resolution ICO (needs a converter dependency or a hand-built binary); no `favicon.ico` (default `/favicon.ico` requests would 404).

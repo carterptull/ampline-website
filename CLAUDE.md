@@ -93,10 +93,11 @@ ampline-website/
 ├── site/                        ← Vercel output directory (the website)
 │   ├── index.html
 │   ├── 404.html
+│   ├── og-card.html             1200x630 social-card render target (noindex, Disallowed in robots.txt); site/og.png is its screenshot
 │   ├── robots.txt  sitemap.xml  site.webmanifest
 │   ├── favicon.ico  icon.svg  apple-touch-icon.png  og.png
 │   ├── assets/  wordmark.v1.svg  fonts/mono-400.v1.woff2  fonts/mono-700.v1.woff2  fonts/OFL.txt
-│   ├── css/  tokens.css  site.css
+│   ├── css/  tokens.css  site.css  og-card.css
 │   └── js/
 │       ├── main.js              entry: wires everything after DOMContentLoaded
 │       ├── runtime/
@@ -108,6 +109,8 @@ ampline-website/
 │       ├── equalizer.js         mountEqualizer(el, wheel, opts) → { hold(i), release() }
 │       ├── hero.js              typed prompt + power-up + cycle
 │       ├── tour.js              renders tour cards from payloads
+│       ├── play-preview.js      Phase 1 static playground stand-in (replaced by playground.js in Phase 2)
+│       ├── og-card.js           renders the og-card.html statusline + frozen wave from the runtime
 │       ├── copy.js              copy-to-clipboard with fallback + aria-live
 │       ├── playground.js        (Phase 2)
 │       └── install-demo.js      (Phase 2)
@@ -118,7 +121,8 @@ ampline-website/
     ├── fakes.test.mjs           git/task fakes === real captured bytes
     ├── ansi.test.mjs
     ├── payloads.test.mjs
-    ├── html-contract.test.mjs   CSP-safety + required meta/disclaimer in site/*.html
+    ├── html-contract.test.mjs   CSP-safety + required meta/disclaimer in site/*.html (og-card.html: CSP-safety only)
+    ├── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
     └── fixtures/real-captures.json   real binary captures used as parity fixtures
 ```
 

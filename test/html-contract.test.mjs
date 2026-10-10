@@ -4,10 +4,14 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 
 const SITE = new URL('../site/', import.meta.url);
 const PKG = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
-const pages = ['index.html', '404.html'].map((f) => [f, readFileSync(new URL(f, SITE), 'utf8')]);
+const pages = ['index.html', '404.html', 'og-card.html'].map((f) => [f, readFileSync(new URL(f, SITE), 'utf8')]);
 const css = readdirSync(new URL('css/', SITE)).map((f) => readFileSync(new URL(`css/${f}`, SITE), 'utf8')).join('\n');
 const js = readdirSync(new URL('js/', SITE), { recursive: true }).filter((f) => f.endsWith('.js'))
   .map((f) => [f, readFileSync(new URL(`js/${f}`, SITE), 'utf8')]);
+
+// og-card.html is the social-card render target: it must be CSP-clean, but it is not a content page
+// (no disclaimer, footer, version or JSON-LD).
+const CARD = 'og-card.html';
 
 for (const [name, html] of pages) {
   test(`${name}: no inline event handlers or style attributes (CSP)`, () => {
@@ -26,6 +30,17 @@ for (const [name, html] of pages) {
       assert.doesNotMatch(tag, /(href|src)="(https?:)?\/\//i, `third-party resource: ${tag}`);
     }
   });
+  test(`${name}: no temporary data: placeholders (real icon links only)`, () => {
+    assert.doesNotMatch(html, /href="data:/i);
+  });
+  test(`${name}: every same-origin resource it loads exists in site/`, () => {
+    for (const tag of html.match(/<(link|script|img|source)\b[^>]*>/gi) || []) {
+      const ref = tag.match(/\b(?:href|src)="(\/[^/"][^"]*)"/);
+      if (!ref) continue;
+      assert.ok(existsSync(new URL(`.${ref[1]}`, SITE)), `missing file for ${tag}`);
+    }
+  });
+  if (name === CARD) continue;
   test(`${name}: lang, viewport, theme-color, disclaimer`, () => {
     assert.match(html, /<html lang="en"/);
     assert.match(html, /name="viewport"/);
@@ -45,13 +60,6 @@ for (const [name, html] of pages) {
     const m = html.match(/<span id="ampVersion">([^<]*)<\/span>/);
     assert.ok(m, 'ampVersion missing');
     assert.equal(m[1], PKG.devDependencies['ampline-claude']);
-  });
-  test(`${name}: every same-origin resource it loads exists in site/`, () => {
-    for (const tag of html.match(/<(link|script|img|source)\b[^>]*>/gi) || []) {
-      const ref = tag.match(/\b(?:href|src)="(\/[^/"][^"]*)"/);
-      if (!ref) continue;
-      assert.ok(existsSync(new URL(`.${ref[1]}`, SITE)), `missing file for ${tag}`);
-    }
   });
 }
 
