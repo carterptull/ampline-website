@@ -40,7 +40,9 @@ Tests use `node:test` and `node:assert/strict` only. `npm run sync:check` verifi
 
 1. Bump the `ampline-claude` devDependency in `package.json` (exact version, no `^`).
 2. `npm run sync`
-3. `npm test`
+3. Update the two static ampline-claude version spans (`#ampVersion`) in `site/index.html` and `site/404.html` to the new version. The tests enforce that they match the pinned devDependency.
+4. `npm test`
+5. If the statusline output changed, re-render `site/og.png`. It is a 1200x630 screenshot of `site/og-card.html` and is not covered by CI.
 
 ## Deploy
 

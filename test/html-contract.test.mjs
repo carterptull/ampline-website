@@ -63,6 +63,10 @@ for (const [name, html] of pages) {
   });
 }
 
+test('og-card.html is marked noindex (the card is a render target, not a page)', () => {
+  assert.match(pages.find(([n]) => n === CARD)[1], /name="robots" content="noindex"/);
+});
+
 const footerOf = (html) => (html.match(/<footer\b[\s\S]*?<\/footer>/) || [''])[0];
 
 test('404.html footer mirrors index.html footer exactly', () => {

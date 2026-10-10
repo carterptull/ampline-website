@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /og-card.html
+Disallow: /og-card
 Sitemap: https://ampline.js.org/sitemap.xml

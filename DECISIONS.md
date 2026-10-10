@@ -119,7 +119,7 @@ considered instead. Reversing any of them is cheap unless noted.
 
 ### D15. `favicon.ico` is a 32x32 PNG with an `.ico` name
 
-**Decision:** `site/favicon.ico` is a 32x32 PNG file saved under the `.ico` name. `icon.svg` is the primary icon, and `apple-touch-icon.png` is `icon.svg` rendered at 180x180 on solid black. All three raster files are rendered from `icon.svg` in Chrome, so no image tool is needed.
+**Decision:** `site/favicon.ico` is a 32x32 PNG file saved under the `.ico` name. `icon.svg` is the primary icon, and `apple-touch-icon.png` is `icon.svg` rendered at 180x180 on solid black. `favicon.ico` and `apple-touch-icon.png` are rendered from `icon.svg`, and `og.png` is rendered from `og-card.html`, all in Chrome, so no image tool is needed.
 
 **Why:** Browsers sniff image content rather than trusting the extension, so a PNG named `favicon.ico` works wherever `/favicon.ico` is requested by default (feed readers, older crawlers). Hand-building a multi-size ICO container, or adding an image library, would buy nothing for a site with no build step and no dependencies.
 

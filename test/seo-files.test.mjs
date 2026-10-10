@@ -4,9 +4,9 @@ import { readFileSync } from 'node:fs';
 
 const read = (f) => readFileSync(new URL(`../site/${f}`, import.meta.url), 'utf8');
 
-test('robots.txt allows the site, hides the OG card source page and points at the sitemap', () => {
+test('robots.txt allows the site, hides the OG card source page (with and without .html, cleanUrls serves both) and points at the sitemap', () => {
   const lines = read('robots.txt').split('\n').map((l) => l.trim()).filter(Boolean);
-  assert.deepEqual(lines, ['User-agent: *', 'Allow: /', 'Disallow: /og-card.html', 'Sitemap: https://ampline.js.org/sitemap.xml']);
+  assert.deepEqual(lines, ['User-agent: *', 'Allow: /', 'Disallow: /og-card.html', 'Disallow: /og-card', 'Sitemap: https://ampline.js.org/sitemap.xml']);
 });
 
 test('sitemap.xml lists exactly the home page', () => {
