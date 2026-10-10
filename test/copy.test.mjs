@@ -168,3 +168,14 @@ test('a fallback click after a success cancels the pending green reset and stays
     mock.timers.reset();
   }
 });
+
+test('fallback with no selection API (getSelection returns null): does not throw, still announces', () => {
+  install({});
+  globalThis.window.getSelection = () => null;
+  const button = makeButton(); const status = { textContent: '' };
+  wireCopy(button, CMD, status);
+  assert.doesNotThrow(() => button.click());
+  assert.equal(button.textContent, 'Selected');
+  assert.equal(status.textContent, 'Command selected. Press and hold, or Ctrl+C, to copy.');
+  assert.ok(!button.classList.contains('is-copied'));
+});

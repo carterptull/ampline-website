@@ -11,7 +11,8 @@ export function wireCopy(button, text, statusEl) {
   const fallback = () => {
     const code = document.getElementById('installCmd');
     const range = document.createRange(); range.selectNodeContents(code);
-    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    const sel = window.getSelection();
+    if (sel) { sel.removeAllRanges(); sel.addRange(range); } // no selection API: still announce, never throw
     button.textContent = 'Selected';
     button.classList.remove('is-copied'); // selecting is not a copy: stays neutral
     statusEl.textContent = 'Command selected. Press and hold, or Ctrl+C, to copy.';
