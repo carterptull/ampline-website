@@ -5,7 +5,7 @@ the *why* behind anything here that looks surprising.
 
 ## Git & GitHub rules (hard rules from the user; they apply to every agent and subagent)
 
-- **Repo:** `https://github.com/carterptull/ampline-website`, cloned at `C:\Users\cart3\Repositories\ampline-website`.
+- **Repo:** `https://github.com/carterptull/ampline-website`, cloned locally.
 - **Working branch:** `ct/feature/website-initial-implementation`, already created from `main` and pushed to origin by Carter. Phase 1 work happens here. Before starting, run `git branch --show-current` to confirm.
 - **What agents MAY do** (authorized by Carter, 2026-10-09), always as Carter:
   - `git commit` on `ct/...` branches, staging by explicit path (never `git add -A` / `git add .`)
@@ -165,7 +165,7 @@ Browser checks use Google Chrome via the Chrome DevTools MCP, run against `npm r
   390×844, 412×915, 768×1024, 844×390 (landscape) and desktop 1440×900. Check:
   - `document.documentElement.scrollWidth === document.documentElement.clientWidth`
   - every `a, button, select, input` is ≥44px in both dimensions on touch viewports
-  - save a screenshot to `.playwright-mcp/` (git-ignored)
+  - save a screenshot to a git-ignored folder
 - The console shows zero errors or warnings, CSP ones especially.
 - Throttling: "Slow 4G" plus 4× CPU. The hero still animates smoothly, and LCP stays under 2.5s.
 - `lighthouse_audit` on mobile and desktop: Performance, Accessibility, Best Practices and SEO

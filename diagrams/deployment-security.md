@@ -33,6 +33,13 @@ rules are in `vercel.json`, which `npm run dev` (`scripts/serve.mjs`) also appli
 CSP violation shows up before deploy. `vercel.json` sets no `Strict-Transport-Security` header,
 and `upgrade-insecure-requests` in the CSP is the in-repo HTTPS control.
 
+**Ordering.** Create the Vercel project and add the domain `ampline.js.org` to it in Vercel
+**before** the js.org DNS entry goes live. A CNAME pointing at Vercel that no project claims can be
+taken over by another Vercel account. If the project is ever deleted, remove the js.org record
+first. Keep Vercel Web Analytics and Speed Insights off: they would add third-party requests, and
+the Vercel preview toolbar loads from `vercel.live`, so `*.vercel.app` previews show CSP errors
+for signed-in team members. Production visitors are not affected.
+
 ## What the headers allow
 
 ```mermaid
@@ -111,4 +118,4 @@ widget. The Buy Me a Beer control is a plain `<a>` with `target="_blank"` and
 page makes.
 
 ---
-_Last verified: 2026-10-09 · site 0.1.0_
+_Last verified: 2026-10-10 · site 0.1.0_

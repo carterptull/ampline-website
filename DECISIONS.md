@@ -69,7 +69,7 @@ considered instead. Reversing any of them is cheap unless noted.
 
 **Alternatives:** a two-column hero with the demo beside the text (cramped at phone widths).
 
-### D9. Self-hosted, subset Iosevka Fixed (renamed "ampline mono")
+### D9. Self-hosted, subset Iosevka Fixed (exposed as "ampline mono")
 
 **Decision:** The monospace face is Iosevka Fixed Regular and Bold v34.9.0 (SIL OFL), subset to Latin plus the statusline glyphs, self-hosted as `mono-400.v1.woff2` and `mono-700.v1.woff2` and exposed as the `"ampline mono"` family.
 
@@ -109,9 +109,9 @@ considered instead. Reversing any of them is cheap unless noted.
 
 **Alternatives:** allowing Dependabot merges (adds `dependabot[bot]` as a contributor); no agent commits at all (slower, and nothing about the review gates needs it).
 
-### D14. One gold "Buy Me a Beer" pill for support; "Star on GitHub" is a plain link
+### D14. One gold "Buy Me a Beer" pill for support; the other footer links stay plain
 
-**Decision:** The footer has a single gold "🍺 Buy Me a Beer" pill linking to `https://buymeacoffee.com/paymonsoftware`. It is a plain `<a>` (`target="_blank"`, `rel="noopener noreferrer"`) with no widget or script. "Star on GitHub" is just a plain link, not a pill. There is no Ko-fi and no GitHub Sponsors.
+**Decision:** The footer has a single gold "🍺 Buy Me a Beer" pill linking to `https://buymeacoffee.com/paymonsoftware`. It is a plain `<a>` (`target="_blank"`, `rel="noopener noreferrer"`) with no widget or script. There is no "Star on GitHub" pill: GitHub, npm, Issues and Changelog stay plain footer links, and the "Buy Me a Beer" pill is the only pill. There is no Ko-fi and no GitHub Sponsors.
 
 **Why:** It matches blitzcast's footer button and the Paymon Software brand, and one clear support action is enough. Gold is `#E8B23D`, the Sonnet-max color on the wheel, so the "color only from the wheel" rule holds.
 
