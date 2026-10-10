@@ -132,3 +132,13 @@ considered instead. Reversing any of them is cheap unless noted.
 **Why:** The hero is a moving picture of the product, not text to read. It powers up with a fade-in and then cycles through the wheel, and some wheel stops are below 4.5:1 on the terminal background by design (Fable/max `#8000c0` is 2.51:1). Those colors are the product's identity, so they can't be lightened for the page. Lighthouse's contrast check (axe) still measures `aria-hidden` text and ignores roles, so it failed whenever its snapshot caught a half-faded segment or the Fable frame. It skips inert content, which keeps Accessibility at 100. Putting `inert` on the line itself would also stop touch scrolling, because inert content is not hit-tested, so it goes on an inner wrapper instead.
 
 **Alternatives:** lighter colors on the page (no longer the real renderer's output); `role="img"` with an `aria-label` on the figure (tried: axe still flags the text inside); no fade-in and no Fable frame in the cycle (hides part of the product); accepting a sub-100 Accessibility score.
+
+### D17. Lighthouse SEO 92 locally: robots.txt audit blocked by `connect-src 'none'`
+
+**Decision:** Keep `connect-src 'none'`. The strict CSP is part of the product story: the page makes zero network requests.
+
+**Why:** Lighthouse's robots.txt audit fetches `/robots.txt` from inside the page, which `connect-src 'none'` blocks. Local runs therefore show SEO 92 even though `robots.txt` is valid. A scratch run with `connect-src 'self'` scored 100.
+
+**Alternatives:** loosen to `connect-src 'self'` (no third-party exposure, but a weaker header; `SECURITY.md` and the diagrams would need updating); allow only the `robots.txt` path on the production host (breaks on preview URLs).
+
+**Follow-up:** re-run Lighthouse SEO against the deployed URL, and loosen the header only if it still reports 92 there.
