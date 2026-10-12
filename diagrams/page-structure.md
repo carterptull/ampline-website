@@ -9,8 +9,8 @@ parsed. `404.html` is a small second page with the same nav and footer.
 ```mermaid
 flowchart TB
     skip["Skip link<br/>to #main"] --> nav["Nav (sticky)<br/>wordmark + small wave,<br/>Features · Playground · How it works,<br/>GitHub and npm links"]
-    nav --> hero["Hero (#top)<br/>wordmark, wave, slogan,<br/>install command + Copy button,<br/>fake Claude Code terminal"]
-    hero --> features["What it shows (#features)<br/>segment tour cards"]
+    nav --> hero["Hero (#top)<br/>wordmark, wave, slogan,<br/>install command + Copy button,<br/>meta line + OS compatibility line,<br/>fake Claude Code terminal"]
+    hero --> features["What it shows (#features)<br/>segment tour cards,<br/>customize and FAQ prompts"]
     features --> play["Playground (#playground)<br/>Phase 1: static preview<br/>interactive controls planned (Phase 2)"]
     play --> how["Under the hood (#how)<br/>four static cards,<br/>FAQ · Configuration · Security ·<br/>Architecture diagrams links"]
     how --> footer["Footer<br/>Buy Me a Beer pill, GitHub · npm ·<br/>Issues · Changelog, copyright,<br/>versions, Anthropic disclaimer"]
@@ -50,6 +50,11 @@ flowchart LR
 still reads, but the wave bars, the demo statuslines and the tour are empty. The static
 `#ampVersion` text is the fallback that `main.js` overwrites.
 
+**The hero wave is independent of the hero line.** Both waves (nav and hero) are mounted once by
+`main.js` and animate freely. The cycling line does not hold or highlight a bar for the current
+model, so the wave never breaks its rhythm. Only the OG card's still image marks one bar. See D18
+in [`DECISIONS.md`](../DECISIONS.md).
+
 **Each statusline container has its own runtime instance** where it matters. The hero line
 cycles through models and efforts on a timer (paused while the tab is hidden and off under
 `prefers-reduced-motion`). The tour gets a wide instance that it reconfigures per card. The
@@ -60,4 +65,4 @@ social card from the same runtime, and `site/og.png` is a screenshot of it at 12
 marked `noindex` and disallowed in `robots.txt`.
 
 ---
-_Last verified: 2026-10-09 · site 0.1.0_
+_Last verified: 2026-10-12 · site 0.2.0_

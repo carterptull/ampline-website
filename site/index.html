@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/css/site.css">
   <script type="module" src="/js/main.js"></script>
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ampline","applicationCategory":"DeveloperApplication",
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ampline","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux, Windows",
    "offers":{"@type":"Offer","price":0,"priceCurrency":"USD"},
    "url":"https://ampline.js.org/","downloadUrl":"https://www.npmjs.com/package/ampline-claude",
    "license":"https://opensource.org/licenses/MIT","author":{"@type":"Organization","name":"Paymon Software"}}
@@ -63,6 +63,7 @@
         <button class="copy" id="copyBtn" type="button">Copy</button>
       </div>
       <p class="meta">Node.js ≥ 24 · 0 dependencies · no network · no credentials · MIT</p>
+      <p class="compat"><span class="compat-dot" aria-hidden="true">●</span> Works on macOS · Linux · Windows</p>
       <noscript><p class="note">ampline's demos run in your browser and need JavaScript. The page text below still works without it.</p></noscript>
       <p class="sr-status" id="copyStatus" role="status" aria-live="polite"></p>
       <figure class="term term-hero">
@@ -80,6 +81,11 @@
       <div class="grid" id="tour"></div>
       <p class="note">5-hour and weekly bars need a Claude.ai subscription. Requires a truecolor terminal.</p>
       <p class="note">Git and task samples use stand-in data with the real formatting; every other segment runs ampline's own code on a sample payload.</p>
+      <p class="learn-note">An optional <code>.amplinerc.json</code> in your project or home folder sets which segments show and in what order, the separator, where line 2 starts, and whether color is on or off.</p>
+      <p class="learn">
+        <span>Want to customize? <a href="https://github.com/carterptull/ampline-claude#configuration" target="_blank" rel="noopener noreferrer">Configure it ↗</a></span>
+        <span>Got a question? <a href="https://github.com/carterptull/ampline-claude#faq" target="_blank" rel="noopener noreferrer">Read the FAQ ↗</a></span>
+      </p>
     </section>
 
     <section class="wrap section" id="playground" aria-labelledby="playground-h">
@@ -121,7 +127,7 @@
       </div>
       <div class="footer-base">
         <p>MIT · © 2026 Paymon Software</p>
-        <span class="ver" id="siteVersion">v0.1.0</span>
+        <span class="ver" id="siteVersion">v0.2.0</span>
       </div>
       <p>Demos rendered by ampline-claude <span id="ampVersion">0.6.0</span>'s own renderer · This page: 0 trackers, 0 third-party requests</p>
       <p class="disc">ampline is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anthropic, PBC. Claude and Claude Code are trademarks of Anthropic, PBC.</p>

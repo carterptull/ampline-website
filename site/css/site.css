@@ -38,7 +38,8 @@ code { font: inherit }
 .links { display: flex; gap: 22px; font-size: 13px; color: var(--muted) }
 .links a:hover { color: var(--white) }
 
-/* wave equalizer: compositor-only (transform + opacity), never height or box-shadow */
+/* wave equalizer: compositor-only (transform + opacity), never height or box-shadow.
+   .hold pins one bar lit: only the OG card's still image uses it; the live waves never hold a bar. */
 .vu { display: flex; align-items: flex-end; gap: 3px }
 .vu > span { flex: 1; height: 100%; border-radius: 1px; background: var(--c); transform-origin: bottom;
   transform: scaleY(var(--snap, .3)); opacity: .5; animation: wave 1.6s ease-in-out infinite; animation-delay: calc(var(--i) * 70ms) }
@@ -62,6 +63,8 @@ code { font: inherit }
 .copy:hover { color: var(--white); border-color: #444 }
 .copy.is-copied, .copy.is-copied:hover { color: var(--danger-1); border-color: var(--danger-1) } /* after :hover so the green state wins */
 .meta { margin: 16px 0 0; font-family: var(--mono); font-size: calc(12px * var(--mk)); color: var(--quiet) }
+.compat { margin: 10px 0 0; font-family: var(--mono); font-size: calc(12px * var(--mk)); color: var(--text) } /* the OS line under .meta: same mono scale, brighter than the quiet meta line */
+.compat-dot { color: var(--danger-1) } /* decoration only, aria-hidden */
 
 /* faux terminal */
 .term { margin: 56px auto 0; max-width: 960px; border: 1px solid #1e1e1e; border-radius: 12px; background: var(--surface-2); overflow: hidden; text-align: left; box-shadow: 0 30px 80px rgb(0 0 0 / .6) }
@@ -89,6 +92,13 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
 .lead { color: var(--muted); font-size: 16px; line-height: 1.6; max-width: 640px; margin: 0 }
 .note { margin: 16px 0 0; font-size: 13px; color: var(--quiet); line-height: 1.5 }
 .note + .note { margin-top: 6px }
+
+/* customize / FAQ prompts after the segment tour */
+.learn-note { margin: 40px auto 0; max-width: 560px; text-align: center; font-size: 13px; color: var(--quiet); line-height: 1.5 }
+.learn { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 32px; margin: 14px 0 0; font-size: 15px; color: var(--muted); line-height: 1.5 }
+.learn > span { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 .4em }
+.learn a { color: var(--white); text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 4px }
+.learn a:hover { text-decoration-color: var(--white) }
 
 /* segment tour */
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 34px }
@@ -177,14 +187,18 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
   .footer-base { justify-content: center }
 }
 
-/* the install line on the narrowest phones: keep the command and Copy on one row */
-@media (max-width: 400px) {
-  .install { gap: 12px; padding: 8px 8px 8px 14px; font-size: calc(12.5px * var(--mk)) }
+/* The install line on phones: the whole command stays visible, with Copy beside it on one row.
+   Box chrome is 108px (2px border + 22px padding + 12px gap + the 72px Copy button) plus 4px of slack, and the
+   command is 30 mono glyphs at 0.5em each = 15em, so the font shrinks just enough to fit the room left between
+   the page gutters. It is capped at the desktop size and only binds below roughly 430px. */
+@media (max-width: 480px) {
+  .install { gap: 12px; padding: 8px 8px 8px 14px;
+    font-size: min(calc(15px * var(--mk)), calc((100vw - 2 * var(--gutter) - 112px) / 15)) }
 }
 
 /* touch: every interactive element gets a 44px hit area */
 @media (pointer: coarse) {
-  .links a, .copy, .seg-toggles button, .ctl select, .btn, .footer-links a, .brand {
+  .links a, .copy, .seg-toggles button, .ctl select, .btn, .learn a, .footer-links a, .brand {
     min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center }
   .card .s { min-height: 44px } /* a one-line sample that overflows is a focusable scroll region (42.4px tall otherwise) */
   .card .s a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center } /* PR / MR links */

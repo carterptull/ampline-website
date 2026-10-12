@@ -12,10 +12,11 @@ document.getElementById('ampVersion').textContent = amp.version;
 // The logo line is colored from the runtime's own wheel, so it can't drift from the product.
 const wheel = amp.colors.WHEEL;
 mountEqualizer(document.getElementById('navVu'), wheel, { size: 'nav' });
-const heroVu = mountEqualizer(document.getElementById('heroVu'), wheel, { size: 'hero' });
+// Both waves animate freely; the hero wave is not tied to the cycling model line (DECISIONS.md D18).
+mountEqualizer(document.getElementById('heroVu'), wheel, { size: 'hero' });
 
 wireCopy(document.getElementById('copyBtn'), 'npx ampline-claude --install', document.getElementById('copyStatus'));
-startHero({ amp, equalizer: heroVu, body: document.getElementById('heroBody'), line: document.getElementById('heroSl') });
+startHero({ amp, body: document.getElementById('heroBody'), line: document.getElementById('heroSl') });
 
 // The tour reconfigures segments/columns per card, so it gets its own instance: shared mutable config would leak into the hero's cycling line.
 const tour = document.getElementById('tour');

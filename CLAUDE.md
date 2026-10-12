@@ -56,7 +56,7 @@ stubs for the Node-only parts. Its ANSI output is turned into DOM nodes, never H
 - No `style=` attributes and no `on*=` attributes in any HTML, and no `innerHTML` with markup, in `site/`.
 - The renderer source is never hand-edited. `site/js/runtime/factories.generated.js` is written only by `scripts/sync-ampline.mjs`, and CI fails if it's stale.
 - Every statusline string on the page comes from the runtime, never typed by hand. The only exception is the Phase 2 installer transcript, which is copied verbatim from a real run.
-- Copy rules: product name "ampline"; "for Claude Code" is descriptive; the disclaimer ("ampline is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anthropic, PBC. Claude and Claude Code are trademarks of Anthropic, PBC.") appears in the footer; the accuracy rules are followed (two separate color scales, bold only at the documented edges, 5-hour and weekly bars need a Claude.ai subscription, truecolor terminals only, no macOS/Linux/Windows claim until macOS is verified, at most two lines, cost is an estimate, PR/MR data comes from Claude Code, context % is from the last completed API call).
+- Copy rules: product name "ampline"; "for Claude Code" is descriptive; the disclaimer ("ampline is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anthropic, PBC. Claude and Claude Code are trademarks of Anthropic, PBC.") appears in the footer; the accuracy rules are followed (two separate color scales, bold only at the documented edges, 5-hour and weekly bars need a Claude.ai subscription, truecolor terminals only, the OS claim ("Works on macOS · Linux · Windows", never "Supports", no versions) appears only in the hero compat line and the JSON-LD `operatingSystem` (verified on real hardware, see D19), at most two lines, cost is an estimate, PR/MR data comes from Claude Code, context % is from the last completed API call).
 - Owner and license: MIT, "Copyright (c) 2026 Paymon Software". README and footer say "© 2026 Paymon Software".
 - Footer support control is ONE gold pill "🍺 Buy Me a Beer" (`#E8B23D`, the `.pill` style) linking to `https://buymeacoffee.com/paymonsoftware`: a plain `<a>` with `target="_blank"` and `rel="noopener noreferrer"`, and NO widget or script. It replaces any "Star on GitHub" pill; GitHub, npm, Issues and Changelog stay plain footer links. `404.html`'s footer mirrors `index.html`. No Ko-fi, no GitHub Sponsors. See D14.
 - Mobile: no horizontal page scroll at ≥360px; tap targets ≥44px under `pointer: coarse`.
@@ -64,6 +64,7 @@ stubs for the Node-only parts. Its ANSI output is turned into DOM nodes, never H
 - Git and GitHub: follow "Git & GitHub rules" at the top, verbatim. Commit, push, `ct/...` branches, PRs and merges after green checks are allowed, **always as Carter Tull, with zero AI attribution**. Repo settings, Vercel, the js.org PR and npm publishing still need approval. Stage by explicit path.
 - Dependabot PRs are never merged: re-apply the bump on a Carter branch, comment that it is superseded, and close the bot PR.
 - Committed files never link to or mention local-only, git-excluded files or folders.
+- Never mention other statusline projects, competitors or third-party statuslines by name, or compare against them, anywhere in this repo or on the website (copy, docs, comments, tests, commit messages). `test/no-third-party-names.test.mjs` enforces the names it knows; the rule covers all of them.
 
 ## Module layout
 
@@ -106,8 +107,8 @@ ampline-website/
 │       │   └── ampline.js       createAmpline(): require registry + shims → render API
 │       ├── ansi.js              parseAnsi(str) → tokens (pure) · renderAnsi(tokens, doc, opts) → DocumentFragment
 │       ├── payloads.js          demo payload builders (time-relative), wheelIndex()
-│       ├── equalizer.js         mountEqualizer(el, wheel, opts) → { hold(i), release() }
-│       ├── hero.js              typed prompt + power-up + cycle
+│       ├── equalizer.js         mountEqualizer(el, wheel, opts) → { bars, hold(i), release() }; live waves never hold, only the OG card's still image does
+│       ├── hero.js              typed prompt + power-up + cycle; does not touch the hero wave (D18)
 │       ├── tour.js              renders tour cards from payloads
 │       ├── play-preview.js      Phase 1 static playground stand-in (replaced by playground.js in Phase 2)
 │       ├── og-card.js           renders the og-card.html statusline + frozen wave from the runtime
@@ -122,7 +123,8 @@ ampline-website/
     ├── ansi.test.mjs
     ├── payloads.test.mjs
     ├── html-contract.test.mjs   CSP-safety + required meta/disclaimer in site/*.html (og-card.html: CSP-safety only)
-    └── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
+    ├── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
+    └── no-third-party-names.test.mjs  fails if a git-tracked text file names another statusline project
 ```
 
 ## Frozen interfaces
@@ -146,6 +148,8 @@ site/js/payloads.js        FAMILIES = ['haiku','sonnet','opus','fable'] · MODEL
                            statusPayload(opts) -> input object · subagentPayload(opts) -> {columns, tasks}
                            HERO_CYCLE: Array<[family, effort]>
 site/js/equalizer.js       mountEqualizer(container, wheelRgbs: number[][], { size: 'hero'|'nav' }) -> { hold(i), release(), bars }
+                           (hold(i) is used only by og-card.js for the still image; the hero and nav waves animate freely, D18)
+site/js/hero.js            startHero({ amp, body, line })   (no equalizer argument: the wave is not synced to the cycle)
 site/js/copy.js            wireCopy(button, text, statusEl)
 ```
 

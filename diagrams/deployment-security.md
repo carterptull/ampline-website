@@ -30,8 +30,10 @@ to a third-party repo and is Carter's to open.
 **Where each control lives.** DNS and the CNAME are js.org's. TLS and the edge are Vercel's.
 The headers, the clean URLs (`/og-card` serves `og-card.html`, no trailing slash) and the cache
 rules are in `vercel.json`, which `npm run dev` (`scripts/serve.mjs`) also applies locally so a
-CSP violation shows up before deploy. `vercel.json` sets no `Strict-Transport-Security` header,
-and `upgrade-insecure-requests` in the CSP is the in-repo HTTPS control.
+CSP violation shows up before deploy. `vercel.json` sets `Strict-Transport-Security` explicitly
+(`max-age=31536000`, no `includeSubDomains`, no `preload`; see D20, which also says why), and `upgrade-insecure-requests`
+in the CSP upgrades any stray `http:` subresource. Browsers ignore HSTS over plain `http://`, so the
+dev server sending it on `127.0.0.1` is harmless.
 
 **Ordering.** Create the Vercel project and add the domain `ampline.js.org` to it in Vercel
 **before** the js.org DNS entry goes live. A CNAME pointing at Vercel that no project claims can be
@@ -57,7 +59,7 @@ flowchart TB
 
     subgraph blocked["Blocked by the CSP"]
         direction TB
-        net["fetch, XHR, WebSocket<br/>connect-src none"]
+        net["fetch, XHR, WebSocket<br/>to any other origin<br/>connect-src self"]
         frm["iframes, forms, plugins, base tag"]
         inl["inline script, inline style,<br/>eval, third-party anything"]
     end
@@ -85,6 +87,7 @@ Sent on every path (`/(.*)`):
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Cross-origin requests carry the origin only, never a path (the outbound links add `noreferrer`, so they send none at all) |
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), interest-cohort=()` | Those features and FLoC are off |
 | `Cross-Origin-Opener-Policy` | `same-origin` | No shared browsing context with pages opened from here |
+| `Strict-Transport-Security` | `max-age=31536000` | HTTPS only for a year on this host. No `includeSubDomains` (ampline.js.org has no subdomains to cover) and no `preload` (a hard-to-undo browser-list commitment on a name under js.org, which we do not own) |
 
 Cache rules (separate entries, only `Cache-Control`): `/assets/*` is `public, max-age=31536000,
 immutable` (filenames carry a version, such as `wordmark.v1.svg`), and `og.png`, `favicon.ico`,
@@ -99,7 +102,7 @@ immutable` (filenames carry a version, such as `wordmark.v1.svg`), and `og.png`,
 | `style-src` | `'self'` | Own stylesheets only. No inline styles |
 | `img-src` | `'self' data:` | Own images, plus `data:` URIs |
 | `font-src` | `'self'` | Self-hosted fonts only |
-| `connect-src` | `'none'` | The page can make no network requests from script |
+| `connect-src` | `'self'` | Script can reach only the site's own origin (Lighthouse's `robots.txt` check needs this). No site code opens a connection at all |
 | `manifest-src` | `'self'` | Own web manifest |
 | `base-uri` | `'none'` | No `<base>` rewriting |
 | `form-action` | `'none'` | The page has no forms |
@@ -114,8 +117,10 @@ widget. The Buy Me a Beer control is a plain `<a>` with `target="_blank"` and
 `rel="noopener noreferrer"`, with no script. These are held by tests rather than by habit:
 `html-contract.test.mjs` fails on any third-party script, stylesheet, font or image tag, any
 `style=` or `on*=` attribute, any `innerHTML` write in `site/js/`, and any remote `url()` or
-`@import` in the CSS. The outbound links are navigations the visitor chooses, not requests the
+`@import` in the CSS. It also fails on any `fetch(`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`
+or `EventSource` in `site/js/`, so the same-origin `connect-src` cannot hide a regression, and it pins
+the header value. The outbound links are navigations the visitor chooses, not requests the
 page makes.
 
 ---
-_Last verified: 2026-10-10 · site 0.1.0_
+_Last verified: 2026-10-12 · site 0.2.0_

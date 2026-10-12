@@ -19,7 +19,8 @@ Examples: a gap in the headers or Content-Security-Policy, a demo that renders u
 ## The site's security posture
 
 - **Zero third-party requests.** No CDN, web fonts, analytics or embeds. Everything the browser loads comes from the site's own origin, and every outbound link is a plain `<a>`.
-- **Strict Content-Security-Policy.** `default-src 'none'`, with scripts, styles, images, fonts and the manifest limited to `'self'`. No `unsafe-inline`, no `unsafe-eval`, `connect-src 'none'`, `frame-ancestors 'none'`. The renderer is pre-wrapped at sync time, so nothing is `eval`'d at runtime.
+- **Strict Content-Security-Policy.** `default-src 'none'`, with scripts, styles, images, fonts and the manifest limited to `'self'`. No `unsafe-inline`, no `unsafe-eval`, `connect-src 'self'` (same-origin only; no site code opens a connection, and a test enforces that), `frame-ancestors 'none'`. The renderer is pre-wrapped at sync time, so nothing is `eval`'d at runtime.
+- **Explicit HSTS.** `Strict-Transport-Security: max-age=31536000`, with no `includeSubDomains` and no `preload`. `includeSubDomains` would cover nothing, since `ampline.js.org` has no subdomains, and `preload` is a browser-list commitment that is hard to undo, on a name under `js.org` that we do not own. It is set in `vercel.json` so the policy is ours and visible in the repo, rather than Vercel's default (which adds both).
 - **No analytics and no trackers.**
 - **The dev server listens on localhost only** (`127.0.0.1`), unless you set `HOST` yourself.
 - **Untrusted text stays text.** Demo output enters the DOM through `textContent` and DOM nodes, never `innerHTML`. Links in statusline output are only turned into anchors when the renderer's own link check approves them.

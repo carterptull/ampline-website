@@ -50,6 +50,12 @@ hero, a separate 500-column one for the tour (which reconfigures segments per ca
 once when it loads, so no-color output needs its own instance. The site does not create one
 today.
 
+**The wave logo uses the renderer's wheel but is not part of the render path.** `main.js` passes
+`amp.colors.WHEEL` (from the vendored `colors` module) to `equalizer.js`, which colors the 20 bars
+in the nav and the hero. `hero.js` only drives the statusline cycle and never touches the waves,
+so both animate freely and no bar is held for the current model (D18 in
+[`DECISIONS.md`](../DECISIONS.md)).
+
 ## How it is kept honest
 
 ```mermaid
@@ -92,4 +98,4 @@ checks each tour card against the renderer's real single-segment output. The pag
 contract (CSP-safe HTML, no third-party resources) is `html-contract.test.mjs`.
 
 ---
-_Last verified: 2026-10-09 · site 0.1.0_
+_Last verified: 2026-10-12 · site 0.2.0_

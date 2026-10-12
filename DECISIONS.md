@@ -53,9 +53,9 @@ considered instead. Reversing any of them is cheap unless noted.
 
 **Alternatives:** self-hosting the Michroma font (an extra font file for one word); a system font (loses the brand).
 
-### D7. A "D2 wave" logo with hold-sync
+### D7. A "D2 wave" logo
 
-**Decision:** The logo mark is a row of 20 equalizer bars, one per stop on the model/effort color wheel, rising and falling in a travelling wave. In the hero, the bar matching the statusline's current model and effort holds lit.
+**Decision:** The logo mark is a row of 20 equalizer bars, one per stop on the model/effort color wheel, rising and falling in a travelling wave. (An earlier design also held the bar matching the hero statusline's current model and effort lit; D18 removed that.)
 
 **Why:** It is a literal picture of the product's 20-step wheel, so the logo and the statusline cannot drift: the bars read the wheel colors from the vendored renderer at runtime. A frozen snapshot serves the favicon, OG card, README and reduced-motion users.
 
@@ -63,7 +63,7 @@ considered instead. Reversing any of them is cheap unless noted.
 
 ### D8. Hero layout A (centered stack)
 
-**Decision:** The hero is a centered stack: wordmark, wave, slogan and subline, copyable install command, meta line, then a faux Claude Code window.
+**Decision:** The hero is a centered stack: wordmark, wave, slogan and subline, copyable install command, meta line, then a faux Claude Code window. The meta line is followed by one "Works on macOS · Linux · Windows" compatibility line (D19).
 
 **Why:** It puts the install command and the live statusline in the first screen on both phones and desktops, with no side-by-side layout to collapse on narrow screens.
 
@@ -137,10 +137,40 @@ considered instead. Reversing any of them is cheap unless noted.
 
 ### D17. Lighthouse SEO 92 locally: robots.txt audit blocked by `connect-src 'none'`
 
-**Decision:** Keep `connect-src 'none'`. The strict CSP is part of the product story: the page makes zero network requests.
+**Decision (original):** Keep `connect-src 'none'`. The strict CSP is part of the product story: the page makes zero network requests.
 
 **Why:** Lighthouse's robots.txt audit fetches `/robots.txt` from inside the page, which `connect-src 'none'` blocks. Local runs therefore show SEO 92 even though `robots.txt` is valid. A scratch run with `connect-src 'self'` scored 100.
 
 **Alternatives:** loosen to `connect-src 'self'` (no third-party exposure, but a weaker header; `SECURITY.md` and the diagrams would need updating); allow only the `robots.txt` path on the production host (breaks on preview URLs).
 
 **Follow-up:** re-run Lighthouse SEO against the deployed URL, and loosen the header only if it still reports 92 there.
+
+**Resolution (2026-10-12):** The re-check on the deployed URL (`https://ampline-website.vercel.app`) still showed SEO 92, with `robots-txt` the only failing audit, so `connect-src` is now `'self'`. Third-party exposure is unchanged: `'self'` allows only same-origin fetch, XHR and WebSocket, and no site code uses any of them (`html-contract.test.mjs` fails if `site/js/` ever gains one, and pins the header value). Re-run Lighthouse after the deploy to confirm 100.
+
+### D18. Hero wave is not synced to the cycling model
+
+**Decision:** The hero wave animates freely, exactly like the nav wave. It is not tied to the hero statusline's model and effort cycle, and no bar is ever held lit while the page is live. `hero.js` no longer touches the wave, and `mountEqualizer`'s `hold()` / `release()` remain only for the OG card, whose still image marks the Opus/xhigh bar.
+
+**Why:** Holding the bar for the current model pinned one bar full-height and glowing while the other 19 kept moving, which broke the wave's rhythm and was easily mistaken for a glitch. The nav wave, which never holds, reads as the intended motion. This supersedes the earlier design (D7) in which the bar matching the current model and effort held lit.
+
+**Alternatives:** keep the sync with a softer highlight (still interrupts the wave); sync only a color tint to the current model (extra per-frame work for a link few visitors would notice).
+
+### D19. OS compatibility claim enabled
+
+**Decision:** The hero shows one line under the meta line, "● Works on macOS · Linux · Windows", and the JSON-LD carries `"operatingSystem": "macOS, Linux, Windows"`. Those are the only two places the OS names may appear (`html-contract.test.mjs` enforces it). The wording is "Works on", never "Supports", and no OS versions are named. The leading dot is the calm end of the danger ramp (`--danger-1`) and is `aria-hidden`, so the line reads as plain text to assistive tech.
+
+**Why:** ampline has been verified on real hardware on all three: Windows, Linux (via WSL) and macOS. WSL counts as Linux here, which is the only way most Windows users meet a Linux shell anyway. This supersedes the earlier rule that held back any macOS/Linux/Windows claim until macOS was verified; that condition is now met.
+
+**Alternatives:** keep saying nothing (leaves a basic question unanswered above the fold); list OS versions (would need a tested matrix, and goes stale); a "Supports" claim (promises more than has been tested); a longer platform paragraph further down the page (the hero is where people decide to install).
+
+### D20. Explicit HSTS
+
+**Decision:** `vercel.json` sets `Strict-Transport-Security: max-age=31536000` on every response, with no `includeSubDomains` and no `preload`.
+
+**Why:** Vercel adds `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` on its own when the project does not set one. We set the header explicitly so the policy is ours and visible in this repo, not whatever the platform default happens to be. `includeSubDomains` is meaningless here: `ampline.js.org` has no subdomains to cover (and HSTS sent by this host never reaches sibling `*.js.org` hosts). `preload` is a commitment to browser-shipped lists that is hard to undo, on a name that is a subdomain of `js.org`, which Carter does not own, so we do not opt into it. One year is a conservative, standard `max-age`, and it still protects this host. The header test pins the exact value and the full global header set.
+
+**Verify after deploy:** run `curl -sI https://ampline.js.org/` (and the `*.vercel.app` URL) and confirm the response has exactly one `strict-transport-security: max-age=31536000` line and that Vercel did not append its own.
+
+**Note:** the dev server applies the same global headers, so it now also sends HSTS over `http://127.0.0.1`. Browsers ignore HSTS on plain HTTP, so it is harmless there.
+
+**Alternatives:** keep Vercel's default (the policy would not be ours or visible in the repo, `includeSubDomains` covers nothing here, and preload is hard to undo on a name under a domain we do not own); leave HSTS off (the deployed site would still get Vercel's default, so the choice would not be ours); `max-age` of two years to match Vercel (no benefit without preload).

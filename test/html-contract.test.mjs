@@ -85,7 +85,7 @@ test('index.html: SEO + social meta present', () => {
   const data = JSON.parse(ld[1]);
   assert.equal(data['@type'], 'SoftwareApplication');
   assert.equal(data.aggregateRating, undefined); // never invent ratings
-  assert.equal(data.operatingSystem, undefined); // no OS claim until macOS is verified
+  assert.equal(data.operatingSystem, "macOS, Linux, Windows"); // verified on real hardware (D19)
 });
 
 test('CSS loads no remote resources', () => {
@@ -156,4 +156,122 @@ test('index.html: a noscript note tells no-JS visitors the demos need JavaScript
   assert.ok(m[1].includes("ampline's demos run in your browser and need JavaScript. The page text below still works without it."));
   assert.ok(html.indexOf('<noscript>') > html.indexOf('<main'), 'noscript note lives inside <main>');
   assert.ok(html.indexOf('<noscript>') < html.indexOf('id="features"'), 'and near the top of it');
+});
+
+// connect-src is 'self' so Lighthouse's in-page fetch of /robots.txt works (DECISIONS.md D17). That is only
+// safe while no site code opens a connection of its own, so the next test guards the code and this one the header.
+const CSP = (() => {
+  const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+  const value = vercel.headers.flatMap((h) => h.headers).find((h) => h.key === 'Content-Security-Policy').value;
+  return Object.fromEntries(value.split(';').map((d) => d.trim()).filter(Boolean).map((d) => { const [name, ...vals] = d.split(/\s+/); return [name, vals]; }));
+})();
+
+test("CSP: connect-src is exactly 'self' and no directive allows a remote host or unsafe keyword", () => {
+  assert.deepEqual(CSP['connect-src'], ["'self'"]);
+  assert.deepEqual(CSP['default-src'], ["'none'"]);
+  for (const [name, vals] of Object.entries(CSP)) {
+    for (const v of vals) {
+      assert.doesNotMatch(v, /^(https?:|wss?:|\*)/i, `${name} allows ${v}`);
+      assert.doesNotMatch(v, /unsafe-/i, `${name} allows ${v}`);
+    }
+  }
+});
+
+test('site JS opens no connections (fetch, XHR, WebSocket, beacons, EventSource), so connect-src can stay on self', () => {
+  for (const [name, src] of js) {
+    if (name.endsWith('factories.generated.js')) continue; // vendored; its Node-only I/O is stubbed by the runtime
+    assert.doesNotMatch(src, /\bfetch\s*\(|XMLHttpRequest|\bWebSocket\b|sendBeacon|\bEventSource\b/, `${name} makes a network request`);
+  }
+});
+
+// The whole install command (30 mono glyphs = 15em) must stay visible on phones, so under 480px the
+// font shrinks to the room left beside the Copy button. A fixed size clipped it at 412px.
+test('phones: the install command font scales to the available width instead of clipping', () => {
+  const site = readFileSync(new URL('css/site.css', SITE), 'utf8');
+  const rule = atBlock(site, '@media (max-width: 480px)').match(/\.install \{([^}]*)\}/);
+  assert.ok(rule, '.install rule missing in the 480px block');
+  assert.match(rule[1], /font-size:\s*min\(calc\(15px \* var\(--mk\)\),\s*calc\(\(100vw - 2 \* var\(--gutter\)/);
+  assert.doesNotMatch(site, /\.install code \{[^}]*text-overflow/);
+});
+
+// D19: the OS compatibility claim is allowed in exactly two places, the hero line and the JSON-LD.
+const COMPAT = '<p class="compat"><span class="compat-dot" aria-hidden="true">●</span> Works on macOS · Linux · Windows</p>';
+
+test('index.html: the hero compat line appears exactly once, right after the meta line', () => {
+  const html = pages.find(([n]) => n === 'index.html')[1];
+  assert.equal(html.split(COMPAT).length - 1, 1);
+  assert.equal(html.match(/class="compat"/g).length, 1);
+  assert.match(html, /<p class="meta">[^<]*<\/p>\n\s*<p class="compat">/);
+  assert.ok(html.indexOf(COMPAT) < html.indexOf('<figure class="term term-hero">'), 'compat line sits above the terminal');
+  assert.doesNotMatch(html, /\bSupports\b/);
+});
+
+test('OS names appear only in the hero compat line and the JSON-LD operatingSystem', () => {
+  const OS = /macOS|Linux|Windows/;
+  for (const [name, html] of pages) {
+    let rest = html;
+    if (name === 'index.html') {
+      assert.match(html, /"operatingSystem":"macOS, Linux, Windows"/);
+      rest = rest.replace(COMPAT, '').replace('"operatingSystem":"macOS, Linux, Windows"', '');
+    }
+    assert.doesNotMatch(rest, OS, `${name} names an OS outside the hero compat line`);
+  }
+  assert.ok(!pages.find(([n]) => n === '404.html')[1].includes('class="compat"'));
+  for (const [name, src] of js) {
+    if (name.endsWith('factories.generated.js')) continue;
+    assert.doesNotMatch(src, OS, `${name} names an OS`);
+  }
+});
+
+// D20: HSTS is set explicitly so the policy is ours and visible in the repo, not Vercel's default
+// (includeSubDomains; preload). includeSubDomains would cover nothing (ampline.js.org has no subdomains), and
+// preload is a hard-to-undo browser-list commitment on a name under js.org, which we do not own.
+test('vercel.json: HSTS is exactly max-age=31536000, and the global header set is pinned', () => {
+  const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+  const global = vercel.headers.find((h) => h.source === '/(.*)').headers;
+  assert.deepEqual(global.map((h) => h.key).sort(), [
+    'Content-Security-Policy', 'Cross-Origin-Opener-Policy', 'Permissions-Policy',
+    'Referrer-Policy', 'Strict-Transport-Security', 'X-Content-Type-Options',
+  ]);
+  const hsts = global.find((h) => h.key === 'Strict-Transport-Security').value;
+  assert.equal(hsts, 'max-age=31536000');
+  assert.doesNotMatch(hsts, /includeSubDomains|preload/i);
+});
+
+// The customize/FAQ prompts close the "Every signal, one line." section, before the playground.
+test('index.html: the features section ends with customize and FAQ prompts that link to the docs', () => {
+  const html = pages.find(([n]) => n === 'index.html')[1];
+  const features = html.slice(html.indexOf('id="features"'), html.indexOf('id="playground"'));
+  const row = features.match(/<p class="learn">([\s\S]*?)<\/p>/)?.[1] || '';
+  assert.ok(row, 'the .learn row must sit inside #features, before #playground');
+  const links = row.match(/<a\b[^>]*>[^<]*<\/a>/g) || [];
+  assert.equal(links.length, 2);
+  const want = [
+    ['https://github.com/carterptull/ampline-claude#configuration', 'Configure it ↗'],
+    ['https://github.com/carterptull/ampline-claude#faq', 'Read the FAQ ↗'],
+  ];
+  want.forEach(([href, text], i) => {
+    assert.equal(links[i], `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`);
+  });
+});
+
+test('touch: the customize and FAQ links are at least 44px tall', () => {
+  const site = readFileSync(new URL('css/site.css', SITE), 'utf8');
+  const block = atBlock(site, '@media (pointer: coarse)');
+  assert.match(block, /\.learn a[^{]*\{[^}]*min-height: 44px/);
+});
+
+// A release must bump all three together: the newest CHANGELOG heading (first `## [x.y.z]` after
+// `## [Unreleased]`), package.json "version", and the footer version on index.html and 404.html.
+test('release version: top CHANGELOG heading, package.json and both footers agree', () => {
+  const changelog = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8');
+  const afterUnreleased = changelog.slice(changelog.indexOf('## [Unreleased]'));
+  assert.ok(afterUnreleased.startsWith('## [Unreleased]'), 'CHANGELOG has no Unreleased heading');
+  const top = afterUnreleased.match(/^## \[(\d+\.\d+\.\d+)\]/m)?.[1];
+  assert.ok(top, 'CHANGELOG has no released version heading');
+  assert.equal(top, PKG.version, 'CHANGELOG top release differs from package.json version');
+  for (const [name, html] of pages.filter(([n]) => n !== CARD)) {
+    const footer = html.match(/<span class="ver" id="siteVersion">([^<]*)<\/span>/)?.[1];
+    assert.equal(footer, `v${top}`, `${name} footer version differs from the CHANGELOG`);
+  }
 });
