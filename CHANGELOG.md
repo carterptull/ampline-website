@@ -5,10 +5,21 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-12
+
+### Added
+
+- A "Works on macOS · Linux · Windows" line under the hero meta line, and `operatingSystem` in the JSON-LD (D19). Verified on Windows, Linux (via WSL) and macOS hardware.
+
 ### Changed
 
-- The hero wave now animates freely instead of holding one bar for the current model.
-- Content-Security-Policy `connect-src` is `'self'` (was `'none'`) so Lighthouse can validate robots.txt; third-party requests stay blocked.
+- An explicit `Strict-Transport-Security: max-age=31536000` header, without `includeSubDomains` or `preload`, so Vercel's default (which adds both) does not apply (D20).
+- The hero wave now animates freely instead of holding one bar for the current model (D18).
+- Content-Security-Policy `connect-src` is `'self'` (was `'none'`) so Lighthouse can validate robots.txt; third-party requests stay blocked (D17).
+
+### Fixed
+
+- The install command was clipped on phones (for example "npx ampline-claude --insta" at 412px). The whole command is now visible from 320px up, with Copy beside it.
 
 ## [0.1.0] - 2026-10-09
 

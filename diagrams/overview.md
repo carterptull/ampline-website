@@ -62,4 +62,4 @@ demo are planned for Phase 2 and are not drawn here as built. See
 | How do I keep these diagrams current? | [`README.md`](README.md) |
 
 ---
-_Last verified: 2026-10-12 · site 0.1.0_
+_Last verified: 2026-10-12 · site 0.2.0_

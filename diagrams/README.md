@@ -54,4 +54,4 @@ A routine fix or copy change doesn't need a diagram update.
 - Verify by viewing the rendered file on github.com. Reading the source is not verification.
 
 ---
-_Last verified: 2026-10-09 · site 0.1.0_
+_Last verified: 2026-10-12 · site 0.2.0_
