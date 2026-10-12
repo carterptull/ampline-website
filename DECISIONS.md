@@ -162,3 +162,15 @@ considered instead. Reversing any of them is cheap unless noted.
 **Why:** Carter has run ampline on all three: Windows and Linux (via WSL) on his own PC, and macOS on real hardware on his work PC. WSL counts as Linux here, which is the only way most Windows users meet a Linux shell anyway. This supersedes the earlier rule that held back any macOS/Linux/Windows claim until macOS was verified; that condition is now met.
 
 **Alternatives:** keep saying nothing (leaves a basic question unanswered above the fold); list OS versions (would need a tested matrix, and goes stale); a "Supports" claim (promises more than has been tested); a longer platform paragraph further down the page (the hero is where people decide to install).
+
+### D20. Explicit HSTS
+
+**Decision:** `vercel.json` sets `Strict-Transport-Security: max-age=31536000` on every response, with no `includeSubDomains` and no `preload`.
+
+**Why:** Vercel adds `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` on its own when the project does not set one. Both extra directives are wrong for this site: it is served at `ampline.js.org`, and we do not control the other `*.js.org` subdomains, so asking browsers to force HTTPS on all of them (or to preload that into browser lists, which is close to irreversible) would be a commitment we cannot keep. One year without those flags still protects this host. The header test pins the exact value and the full global header set.
+
+**Verify after deploy:** run `curl -sI https://ampline.js.org/` (and the `*.vercel.app` URL) and confirm the response has exactly one `strict-transport-security: max-age=31536000` line and that Vercel did not append its own.
+
+**Note:** the dev server applies the same global headers, so it now also sends HSTS over `http://127.0.0.1`. Browsers ignore HSTS on plain HTTP, so it is harmless there.
+
+**Alternatives:** keep Vercel's default (commits js.org subdomains we do not own, and preload is hard to undo); leave HSTS off (the deployed site would still get Vercel's default, so the choice would not be ours); `max-age` of two years to match Vercel (no benefit without preload).

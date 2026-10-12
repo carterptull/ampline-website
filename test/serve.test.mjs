@@ -29,6 +29,13 @@ before(async () => {
 
 after(() => { child?.kill(); });
 
+test('every response carries the explicit HSTS header, without includeSubDomains or preload (D20)', async () => {
+  for (const p of ['/', '/nope']) {
+    const r = await get(p);
+    assert.equal(r.headers['strict-transport-security'], 'max-age=31536000', p);
+  }
+});
+
 test('GET / is 200 with the CSP header', async () => {
   const r = await get('/');
   assert.equal(r.status, 200);

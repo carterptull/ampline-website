@@ -222,3 +222,17 @@ test('OS names appear only in the hero compat line and the JSON-LD operatingSyst
     assert.doesNotMatch(src, OS, `${name} names an OS`);
   }
 });
+
+// D20: HSTS is set explicitly so Vercel does not add its default (includeSubDomains; preload). We do not
+// control the other js.org subdomains, so the header must not cover them or opt into the preload list.
+test('vercel.json: HSTS is exactly max-age=31536000, and the global header set is pinned', () => {
+  const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+  const global = vercel.headers.find((h) => h.source === '/(.*)').headers;
+  assert.deepEqual(global.map((h) => h.key).sort(), [
+    'Content-Security-Policy', 'Cross-Origin-Opener-Policy', 'Permissions-Policy',
+    'Referrer-Policy', 'Strict-Transport-Security', 'X-Content-Type-Options',
+  ]);
+  const hsts = global.find((h) => h.key === 'Strict-Transport-Security').value;
+  assert.equal(hsts, 'max-age=31536000');
+  assert.doesNotMatch(hsts, /includeSubDomains|preload/i);
+});
