@@ -183,3 +183,13 @@ test('site JS opens no connections (fetch, XHR, WebSocket, beacons, EventSource)
     assert.doesNotMatch(src, /\bfetch\s*\(|XMLHttpRequest|\bWebSocket\b|sendBeacon|\bEventSource\b/, `${name} makes a network request`);
   }
 });
+
+// The whole install command (30 mono glyphs = 15em) must stay visible on phones, so under 480px the
+// font shrinks to the room left beside the Copy button. A fixed size clipped it at 412px.
+test('phones: the install command font scales to the available width instead of clipping', () => {
+  const site = readFileSync(new URL('css/site.css', SITE), 'utf8');
+  const rule = atBlock(site, '@media (max-width: 480px)').match(/\.install \{([^}]*)\}/);
+  assert.ok(rule, '.install rule missing in the 480px block');
+  assert.match(rule[1], /font-size:\s*min\(calc\(15px \* var\(--mk\)\),\s*calc\(\(100vw - 2 \* var\(--gutter\)/);
+  assert.doesNotMatch(site, /\.install code \{[^}]*text-overflow/);
+});

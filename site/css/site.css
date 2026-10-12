@@ -178,9 +178,13 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
   .footer-base { justify-content: center }
 }
 
-/* the install line on the narrowest phones: keep the command and Copy on one row */
-@media (max-width: 400px) {
-  .install { gap: 12px; padding: 8px 8px 8px 14px; font-size: calc(12.5px * var(--mk)) }
+/* The install line on phones: the whole command stays visible, with Copy beside it on one row.
+   Box chrome is 108px (2px border + 22px padding + 12px gap + the 72px Copy button) plus 4px of slack, and the
+   command is 30 mono glyphs at 0.5em each = 15em, so the font shrinks just enough to fit the room left between
+   the page gutters. It is capped at the desktop size and only binds below roughly 430px. */
+@media (max-width: 480px) {
+  .install { gap: 12px; padding: 8px 8px 8px 14px;
+    font-size: min(calc(15px * var(--mk)), calc((100vw - 2 * var(--gutter) - 112px) / 15)) }
 }
 
 /* touch: every interactive element gets a 44px hit area */
