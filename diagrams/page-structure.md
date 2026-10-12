@@ -9,7 +9,7 @@ parsed. `404.html` is a small second page with the same nav and footer.
 ```mermaid
 flowchart TB
     skip["Skip link<br/>to #main"] --> nav["Nav (sticky)<br/>wordmark + small wave,<br/>Features · Playground · How it works,<br/>GitHub and npm links"]
-    nav --> hero["Hero (#top)<br/>wordmark, wave, slogan,<br/>install command + Copy button,<br/>fake Claude Code terminal"]
+    nav --> hero["Hero (#top)<br/>wordmark, wave, slogan,<br/>install command + Copy button,<br/>meta line + OS compatibility line,<br/>fake Claude Code terminal"]
     hero --> features["What it shows (#features)<br/>segment tour cards"]
     features --> play["Playground (#playground)<br/>Phase 1: static preview<br/>interactive controls planned (Phase 2)"]
     play --> how["Under the hood (#how)<br/>four static cards,<br/>FAQ · Configuration · Security ·<br/>Architecture diagrams links"]

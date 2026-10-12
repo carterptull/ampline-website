@@ -85,7 +85,7 @@ test('index.html: SEO + social meta present', () => {
   const data = JSON.parse(ld[1]);
   assert.equal(data['@type'], 'SoftwareApplication');
   assert.equal(data.aggregateRating, undefined); // never invent ratings
-  assert.equal(data.operatingSystem, undefined); // no OS claim until macOS is verified
+  assert.equal(data.operatingSystem, "macOS, Linux, Windows"); // verified on real hardware (D19)
 });
 
 test('CSS loads no remote resources', () => {
@@ -192,4 +192,33 @@ test('phones: the install command font scales to the available width instead of 
   assert.ok(rule, '.install rule missing in the 480px block');
   assert.match(rule[1], /font-size:\s*min\(calc\(15px \* var\(--mk\)\),\s*calc\(\(100vw - 2 \* var\(--gutter\)/);
   assert.doesNotMatch(site, /\.install code \{[^}]*text-overflow/);
+});
+
+// D19: the OS compatibility claim is allowed in exactly two places, the hero line and the JSON-LD.
+const COMPAT = '<p class="compat"><span class="compat-dot" aria-hidden="true">●</span> Works on macOS · Linux · Windows</p>';
+
+test('index.html: the hero compat line appears exactly once, right after the meta line', () => {
+  const html = pages.find(([n]) => n === 'index.html')[1];
+  assert.equal(html.split(COMPAT).length - 1, 1);
+  assert.equal(html.match(/class="compat"/g).length, 1);
+  assert.match(html, /<p class="meta">[^<]*<\/p>\n\s*<p class="compat">/);
+  assert.ok(html.indexOf(COMPAT) < html.indexOf('<figure class="term term-hero">'), 'compat line sits above the terminal');
+  assert.doesNotMatch(html, /\bSupports\b/);
+});
+
+test('OS names appear only in the hero compat line and the JSON-LD operatingSystem', () => {
+  const OS = /macOS|Linux|Windows/;
+  for (const [name, html] of pages) {
+    let rest = html;
+    if (name === 'index.html') {
+      assert.match(html, /"operatingSystem":"macOS, Linux, Windows"/);
+      rest = rest.replace(COMPAT, '').replace('"operatingSystem":"macOS, Linux, Windows"', '');
+    }
+    assert.doesNotMatch(rest, OS, `${name} names an OS outside the hero compat line`);
+  }
+  assert.ok(!pages.find(([n]) => n === '404.html')[1].includes('class="compat"'));
+  for (const [name, src] of js) {
+    if (name.endsWith('factories.generated.js')) continue;
+    assert.doesNotMatch(src, OS, `${name} names an OS`);
+  }
 });

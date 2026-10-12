@@ -154,3 +154,11 @@ considered instead. Reversing any of them is cheap unless noted.
 **Why:** Holding the bar for the current model pinned one bar full-height and glowing while the other 19 kept moving, which broke the wave's rhythm and was easily mistaken for a glitch. The nav wave, which never holds, reads as the intended motion. This supersedes the earlier design (D7) in which the bar matching the current model and effort held lit.
 
 **Alternatives:** keep the sync with a softer highlight (still interrupts the wave); sync only a color tint to the current model (extra per-frame work for a link few visitors would notice).
+
+### D19. OS compatibility claim enabled
+
+**Decision:** The hero shows one line under the meta line, "● Works on macOS · Linux · Windows", and the JSON-LD carries `"operatingSystem": "macOS, Linux, Windows"`. Those are the only two places the OS names may appear (`html-contract.test.mjs` enforces it). The wording is "Works on", never "Supports", and no OS versions are named. The leading dot is the calm end of the danger ramp (`--danger-1`) and is `aria-hidden`, so the line reads as plain text to assistive tech.
+
+**Why:** Carter has run ampline on all three: Windows and Linux (via WSL) on his own PC, and macOS on real hardware on his work PC. WSL counts as Linux here, which is the only way most Windows users meet a Linux shell anyway. This supersedes the earlier rule that held back any macOS/Linux/Windows claim until macOS was verified; that condition is now met.
+
+**Alternatives:** keep saying nothing (leaves a basic question unanswered above the fold); list OS versions (would need a tested matrix, and goes stale); a "Supports" claim (promises more than has been tested); a longer platform paragraph further down the page (the hero is where people decide to install).

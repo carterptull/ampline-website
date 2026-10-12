@@ -63,6 +63,8 @@ code { font: inherit }
 .copy:hover { color: var(--white); border-color: #444 }
 .copy.is-copied, .copy.is-copied:hover { color: var(--danger-1); border-color: var(--danger-1) } /* after :hover so the green state wins */
 .meta { margin: 16px 0 0; font-family: var(--mono); font-size: calc(12px * var(--mk)); color: var(--quiet) }
+.compat { margin: 10px 0 0; font-family: var(--mono); font-size: calc(12px * var(--mk)); color: var(--text) } /* the OS line under .meta: same mono scale, brighter than the quiet meta line */
+.compat-dot { color: var(--danger-1) } /* decoration only, aria-hidden */
 
 /* faux terminal */
 .term { margin: 56px auto 0; max-width: 960px; border: 1px solid #1e1e1e; border-radius: 12px; background: var(--surface-2); overflow: hidden; text-align: left; box-shadow: 0 30px 80px rgb(0 0 0 / .6) }
