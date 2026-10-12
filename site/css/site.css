@@ -93,6 +93,13 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
 .note { margin: 16px 0 0; font-size: 13px; color: var(--quiet); line-height: 1.5 }
 .note + .note { margin-top: 6px }
 
+/* customize / FAQ prompts after the segment tour */
+.learn-note { margin: 40px auto 0; max-width: 560px; text-align: center; font-size: 13px; color: var(--quiet); line-height: 1.5 }
+.learn { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 32px; margin: 14px 0 0; font-size: 15px; color: var(--muted); line-height: 1.5 }
+.learn > span { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 .4em }
+.learn a { color: var(--white); text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 4px }
+.learn a:hover { text-decoration-color: var(--white) }
+
 /* segment tour */
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 34px }
 .card { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--surface) }
@@ -191,7 +198,7 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
 
 /* touch: every interactive element gets a 44px hit area */
 @media (pointer: coarse) {
-  .links a, .copy, .seg-toggles button, .ctl select, .btn, .footer-links a, .brand {
+  .links a, .copy, .seg-toggles button, .ctl select, .btn, .learn a, .footer-links a, .brand {
     min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center }
   .card .s { min-height: 44px } /* a one-line sample that overflows is a focusable scroll region (42.4px tall otherwise) */
   .card .s a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center } /* PR / MR links */

@@ -236,3 +236,26 @@ test('vercel.json: HSTS is exactly max-age=31536000, and the global header set i
   assert.equal(hsts, 'max-age=31536000');
   assert.doesNotMatch(hsts, /includeSubDomains|preload/i);
 });
+
+// The customize/FAQ prompts close the "Every signal, one line." section, before the playground.
+test('index.html: the features section ends with customize and FAQ prompts that link to the docs', () => {
+  const html = pages.find(([n]) => n === 'index.html')[1];
+  const features = html.slice(html.indexOf('id="features"'), html.indexOf('id="playground"'));
+  const row = features.match(/<p class="learn">([\s\S]*?)<\/p>/)?.[1] || '';
+  assert.ok(row, 'the .learn row must sit inside #features, before #playground');
+  const links = row.match(/<a\b[^>]*>[^<]*<\/a>/g) || [];
+  assert.equal(links.length, 2);
+  const want = [
+    ['https://github.com/carterptull/ampline-claude#configuration', 'Configure it ↗'],
+    ['https://github.com/carterptull/ampline-claude#faq', 'Read the FAQ ↗'],
+  ];
+  want.forEach(([href, text], i) => {
+    assert.equal(links[i], `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`);
+  });
+});
+
+test('touch: the customize and FAQ links are at least 44px tall', () => {
+  const site = readFileSync(new URL('css/site.css', SITE), 'utf8');
+  const block = atBlock(site, '@media (pointer: coarse)');
+  assert.match(block, /\.learn a[^{]*\{[^}]*min-height: 44px/);
+});

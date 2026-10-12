@@ -10,6 +10,7 @@ All notable changes to this project are documented here. The format follows
 ### Added
 
 - A "Works on macOS · Linux · Windows" line under the hero meta line, and `operatingSystem` in the JSON-LD (D19). Verified on Windows, Linux (via WSL) and macOS hardware.
+- Customize and FAQ prompts after the segment tour.
 
 ### Changed
 
