@@ -64,6 +64,7 @@ stubs for the Node-only parts. Its ANSI output is turned into DOM nodes, never H
 - Git and GitHub: follow "Git & GitHub rules" at the top, verbatim. Commit, push, `ct/...` branches, PRs and merges after green checks are allowed, **always as Carter Tull, with zero AI attribution**. Repo settings, Vercel, the js.org PR and npm publishing still need approval. Stage by explicit path.
 - Dependabot PRs are never merged: re-apply the bump on a Carter branch, comment that it is superseded, and close the bot PR.
 - Committed files never link to or mention local-only, git-excluded files or folders.
+- Never mention other statusline projects, competitors or third-party statuslines by name, or compare against them, anywhere in this repo or on the website (copy, docs, comments, tests, commit messages). `test/no-third-party-names.test.mjs` enforces the names it knows; the rule covers all of them.
 
 ## Module layout
 
@@ -122,7 +123,8 @@ ampline-website/
     ├── ansi.test.mjs
     ├── payloads.test.mjs
     ├── html-contract.test.mjs   CSP-safety + required meta/disclaimer in site/*.html (og-card.html: CSP-safety only)
-    └── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
+    ├── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
+    └── no-third-party-names.test.mjs  fails if a git-tracked text file names another statusline project
 ```
 
 ## Frozen interfaces
