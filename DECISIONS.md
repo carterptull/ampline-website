@@ -63,7 +63,7 @@ considered instead. Reversing any of them is cheap unless noted.
 
 ### D8. Hero layout A (centered stack)
 
-**Decision:** The hero is a centered stack: wordmark, wave, slogan and subline, copyable install command, meta line, then a faux Claude Code window.
+**Decision:** The hero is a centered stack: wordmark, wave, slogan and subline, copyable install command, meta line, then a faux Claude Code window. The meta line is followed by one "Works on macOS · Linux · Windows" compatibility line (D19).
 
 **Why:** It puts the install command and the live statusline in the first screen on both phones and desktops, with no side-by-side layout to collapse on narrow screens.
 
@@ -159,7 +159,7 @@ considered instead. Reversing any of them is cheap unless noted.
 
 **Decision:** The hero shows one line under the meta line, "● Works on macOS · Linux · Windows", and the JSON-LD carries `"operatingSystem": "macOS, Linux, Windows"`. Those are the only two places the OS names may appear (`html-contract.test.mjs` enforces it). The wording is "Works on", never "Supports", and no OS versions are named. The leading dot is the calm end of the danger ramp (`--danger-1`) and is `aria-hidden`, so the line reads as plain text to assistive tech.
 
-**Why:** Carter has run ampline on all three: Windows and Linux (via WSL) on his own PC, and macOS on real hardware on his work PC. WSL counts as Linux here, which is the only way most Windows users meet a Linux shell anyway. This supersedes the earlier rule that held back any macOS/Linux/Windows claim until macOS was verified; that condition is now met.
+**Why:** ampline has been verified on real hardware on all three: Windows, Linux (via WSL) and macOS. WSL counts as Linux here, which is the only way most Windows users meet a Linux shell anyway. This supersedes the earlier rule that held back any macOS/Linux/Windows claim until macOS was verified; that condition is now met.
 
 **Alternatives:** keep saying nothing (leaves a basic question unanswered above the fold); list OS versions (would need a tested matrix, and goes stale); a "Supports" claim (promises more than has been tested); a longer platform paragraph further down the page (the hero is where people decide to install).
 
@@ -167,10 +167,10 @@ considered instead. Reversing any of them is cheap unless noted.
 
 **Decision:** `vercel.json` sets `Strict-Transport-Security: max-age=31536000` on every response, with no `includeSubDomains` and no `preload`.
 
-**Why:** Vercel adds `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` on its own when the project does not set one. Both extra directives are wrong for this site: it is served at `ampline.js.org`, and we do not control the other `*.js.org` subdomains, so asking browsers to force HTTPS on all of them (or to preload that into browser lists, which is close to irreversible) would be a commitment we cannot keep. One year without those flags still protects this host. The header test pins the exact value and the full global header set.
+**Why:** Vercel adds `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` on its own when the project does not set one. We set the header explicitly so the policy is ours and visible in this repo, not whatever the platform default happens to be. `includeSubDomains` is meaningless here: `ampline.js.org` has no subdomains to cover (and HSTS sent by this host never reaches sibling `*.js.org` hosts). `preload` is a commitment to browser-shipped lists that is hard to undo, on a name that is a subdomain of `js.org`, which Carter does not own, so we do not opt into it. One year is a conservative, standard `max-age`, and it still protects this host. The header test pins the exact value and the full global header set.
 
 **Verify after deploy:** run `curl -sI https://ampline.js.org/` (and the `*.vercel.app` URL) and confirm the response has exactly one `strict-transport-security: max-age=31536000` line and that Vercel did not append its own.
 
 **Note:** the dev server applies the same global headers, so it now also sends HSTS over `http://127.0.0.1`. Browsers ignore HSTS on plain HTTP, so it is harmless there.
 
-**Alternatives:** keep Vercel's default (commits js.org subdomains we do not own, and preload is hard to undo); leave HSTS off (the deployed site would still get Vercel's default, so the choice would not be ours); `max-age` of two years to match Vercel (no benefit without preload).
+**Alternatives:** keep Vercel's default (the policy would not be ours or visible in the repo, `includeSubDomains` covers nothing here, and preload is hard to undo on a name under a domain we do not own); leave HSTS off (the deployed site would still get Vercel's default, so the choice would not be ours); `max-age` of two years to match Vercel (no benefit without preload).

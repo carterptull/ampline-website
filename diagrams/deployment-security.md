@@ -31,7 +31,7 @@ to a third-party repo and is Carter's to open.
 The headers, the clean URLs (`/og-card` serves `og-card.html`, no trailing slash) and the cache
 rules are in `vercel.json`, which `npm run dev` (`scripts/serve.mjs`) also applies locally so a
 CSP violation shows up before deploy. `vercel.json` sets `Strict-Transport-Security` explicitly
-(`max-age=31536000`, no `includeSubDomains`, no `preload`; see D20), and `upgrade-insecure-requests`
+(`max-age=31536000`, no `includeSubDomains`, no `preload`; see D20, which also says why), and `upgrade-insecure-requests`
 in the CSP upgrades any stray `http:` subresource. Browsers ignore HSTS over plain `http://`, so the
 dev server sending it on `127.0.0.1` is harmless.
 
@@ -87,7 +87,7 @@ Sent on every path (`/(.*)`):
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Cross-origin requests carry the origin only, never a path (the outbound links add `noreferrer`, so they send none at all) |
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), interest-cohort=()` | Those features and FLoC are off |
 | `Cross-Origin-Opener-Policy` | `same-origin` | No shared browsing context with pages opened from here |
-| `Strict-Transport-Security` | `max-age=31536000` | HTTPS only for a year on this host. No `includeSubDomains` (js.org's other subdomains are not ours) and no `preload` |
+| `Strict-Transport-Security` | `max-age=31536000` | HTTPS only for a year on this host. No `includeSubDomains` (ampline.js.org has no subdomains to cover) and no `preload` (a hard-to-undo browser-list commitment on a name under js.org, which we do not own) |
 
 Cache rules (separate entries, only `Cache-Control`): `/assets/*` is `public, max-age=31536000,
 immutable` (filenames carry a version, such as `wordmark.v1.svg`), and `og.png`, `favicon.ico`,

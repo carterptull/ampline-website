@@ -40,10 +40,14 @@ const advance = (ms) => { for (let t = 0; t < ms; t += 10) mock.timers.tick(10);
 
 // The hero wave animates freely, like the nav wave (DECISIONS.md D18): the hero never holds a bar.
 // A spy equalizer is still passed in, to prove that even a caller that hands one over sees it untouched.
+// Its hold()/release() really toggle the `hold` class on the fake bars, like the real equalizer does, so the
+// heldBars() assertions below fail if hero.js ever holds a bar.
 function spyEqualizer() {
   const calls = [];
-  return { calls, bars: Array.from({ length: 20 }, () => makeEl('span')),
-    hold: (i) => calls.push(['hold', i]), release: () => calls.push(['release']) };
+  const bars = Array.from({ length: 20 }, () => makeEl('span'));
+  return { calls, bars,
+    hold: (i) => { calls.push(['hold', i]); bars.forEach((b, k) => b.classList.toggle('hold', k === i)); },
+    release: () => { calls.push(['release']); bars.forEach((b) => b.classList.remove('hold')); } };
 }
 const heldBars = (eq) => eq.bars.filter((b) => b.classList.contains('hold')).length;
 

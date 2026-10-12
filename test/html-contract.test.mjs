@@ -223,8 +223,9 @@ test('OS names appear only in the hero compat line and the JSON-LD operatingSyst
   }
 });
 
-// D20: HSTS is set explicitly so Vercel does not add its default (includeSubDomains; preload). We do not
-// control the other js.org subdomains, so the header must not cover them or opt into the preload list.
+// D20: HSTS is set explicitly so the policy is ours and visible in the repo, not Vercel's default
+// (includeSubDomains; preload). includeSubDomains would cover nothing (ampline.js.org has no subdomains), and
+// preload is a hard-to-undo browser-list commitment on a name under js.org, which we do not own.
 test('vercel.json: HSTS is exactly max-age=31536000, and the global header set is pinned', () => {
   const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
   const global = vercel.headers.find((h) => h.source === '/(.*)').headers;
@@ -258,4 +259,19 @@ test('touch: the customize and FAQ links are at least 44px tall', () => {
   const site = readFileSync(new URL('css/site.css', SITE), 'utf8');
   const block = atBlock(site, '@media (pointer: coarse)');
   assert.match(block, /\.learn a[^{]*\{[^}]*min-height: 44px/);
+});
+
+// A release must bump all three together: the newest CHANGELOG heading (first `## [x.y.z]` after
+// `## [Unreleased]`), package.json "version", and the footer version on index.html and 404.html.
+test('release version: top CHANGELOG heading, package.json and both footers agree', () => {
+  const changelog = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8');
+  const afterUnreleased = changelog.slice(changelog.indexOf('## [Unreleased]'));
+  assert.ok(afterUnreleased.startsWith('## [Unreleased]'), 'CHANGELOG has no Unreleased heading');
+  const top = afterUnreleased.match(/^## \[(\d+\.\d+\.\d+)\]/m)?.[1];
+  assert.ok(top, 'CHANGELOG has no released version heading');
+  assert.equal(top, PKG.version, 'CHANGELOG top release differs from package.json version');
+  for (const [name, html] of pages.filter(([n]) => n !== CARD)) {
+    const footer = html.match(/<span class="ver" id="siteVersion">([^<]*)<\/span>/)?.[1];
+    assert.equal(footer, `v${top}`, `${name} footer version differs from the CHANGELOG`);
+  }
 });
