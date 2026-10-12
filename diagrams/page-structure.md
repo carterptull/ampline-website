@@ -50,6 +50,11 @@ flowchart LR
 still reads, but the wave bars, the demo statuslines and the tour are empty. The static
 `#ampVersion` text is the fallback that `main.js` overwrites.
 
+**The hero wave is independent of the hero line.** Both waves (nav and hero) are mounted once by
+`main.js` and animate freely. The cycling line does not hold or highlight a bar for the current
+model, so the wave never breaks its rhythm. Only the OG card's still image marks one bar. See D18
+in [`DECISIONS.md`](../DECISIONS.md).
+
 **Each statusline container has its own runtime instance** where it matters. The hero line
 cycles through models and efforts on a timer (paused while the tab is hidden and off under
 `prefers-reduced-motion`). The tour gets a wide instance that it reconfigures per card. The
@@ -60,4 +65,4 @@ social card from the same runtime, and `site/og.png` is a screenshot of it at 12
 marked `noindex` and disallowed in `robots.txt`.
 
 ---
-_Last verified: 2026-10-09 · site 0.1.0_
+_Last verified: 2026-10-12 · site 0.1.0_

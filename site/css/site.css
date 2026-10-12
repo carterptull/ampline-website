@@ -38,7 +38,8 @@ code { font: inherit }
 .links { display: flex; gap: 22px; font-size: 13px; color: var(--muted) }
 .links a:hover { color: var(--white) }
 
-/* wave equalizer: compositor-only (transform + opacity), never height or box-shadow */
+/* wave equalizer: compositor-only (transform + opacity), never height or box-shadow.
+   .hold pins one bar lit: only the OG card's still image uses it; the live waves never hold a bar. */
 .vu { display: flex; align-items: flex-end; gap: 3px }
 .vu > span { flex: 1; height: 100%; border-radius: 1px; background: var(--c); transform-origin: bottom;
   transform: scaleY(var(--snap, .3)); opacity: .5; animation: wave 1.6s ease-in-out infinite; animation-delay: calc(var(--i) * 70ms) }

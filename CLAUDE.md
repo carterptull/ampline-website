@@ -106,8 +106,8 @@ ampline-website/
 │       │   └── ampline.js       createAmpline(): require registry + shims → render API
 │       ├── ansi.js              parseAnsi(str) → tokens (pure) · renderAnsi(tokens, doc, opts) → DocumentFragment
 │       ├── payloads.js          demo payload builders (time-relative), wheelIndex()
-│       ├── equalizer.js         mountEqualizer(el, wheel, opts) → { hold(i), release() }
-│       ├── hero.js              typed prompt + power-up + cycle
+│       ├── equalizer.js         mountEqualizer(el, wheel, opts) → { bars, hold(i), release() }; live waves never hold, only the OG card's still image does
+│       ├── hero.js              typed prompt + power-up + cycle; does not touch the hero wave (D18)
 │       ├── tour.js              renders tour cards from payloads
 │       ├── play-preview.js      Phase 1 static playground stand-in (replaced by playground.js in Phase 2)
 │       ├── og-card.js           renders the og-card.html statusline + frozen wave from the runtime
@@ -146,6 +146,8 @@ site/js/payloads.js        FAMILIES = ['haiku','sonnet','opus','fable'] · MODEL
                            statusPayload(opts) -> input object · subagentPayload(opts) -> {columns, tasks}
                            HERO_CYCLE: Array<[family, effort]>
 site/js/equalizer.js       mountEqualizer(container, wheelRgbs: number[][], { size: 'hero'|'nav' }) -> { hold(i), release(), bars }
+                           (hold(i) is used only by og-card.js for the still image; the hero and nav waves animate freely, D18)
+site/js/hero.js            startHero({ amp, body, line })   (no equalizer argument: the wave is not synced to the cycle)
 site/js/copy.js            wireCopy(button, text, statusEl)
 ```
 

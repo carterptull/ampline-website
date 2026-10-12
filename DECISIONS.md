@@ -53,9 +53,9 @@ considered instead. Reversing any of them is cheap unless noted.
 
 **Alternatives:** self-hosting the Michroma font (an extra font file for one word); a system font (loses the brand).
 
-### D7. A "D2 wave" logo with hold-sync
+### D7. A "D2 wave" logo
 
-**Decision:** The logo mark is a row of 20 equalizer bars, one per stop on the model/effort color wheel, rising and falling in a travelling wave. In the hero, the bar matching the statusline's current model and effort holds lit.
+**Decision:** The logo mark is a row of 20 equalizer bars, one per stop on the model/effort color wheel, rising and falling in a travelling wave. (An earlier design also held the bar matching the hero statusline's current model and effort lit; D18 removed that.)
 
 **Why:** It is a literal picture of the product's 20-step wheel, so the logo and the statusline cannot drift: the bars read the wheel colors from the vendored renderer at runtime. A frozen snapshot serves the favicon, OG card, README and reduced-motion users.
 
@@ -144,3 +144,11 @@ considered instead. Reversing any of them is cheap unless noted.
 **Alternatives:** loosen to `connect-src 'self'` (no third-party exposure, but a weaker header; `SECURITY.md` and the diagrams would need updating); allow only the `robots.txt` path on the production host (breaks on preview URLs).
 
 **Follow-up:** re-run Lighthouse SEO against the deployed URL, and loosen the header only if it still reports 92 there.
+
+### D18. Hero wave is not synced to the cycling model
+
+**Decision:** The hero wave animates freely, exactly like the nav wave. It is not tied to the hero statusline's model and effort cycle, and no bar is ever held lit while the page is live. `hero.js` no longer touches the wave, and `mountEqualizer`'s `hold()` / `release()` remain only for the OG card, whose still image marks the Opus/xhigh bar.
+
+**Why:** Holding the bar for the current model pinned one bar full-height and glowing while the other 19 kept moving, which broke the wave's rhythm and was easily mistaken for a glitch. The nav wave, which never holds, reads as the intended motion. This supersedes the earlier design (D7) in which the bar matching the current model and effort held lit.
+
+**Alternatives:** keep the sync with a softer highlight (still interrupts the wave); sync only a color tint to the current model (extra per-frame work for a link few visitors would notice).
