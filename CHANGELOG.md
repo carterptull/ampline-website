@@ -8,6 +8,7 @@ All notable changes to this project are documented here. The format follows
 ### Changed
 
 - The hero wave now animates freely instead of holding one bar for the current model.
+- Content-Security-Policy `connect-src` is `'self'` (was `'none'`) so Lighthouse can validate robots.txt; third-party requests stay blocked.
 
 ## [0.1.0] - 2026-10-09
 

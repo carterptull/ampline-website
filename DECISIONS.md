@@ -137,13 +137,15 @@ considered instead. Reversing any of them is cheap unless noted.
 
 ### D17. Lighthouse SEO 92 locally: robots.txt audit blocked by `connect-src 'none'`
 
-**Decision:** Keep `connect-src 'none'`. The strict CSP is part of the product story: the page makes zero network requests.
+**Decision (original):** Keep `connect-src 'none'`. The strict CSP is part of the product story: the page makes zero network requests.
 
 **Why:** Lighthouse's robots.txt audit fetches `/robots.txt` from inside the page, which `connect-src 'none'` blocks. Local runs therefore show SEO 92 even though `robots.txt` is valid. A scratch run with `connect-src 'self'` scored 100.
 
 **Alternatives:** loosen to `connect-src 'self'` (no third-party exposure, but a weaker header; `SECURITY.md` and the diagrams would need updating); allow only the `robots.txt` path on the production host (breaks on preview URLs).
 
 **Follow-up:** re-run Lighthouse SEO against the deployed URL, and loosen the header only if it still reports 92 there.
+
+**Resolution (2026-10-12):** The re-check on the deployed URL (`https://ampline-website.vercel.app`) still showed SEO 92, with `robots-txt` the only failing audit, so `connect-src` is now `'self'`. Third-party exposure is unchanged: `'self'` allows only same-origin fetch, XHR and WebSocket, and no site code uses any of them (`html-contract.test.mjs` fails if `site/js/` ever gains one, and pins the header value). Re-run Lighthouse after the deploy to confirm 100.
 
 ### D18. Hero wave is not synced to the cycling model
 

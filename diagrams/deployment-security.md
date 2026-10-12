@@ -57,7 +57,7 @@ flowchart TB
 
     subgraph blocked["Blocked by the CSP"]
         direction TB
-        net["fetch, XHR, WebSocket<br/>connect-src none"]
+        net["fetch, XHR, WebSocket<br/>to any other origin<br/>connect-src self"]
         frm["iframes, forms, plugins, base tag"]
         inl["inline script, inline style,<br/>eval, third-party anything"]
     end
@@ -99,7 +99,7 @@ immutable` (filenames carry a version, such as `wordmark.v1.svg`), and `og.png`,
 | `style-src` | `'self'` | Own stylesheets only. No inline styles |
 | `img-src` | `'self' data:` | Own images, plus `data:` URIs |
 | `font-src` | `'self'` | Self-hosted fonts only |
-| `connect-src` | `'none'` | The page can make no network requests from script |
+| `connect-src` | `'self'` | Script can reach only the site's own origin (Lighthouse's `robots.txt` check needs this). No site code opens a connection at all |
 | `manifest-src` | `'self'` | Own web manifest |
 | `base-uri` | `'none'` | No `<base>` rewriting |
 | `form-action` | `'none'` | The page has no forms |
@@ -114,8 +114,10 @@ widget. The Buy Me a Beer control is a plain `<a>` with `target="_blank"` and
 `rel="noopener noreferrer"`, with no script. These are held by tests rather than by habit:
 `html-contract.test.mjs` fails on any third-party script, stylesheet, font or image tag, any
 `style=` or `on*=` attribute, any `innerHTML` write in `site/js/`, and any remote `url()` or
-`@import` in the CSS. The outbound links are navigations the visitor chooses, not requests the
+`@import` in the CSS. It also fails on any `fetch(`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`
+or `EventSource` in `site/js/`, so the same-origin `connect-src` cannot hide a regression, and it pins
+the header value. The outbound links are navigations the visitor chooses, not requests the
 page makes.
 
 ---
-_Last verified: 2026-10-10 · site 0.1.0_
+_Last verified: 2026-10-12 · site 0.1.0_

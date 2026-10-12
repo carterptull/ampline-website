@@ -39,7 +39,7 @@ flowchart TB
 **The one thing to take away:** the page makes no requests of its own to anyone but its own
 origin. The three dashed boxes are only reached when a visitor clicks a plain `<a>` link that
 opens in a new tab with `rel="noopener noreferrer"`. The page never fetches from them, which
-the CSP enforces (`connect-src 'none'`). See [`deployment-security.md`](deployment-security.md).
+the CSP enforces (`connect-src 'self'`: same-origin only, and no site code opens a connection). See [`deployment-security.md`](deployment-security.md).
 
 **The demos are the real renderer, not screenshots or typed strings.** `scripts/sync-ampline.mjs`
 copies ampline-claude's source into `site/js/runtime/factories.generated.js` at development
@@ -62,4 +62,4 @@ demo are planned for Phase 2 and are not drawn here as built. See
 | How do I keep these diagrams current? | [`README.md`](README.md) |
 
 ---
-_Last verified: 2026-10-09 · site 0.1.0_
+_Last verified: 2026-10-12 · site 0.1.0_

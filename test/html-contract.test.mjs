@@ -157,3 +157,29 @@ test('index.html: a noscript note tells no-JS visitors the demos need JavaScript
   assert.ok(html.indexOf('<noscript>') > html.indexOf('<main'), 'noscript note lives inside <main>');
   assert.ok(html.indexOf('<noscript>') < html.indexOf('id="features"'), 'and near the top of it');
 });
+
+// connect-src is 'self' so Lighthouse's in-page fetch of /robots.txt works (DECISIONS.md D17). That is only
+// safe while no site code opens a connection of its own, so the next test guards the code and this one the header.
+const CSP = (() => {
+  const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+  const value = vercel.headers.flatMap((h) => h.headers).find((h) => h.key === 'Content-Security-Policy').value;
+  return Object.fromEntries(value.split(';').map((d) => d.trim()).filter(Boolean).map((d) => { const [name, ...vals] = d.split(/\s+/); return [name, vals]; }));
+})();
+
+test("CSP: connect-src is exactly 'self' and no directive allows a remote host or unsafe keyword", () => {
+  assert.deepEqual(CSP['connect-src'], ["'self'"]);
+  assert.deepEqual(CSP['default-src'], ["'none'"]);
+  for (const [name, vals] of Object.entries(CSP)) {
+    for (const v of vals) {
+      assert.doesNotMatch(v, /^(https?:|wss?:|\*)/i, `${name} allows ${v}`);
+      assert.doesNotMatch(v, /unsafe-/i, `${name} allows ${v}`);
+    }
+  }
+});
+
+test('site JS opens no connections (fetch, XHR, WebSocket, beacons, EventSource), so connect-src can stay on self', () => {
+  for (const [name, src] of js) {
+    if (name.endsWith('factories.generated.js')) continue; // vendored; its Node-only I/O is stubbed by the runtime
+    assert.doesNotMatch(src, /\bfetch\s*\(|XMLHttpRequest|\bWebSocket\b|sendBeacon|\bEventSource\b/, `${name} makes a network request`);
+  }
+});
