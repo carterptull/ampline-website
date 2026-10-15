@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   configFor, buildPlaygroundInput, renderPlayground, instanceFor, defaultState, applyPreset,
-  captureDefaults, amplinercJson, PRESETS, NARROW_COLUMNS,
+  captureDefaults, amplinercJson, PRESETS, NARROW_COLUMNS, h,
 } from '../site/js/playground.js';
 import { createAmpline } from '../site/js/runtime/ampline.js';
 import { parseAnsi } from '../site/js/ansi.js';
@@ -183,4 +183,16 @@ test('narrow mode ignores the width slider and renders at the fixed narrow colum
 test('the module touches no DOM at import time', () => {
   assert.equal(typeof globalThis.document, 'undefined');
   assert.equal(typeof globalThis.window, 'undefined');
+});
+
+test('h() skips null, undefined and false children (append would render the text "null")', () => {
+  // Same coercion as Element.append: a non-node argument becomes a text node of String(arg).
+  const mk = (tag) => ({ tag, attrs: {}, kids: [],
+    setAttribute(k, v) { this.attrs[k] = String(v); },
+    append(...cs) { for (const c of cs) this.kids.push(typeof c === 'object' && c !== null ? c : { text: String(c) }); } });
+  const doc = { createElement: mk };
+  const child = mk('b');
+  const el = h(doc, 'div', { class: 'x', text: 'hi' }, null, child, undefined, false);
+  assert.deepEqual(el.kids, [child]);
+  assert.equal(h(doc, 'div', {}, null).kids.length, 0, 'append is not called for only-empty children');
 });

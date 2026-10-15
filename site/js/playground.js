@@ -100,14 +100,17 @@ export function amplinercJson(effective, defaults) {
 
 // ---- DOM wiring (browser only) -------------------------------------------------------------------------
 
-function h(doc, tag, props = {}, ...kids) {
+// Element builder. null, undefined and false children are skipped: Element.append would turn a null into the
+// literal text "null".
+export function h(doc, tag, props = {}, ...kids) {
   const e = doc.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
     if (k === 'class') e.className = v;
     else if (k === 'text') e.textContent = v;
     else e.setAttribute(k, v);
   }
-  if (kids.length) e.append(...kids);
+  const real = kids.filter((k) => k !== null && k !== undefined && k !== false);
+  if (real.length) e.append(...real);
   return e;
 }
 
@@ -158,7 +161,7 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
     h(doc, 'div', { class: 'row' }, h(doc, 'label', { for: s.id, text: s.label }), s.output), s.input);
   // The hint paragraph is always rendered (empty when nothing applies) with a reserved height, so choosing a
   // preset never moves anything below it. It sits right under the buttons that cause it.
-  const group = (id, title, hint, ...buttons) => h(doc, 'div', { class: 'field', role: 'group', 'aria-labelledby': id },
+  const group = (id, title, buttons, hint) => h(doc, 'div', { class: 'field', role: 'group', 'aria-labelledby': id },
     h(doc, 'span', { id, text: title }), h(doc, 'div', { class: 'seg-toggles' }, ...buttons), hint);
   const envHint = h(doc, 'p', { class: 'note play-hint' });
   const presetHint = h(doc, 'p', { class: 'note play-hint' });
@@ -171,9 +174,9 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
     select(effortId, 'Effort', effort),
     slider(sliders.context), slider(sliders.fiveHour), slider(sliders.weekly),
     widthField,
-    group('pg-segs', 'Segments', null, ...SEGMENT_KEYS.map((k) => segButtons[k])),
-    group('pg-env', 'Environment', envHint, noColorBtn),
-    group('pg-presets', 'Edge cases', presetHint, ...Object.keys(PRESETS).map((k) => presetButtons[k])));
+    group('pg-segs', 'Segments', SEGMENT_KEYS.map((k) => segButtons[k])),
+    group('pg-env', 'Environment', [noColorBtn], envHint),
+    group('pg-presets', 'Edge cases', Object.keys(PRESETS).map((k) => presetButtons[k]), presetHint));
 
   // --- preview, hints, config JSON
   const line = h(doc, 'div', { class: 'sl', id: 'playLine', role: 'group', 'aria-label': 'ampline statusline preview' });
