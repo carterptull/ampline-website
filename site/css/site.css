@@ -79,6 +79,14 @@ code { font: inherit }
 .sl { border-top: 1px solid var(--line); padding: 10px 18px 12px; font-family: var(--mono); font-size: calc(13px * var(--mk)); line-height: 1.65;
   white-space: pre; overflow-x: auto; color: #ddd; transition: filter .5s }
 .term-hero .sl { min-height: calc(2 * 1.65em + 22px) } /* room for the two-line wrap before it powers up (no layout shift) */
+
+/* install demo: the final state's height is reserved up front (8 lines, 12 once the long lines wrap on a phone), so playing the script shifts nothing */
+#installMount .term { margin: 34px 0 0; max-width: none }
+.term-install .term-body { min-height: calc(8 * 1.7em + 44px) }
+.term-install .sl { min-height: calc(2 * 1.65em + 22px) }
+.install-actions { margin-top: 16px }
+.lead code, .note code { font-family: var(--mono); font-size: calc(.92em * var(--mk)); color: var(--text) }
+@media (max-width: 600px) { .term-install .term-body { min-height: calc(12 * 1.7em + 44px) } }
 .sl.is-scrollable, .card .s.is-scrollable { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent) }
 .sl.sl-off { filter: brightness(.18) saturate(0) }
 .seg-in { animation: segin .45s ease-out both }

@@ -174,3 +174,11 @@ considered instead. Reversing any of them is cheap unless noted.
 **Note:** the dev server applies the same global headers, so it now also sends HSTS over `http://127.0.0.1`. Browsers ignore HSTS on plain HTTP, so it is harmless there.
 
 **Alternatives:** keep Vercel's default (the policy would not be ours or visible in the repo, `includeSubDomains` covers nothing here, and preload is hard to undo on a name under a domain we do not own); leave HSTS off (the deployed site would still get Vercel's default, so the choice would not be ours); `max-age` of two years to match Vercel (no benefit without preload).
+
+### D21. The installer transcript is the one hand-copied block, and CI keeps it honest
+
+**Decision:** The install demo's terminal output (`INSTALL_TRANSCRIPT` in `site/js/install-demo.js`) is typed into the repo as six literal lines, copied from a real run of the pinned `ampline-claude` installer (`--install`, in a throwaway HOME, exit 0, empty stderr). It is the only text on the page that is not produced by the runtime. `test/install-transcript.test.mjs` spawns the installer from `node_modules` in a fresh temp HOME and requires its stdout to equal the constant line for line. Whenever the pinned version's installer output changes, that test fails and the block is re-captured.
+
+**Why:** The runtime renders statuslines, but the installer is a different program that talks to the filesystem, so it cannot run in the browser. A demo that invents what the installer prints would be a claim about the product that nothing checks. Copying the real output, and running the real installer in CI against the copy, makes the claim as strong as the statusline demos: a bump that changes the wording cannot ship a stale transcript. The test uses a throwaway HOME and USERPROFILE (and clears `CLAUDE_CONFIG_DIR`), so it never touches the developer's real Claude settings.
+
+**Alternatives:** generate the transcript at build time (there is no build step); read it from a vendored file (adds a second generated artifact for six lines); describe the install in prose with no transcript (the demo is the point of the section); capture it once and trust it (drifts silently on the next bump).

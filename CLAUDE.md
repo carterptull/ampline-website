@@ -55,7 +55,7 @@ stubs for the Node-only parts. Its ANSI output is turned into DOM nodes, never H
 - Everything the browser loads is served from the site's own origin. Zero third-party requests.
 - No `style=` attributes and no `on*=` attributes in any HTML, and no `innerHTML` with markup, in `site/`.
 - The renderer source is never hand-edited. `site/js/runtime/factories.generated.js` is written only by `scripts/sync-ampline.mjs`, and CI fails if it's stale.
-- Every statusline string on the page comes from the runtime, never typed by hand. The only exception is the Phase 2 installer transcript, which is copied verbatim from a real run.
+- Every statusline string on the page comes from the runtime, never typed by hand. The only exception is the installer transcript in `site/js/install-demo.js`, copied verbatim from a real run of the pinned installer and guarded by `test/install-transcript.test.mjs` (D21).
 - Copy rules: product name "ampline"; "for Claude Code" is descriptive; the disclaimer ("ampline is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anthropic, PBC. Claude and Claude Code are trademarks of Anthropic, PBC.") appears in the footer; the accuracy rules are followed (two separate color scales, bold only at the documented edges, 5-hour and weekly bars need a Claude.ai subscription, truecolor terminals only, the OS claim ("Works on macOS · Linux · Windows", never "Supports", no versions) appears only in the hero compat line and the JSON-LD `operatingSystem` (verified on real hardware, see D19), at most two lines, cost is an estimate, PR/MR data comes from Claude Code, context % is from the last completed API call).
 - Owner and license: MIT, "Copyright (c) 2026 Paymon Software". README and footer say "© 2026 Paymon Software".
 - Footer support control is ONE gold pill "🍺 Buy Me a Beer" (`#E8B23D`, the `.pill` style) linking to `https://buymeacoffee.com/paymonsoftware`: a plain `<a>` with `target="_blank"` and `rel="noopener noreferrer"`, and NO widget or script. It replaces any "Star on GitHub" pill; GitHub, npm, Issues and Changelog stay plain footer links. `404.html`'s footer mirrors `index.html`. No Ko-fi, no GitHub Sponsors. See D14.
@@ -113,7 +113,7 @@ ampline-website/
 │       ├── og-card.js           renders the og-card.html statusline + frozen wave from the runtime
 │       ├── copy.js              copy-to-clipboard with fallback + aria-live
 │       ├── playground.js        interactive playground: pure render pipeline (configFor, buildPlaygroundInput, renderPlayground) + mountPlayground DOM wiring
-│       └── install-demo.js      (Phase 2)
+│       └── install-demo.js      INSTALL_TRANSCRIPT (the one hand-copied block, D21) + mountInstallDemo(): types the command, prints it, lights the runtime statusline
 └── test/
     ├── smoke.test.mjs
     ├── sync.test.mjs
@@ -123,6 +123,8 @@ ampline-website/
     ├── payloads.test.mjs
     ├── html-contract.test.mjs   CSP-safety + required meta/disclaimer in site/*.html (og-card.html: CSP-safety only)
     ├── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
+    ├── install-demo.test.mjs    install demo script, reduced motion, Replay, hidden-tab pause (fake DOM)
+    ├── install-transcript.test.mjs  runs the pinned installer in a throwaway HOME; stdout === INSTALL_TRANSCRIPT
     └── no-third-party-names.test.mjs  fails if a git-tracked text file names another statusline project
 ```
 

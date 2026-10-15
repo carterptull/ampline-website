@@ -7,6 +7,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Install demo section: a terminal that types `npx ampline-claude --install`, prints the installer's real output and lights the runtime statusline when it scrolls into view, with Replay. `test/install-transcript.test.mjs` keeps the copied output equal to the pinned installer's (D21).
 - Interactive playground on the real renderer: model and effort, context, 5-hour and weekly sliders, git, cost, PR and task toggles, NO_COLOR, a terminal-width slider that flips between one and two lines, and Stale cache, 85% edge and API-key account presets, with a copyable `.amplinerc.json`.
 
 ### Changed

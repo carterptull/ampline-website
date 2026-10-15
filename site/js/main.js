@@ -5,6 +5,7 @@ import { wireCopy } from './copy.js';
 import { startHero } from './hero.js';
 import { renderTour, watchScrollable } from './tour.js';
 import { mountPlayground } from './playground.js';
+import { mountInstallDemo } from './install-demo.js';
 
 const amp = createAmpline({ columns: 120 });
 document.getElementById('ampVersion').textContent = amp.version;
@@ -27,4 +28,5 @@ watchScrollable(tour);
 // through the real runtime, and NO_COLOR is a second instance because colors.js reads it once at load.
 mountPlayground({ mount: document.getElementById('playMount'), makeAmpline: createAmpline, win: window });
 
-// Phase 2 wiring continues here: install-demo.js.
+// The install demo also gets its own instance: it plays a fixed script and must not share state with the hero.
+mountInstallDemo({ amp: createAmpline({ columns: 120 }), mount: document.getElementById('installMount'), win: window });
