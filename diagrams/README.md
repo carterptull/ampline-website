@@ -29,7 +29,7 @@ below, and update its Mermaid source and prose then, not on every release.
 | `scripts/sync-ampline.mjs` (the `VENDORED` list) or the pinned `ampline-claude` version | `render-pipeline.md`, `release-sync.md` |
 | `site/js/runtime/ampline.js` or `fakes.js` (stubs, fakes, registry) | `render-pipeline.md` |
 | `site/js/ansi.js` or `payloads.js` | `render-pipeline.md` |
-| a section, container id, or JS module in `site/index.html` and `site/js/main.js` (including Phase 2's `playground.js` and `install-demo.js`) | `page-structure.md`, `render-pipeline.md` |
+| a section, container id, or JS module in `site/index.html` and `site/js/main.js` (including `playground.js` and `install-demo.js`) | `page-structure.md`, `render-pipeline.md` |
 | `vercel.json` (headers, CSP, caching) | `deployment-security.md` |
 | a new outbound link or any new origin the page touches | `overview.md`, `deployment-security.md` |
 | `.github/workflows/ci.yml` or `.github/dependabot.yml` | `release-sync.md` |
@@ -54,4 +54,4 @@ A routine fix or copy change doesn't need a diagram update.
 - Verify by viewing the rendered file on github.com. Reading the source is not verification.
 
 ---
-_Last verified: 2026-10-12 · site 0.2.0_
+_Last verified: 2026-10-15 · site 0.3.0_

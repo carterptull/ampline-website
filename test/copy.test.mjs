@@ -179,3 +179,47 @@ test('fallback with no selection API (getSelection returns null): does not throw
   assert.equal(status.textContent, 'Command selected. Press and hold, or Ctrl+C, to copy.');
   assert.ok(!button.classList.contains('is-copied'));
 });
+
+test('text may be a function: it is read at click time, not at wire time', async () => {
+  const calls = [];
+  install({ clipboard: { writeText: (t) => { calls.push(t); return Promise.resolve(); } } });
+  const button = makeButton(); const status = { textContent: '' };
+  let current = '{}';
+  wireCopy(button, () => current, status);
+  current = '{ "color": false }';
+  button.click(); await flush();
+  assert.deepEqual(calls, ['{ "color": false }']);
+  assert.equal(button.textContent, 'Copied');
+});
+
+test('opts: custom label, messages and fallback element (element or function)', async () => {
+  mock.timers.enable({ apis: ['setTimeout'] });
+  try {
+    install({ clipboard: { writeText: () => Promise.resolve() } });
+    const button = makeButton(); const status = { textContent: '' };
+    wireCopy(button, 'x', status, { label: 'Copy .amplinerc.json', copiedMessage: 'Config copied.' });
+    button.click(); await flush();
+    assert.equal(button.textContent, 'Copied');
+    assert.equal(status.textContent, 'Config copied.');
+    mock.timers.tick(3000);
+    assert.equal(button.textContent, 'Copy .amplinerc.json', 'reset restores the custom label');
+    assert.equal(status.textContent, '');
+  } finally { mock.timers.reset(); }
+
+  install({});
+  const pre = { id: 'pre' };
+  let opened = 0;
+  const b2 = makeButton(); const s2 = { textContent: '' };
+  wireCopy(b2, 'x', s2, { fallbackEl: () => { opened++; return pre; }, selectedMessage: 'JSON selected.' });
+  b2.click();
+  assert.equal(opened, 1);
+  assert.equal(state.ranges[0].selected, pre);
+  assert.equal(b2.textContent, 'Selected');
+  assert.equal(s2.textContent, 'JSON selected.');
+
+  install({});
+  const b3 = makeButton(); const s3 = { textContent: '' };
+  wireCopy(b3, 'x', s3, { fallbackEl: pre });
+  b3.click();
+  assert.equal(state.ranges[0].selected, pre);
+});

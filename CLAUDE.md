@@ -55,7 +55,7 @@ stubs for the Node-only parts. Its ANSI output is turned into DOM nodes, never H
 - Everything the browser loads is served from the site's own origin. Zero third-party requests.
 - No `style=` attributes and no `on*=` attributes in any HTML, and no `innerHTML` with markup, in `site/`.
 - The renderer source is never hand-edited. `site/js/runtime/factories.generated.js` is written only by `scripts/sync-ampline.mjs`, and CI fails if it's stale.
-- Every statusline string on the page comes from the runtime, never typed by hand. The only exception is the Phase 2 installer transcript, which is copied verbatim from a real run.
+- Every statusline string on the page comes from the runtime, never typed by hand. The only exception is the installer transcript in `site/js/install-demo.js`, copied verbatim from a real run of the pinned installer and guarded by `test/install-transcript.test.mjs` (D21).
 - Copy rules: product name "ampline"; "for Claude Code" is descriptive; the disclaimer ("ampline is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anthropic, PBC. Claude and Claude Code are trademarks of Anthropic, PBC.") appears in the footer; the accuracy rules are followed (two separate color scales, bold only at the documented edges, 5-hour and weekly bars need a Claude.ai subscription, truecolor terminals only, the OS claim ("Works on macOS · Linux · Windows", never "Supports", no versions) appears only in the hero compat line and the JSON-LD `operatingSystem` (verified on real hardware, see D19), at most two lines, cost is an estimate, PR/MR data comes from Claude Code, context % is from the last completed API call).
 - Owner and license: MIT, "Copyright (c) 2026 Paymon Software". README and footer say "© 2026 Paymon Software".
 - Footer support control is ONE gold pill "🍺 Buy Me a Beer" (`#E8B23D`, the `.pill` style) linking to `https://buymeacoffee.com/paymonsoftware`: a plain `<a>` with `target="_blank"` and `rel="noopener noreferrer"`, and NO widget or script. It replaces any "Star on GitHub" pill; GitHub, npm, Issues and Changelog stay plain footer links. `404.html`'s footer mirrors `index.html`. No Ko-fi, no GitHub Sponsors. See D14.
@@ -110,20 +110,28 @@ ampline-website/
 │       ├── equalizer.js         mountEqualizer(el, wheel, opts) → { bars, hold(i), release() }; live waves never hold, only the OG card's still image does
 │       ├── hero.js              typed prompt + power-up + cycle; does not touch the hero wave (D18)
 │       ├── tour.js              renders tour cards from payloads
-│       ├── play-preview.js      Phase 1 static playground stand-in (replaced by playground.js in Phase 2)
 │       ├── og-card.js           renders the og-card.html statusline + frozen wave from the runtime
 │       ├── copy.js              copy-to-clipboard with fallback + aria-live
-│       ├── playground.js        (Phase 2)
-│       └── install-demo.js      (Phase 2)
+│       ├── playground.js        interactive playground: pure render pipeline (configFor, buildPlaygroundInput, renderPlayground) + mountPlayground DOM wiring
+│       └── install-demo.js      INSTALL_TRANSCRIPT (the one hand-copied block, D21) + mountInstallDemo(): types the command, prints it, lights the runtime statusline
 └── test/
     ├── smoke.test.mjs
     ├── sync.test.mjs
     ├── runtime-parity.test.mjs  runtime output === real binary output, per payload
     ├── fakes.test.mjs           git/task fakes === real captured bytes
-    ├── ansi.test.mjs
+    ├── ansi.test.mjs            parseAnsi/renderAnsi on the SGR and OSC 8 subset ampline emits
+    ├── copy.test.mjs            wireCopy: clipboard, select fallback, label reset, aria-live messages
+    ├── equalizer.test.mjs       one bar per wheel stop, size classes, hold/release, colors set via setProperty only
+    ├── hero.test.mjs            hero typing, power-up and cycle; pauses while the tab is hidden
+    ├── serve.test.mjs           dev server applies the vercel.json headers (HSTS, CSP, cache) and answers 400/403/404 safely
+    ├── tour.test.mjs            tour cards, stable ids, overflow flags (watchOverflow/watchScrollable)
     ├── payloads.test.mjs
     ├── html-contract.test.mjs   CSP-safety + required meta/disclaimer in site/*.html (og-card.html: CSP-safety only)
     ├── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
+    ├── playground-state.test.mjs  playground pure pipeline: config, presets, purity, JSON
+    ├── playground-mount.test.mjs  mountPlayground wiring on a fake DOM: presets, NO_COLOR, narrow mode, copy
+    ├── install-demo.test.mjs    install demo script, reduced motion, Replay, hidden-tab pause (fake DOM)
+    ├── install-transcript.test.mjs  runs the pinned installer in a throwaway HOME; stdout === INSTALL_TRANSCRIPT
     └── no-third-party-names.test.mjs  fails if a git-tracked text file names another statusline project
 ```
 
@@ -140,17 +148,24 @@ site/js/runtime/fakes.js   makeFakeGit(colors) -> { renderGitSegment(ctx) }
 site/js/runtime/ampline.js createAmpline({ noColor?: boolean, columns?: number }) -> {
                              version, renderStatusline(input) -> string, renderSubagentLine(input) -> string,
                              setColumns(n), setConfig(user) -> merged config, getConfig() -> config,
+                             resetCache() /* clears the in-memory usage cache */,
                              stripAnsi(s), safeLinkUrl(u) -> string|null, colors /* lib/colors exports */ }
 site/js/ansi.js            parseAnsi(str) -> Token[]   Token = { text, fg: [r,g,b]|null, bold, dim, href: string|null }
                            renderAnsi(tokens, doc, { safeLinkUrl }) -> DocumentFragment
-site/js/payloads.js        FAMILIES = ['haiku','sonnet','opus','fable'] · MODEL_NAMES
+site/js/payloads.js        FAMILIES = ['haiku','sonnet','opus','fable'] · EFFORTS · MODEL_NAMES
                            wheelIndex(family, effort) -> 0..19
                            statusPayload(opts) -> input object · subagentPayload(opts) -> {columns, tasks}
                            HERO_CYCLE: Array<[family, effort]>
+site/js/tour.js            watchOverflow(elements: () => Element[], onChange(el, over), win?) -> mark()
 site/js/equalizer.js       mountEqualizer(container, wheelRgbs: number[][], { size: 'hero'|'nav' }) -> { hold(i), release(), bars }
                            (hold(i) is used only by og-card.js for the still image; the hero and nav waves animate freely, D18)
 site/js/hero.js            startHero({ amp, body, line })   (no equalizer argument: the wave is not synced to the cycle)
-site/js/copy.js            wireCopy(button, text, statusEl)
+site/js/install-demo.js    INSTALL_COMMAND: string · INSTALL_TRANSCRIPT: string[]
+                           mountInstallDemo({ amp, mount, win?, doc? }) -> { play }
+site/js/copy.js            wireCopy(button, text: string | () => string, statusEl, opts?: { label, fallbackEl, copiedMessage, selectedMessage })
+site/js/playground.js      configFor(state, narrow) -> userConfig · buildPlaygroundInput(state, now) -> input
+                           renderPlayground(state, { color, plain }, now, narrow) -> ansi string (pure: resets the cache, seeds it for `stale`)
+                           mountPlayground({ mount, makeAmpline, win })
 ```
 
 ## Never hand-edit `factories.generated.js`

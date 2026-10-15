@@ -47,8 +47,8 @@ time, and a small in-browser `require` registry runs it. See
 [`render-pipeline.md`](render-pipeline.md) for how, and [`release-sync.md`](release-sync.md)
 for how it gets updated.
 
-**Phase 1 ships a static playground preview.** The interactive playground and the installer
-demo are planned for Phase 2 and are not drawn here as built. See
+**The playground is interactive.** Its controls re-render through the real renderer. The install
+demo prints the installer's real output and then renders a statusline through the same runtime. See
 [`page-structure.md`](page-structure.md).
 
 ## Go deeper
@@ -62,4 +62,4 @@ demo are planned for Phase 2 and are not drawn here as built. See
 | How do I keep these diagrams current? | [`README.md`](README.md) |
 
 ---
-_Last verified: 2026-10-12 · site 0.2.0_
+_Last verified: 2026-10-15 · site 0.3.0_

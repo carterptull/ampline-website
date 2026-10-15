@@ -127,7 +127,7 @@ considered instead. Reversing any of them is cheap unless noted.
 
 ### D16. The hero's statusline is an inert picture; the product colors stay as they are
 
-**Decision:** The hero statusline's segments are rendered inside an `inert` wrapper, within the line that is already `aria-hidden`. The line itself stays a normal scroll box, so a swipe still scrolls it sideways on a phone. The figure's visually hidden caption is the text alternative. The product colors are not changed, and the tour cards and the playground preview are left alone because every color they show clears 4.5:1.
+**Decision:** The hero statusline's segments are rendered inside an `inert` wrapper, within the line that is already `aria-hidden`. The line itself stays a normal scroll box, so a swipe still scrolls it sideways on a phone. The figure's visually hidden caption is the text alternative. The product colors are not changed. The tour cards are left alone because every color they show clears 4.5:1; the interactive playground can show colors below it, which D22 covers.
 
 **Why:** The hero is a moving picture of the product, not text to read. It powers up with a fade-in and then cycles through the wheel, and some wheel stops are below 4.5:1 on the terminal background by design (Fable/max `#8000c0` is 2.51:1). Those colors are the product's identity, so they can't be lightened for the page. Lighthouse's contrast check (axe) still measures `aria-hidden` text and ignores roles, so it failed whenever its snapshot caught a half-faded segment or the Fable frame. It skips inert content, which keeps Accessibility at 100. Putting `inert` on the line itself would also stop touch scrolling, because inert content is not hit-tested, so it goes on an inner wrapper instead.
 
@@ -174,3 +174,19 @@ considered instead. Reversing any of them is cheap unless noted.
 **Note:** the dev server applies the same global headers, so it now also sends HSTS over `http://127.0.0.1`. Browsers ignore HSTS on plain HTTP, so it is harmless there.
 
 **Alternatives:** keep Vercel's default (the policy would not be ours or visible in the repo, `includeSubDomains` covers nothing here, and preload is hard to undo on a name under a domain we do not own); leave HSTS off (the deployed site would still get Vercel's default, so the choice would not be ours); `max-age` of two years to match Vercel (no benefit without preload).
+
+### D21. The installer transcript is the one hand-copied block, and CI keeps it honest
+
+**Decision:** The install demo's terminal output (`INSTALL_TRANSCRIPT` in `site/js/install-demo.js`) is typed into the repo as six literal lines, copied from a real run of the pinned `ampline-claude` installer (`--install`, in a throwaway HOME, exit 0, empty stderr). It is the only text on the page that is not produced by the runtime. `test/install-transcript.test.mjs` spawns the installer from `node_modules` in a fresh temp HOME and requires its stdout to equal the constant line for line. Whenever the pinned version's installer output changes, that test fails and the block is re-captured.
+
+**Why:** The runtime renders statuslines, but the installer is a different program that talks to the filesystem, so it cannot run in the browser. A demo that invents what the installer prints would be a claim about the product that nothing checks. Copying the real output, and running the real installer in CI against the copy, makes the claim as strong as the statusline demos: a bump that changes the wording cannot ship a stale transcript. The test runs the installer with an allowlisted environment (PATH, SYSTEMROOT, TEMP and TMP, matched case-insensitively, plus HOME and USERPROFILE set to the throwaway directory), with that directory as the working directory and a 30-second timeout, so it never sees `CLAUDE_CONFIG_DIR` or the developer's real Claude settings.
+
+**Alternatives:** generate the transcript at build time (there is no build step); read it from a vendored file (adds a second generated artifact for six lines); describe the install in prose with no transcript (the demo is the point of the section); capture it once and trust it (drifts silently on the next bump).
+
+### D22. The playground shows the real colors the visitor picks, including ones below 4.5:1
+
+**Decision:** The playground preview renders whatever the controls select with the product's own colors, unchanged. D16's earlier statement that the tour and the playground only show colors that clear 4.5:1 on the terminal background is superseded for the playground: a visitor can pick wheel stops that measure well below it on #0b0b0b (Haiku/low 3.92:1, Opus/max 3.93:1, Fable/xhigh 3.66:1, Fable/max 2.51:1) and a context or usage value at 95% or more shows the danger red (163, 45, 45) at 2.78:1. Product colors are never altered for the page.
+
+**Why:** The point of the playground is to show the real renderer's output, and those colors are the product's identity (see D16). The mitigations are structural: the preview text stays in the accessibility tree (it is a labelled group, not hidden), a debounced polite live region announces each change as plain text, and the NO_COLOR toggle gives a plain-text view of the same line. Lighthouse and axe only score the default state, which clears the threshold; they do not drive the sliders.
+
+**Alternatives:** lighten the low-contrast stops on the page (no longer the real output, and it would misstate the product); clamp the controls so only passing colors can be picked (hides part of the product and makes the demo dishonest); mark the preview `aria-hidden` like the hero (the playground is an interactive tool, so it must be readable).

@@ -1,7 +1,7 @@
 // Demo payloads in Claude Code's statusline shape. Reset times are computed from `now`
 // at render time: fixed epochs go stale and silently drop the ↺ countdown.
 export const FAMILIES = ['haiku', 'sonnet', 'opus', 'fable'];
-const EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'];
+export const EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'];
 export const MODEL_NAMES = {
   haiku: { id: 'claude-haiku-5-5', name: 'Haiku 5.5' },
   sonnet: { id: 'claude-sonnet-5-5', name: 'Sonnet 5.5' },

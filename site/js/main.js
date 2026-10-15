@@ -4,7 +4,8 @@ import { mountEqualizer } from './equalizer.js';
 import { wireCopy } from './copy.js';
 import { startHero } from './hero.js';
 import { renderTour, watchScrollable } from './tour.js';
-import { renderPlayPreview } from './play-preview.js';
+import { mountPlayground } from './playground.js';
+import { mountInstallDemo } from './install-demo.js';
 
 const amp = createAmpline({ columns: 120 });
 document.getElementById('ampVersion').textContent = amp.version;
@@ -23,7 +24,9 @@ const tour = document.getElementById('tour');
 renderTour({ amp: createAmpline({ columns: 500 }), mount: tour });
 watchScrollable(tour);
 
-// Phase 1 playground preview: static, own instance (nothing shared with the hero or the tour). Phase 2 swaps it for playground.js.
-renderPlayPreview({ amp: createAmpline({ columns: 120 }), mount: document.getElementById('playMount') });
+// The playground builds its own instances (never shared with the hero or the tour): every control re-renders
+// through the real runtime, and NO_COLOR is a second instance because colors.js reads it once at load.
+mountPlayground({ mount: document.getElementById('playMount'), makeAmpline: createAmpline, win: window });
 
-// Phase 2 wiring lands here, each with its own import: playground.js, install-demo.js.
+// The install demo also gets its own instance: it plays a fixed script and must not share state with the hero.
+mountInstallDemo({ amp: createAmpline({ columns: 120 }), mount: document.getElementById('installMount'), win: window });

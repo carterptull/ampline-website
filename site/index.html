@@ -74,6 +74,14 @@
       </figure>
     </header>
 
+    <section class="wrap section" id="install" aria-labelledby="install-h">
+      <p class="eyebrow">Install</p>
+      <h2 id="install-h">One command.</h2>
+      <p class="lead">Run <code>npx ampline-claude --install</code>. It sets two entries in your Claude Code settings, <code>statusLine</code> and <code>subagentStatusLine</code> (backing up your settings first), and copies its runtime to <code>~/.claude/hooks/ampline-claude</code>. Its small cache lives in <code>~/.claude/cache/ampline</code>.</p>
+      <div id="installMount"></div>
+      <p class="note">Undo any time: <code>npx ampline-claude uninstall</code> (backs up your settings first).</p>
+    </section>
+
     <section class="wrap section" id="features" aria-labelledby="features-h">
       <p class="eyebrow">What it shows</p>
       <h2 id="features-h">Every signal, one line.</h2>
@@ -91,7 +99,7 @@
     <section class="wrap section" id="playground" aria-labelledby="playground-h">
       <p class="eyebrow">Playground</p>
       <h2 id="playground-h">Turn it up.</h2>
-      <p class="lead">This is ampline's own renderer, running in your browser. Interactive controls are coming soon.</p>
+      <p class="lead">This is ampline's own renderer, running in your browser. Change anything and watch the real statusline respond.</p>
       <div id="playMount"></div>
     </section>
 
@@ -127,7 +135,7 @@
       </div>
       <div class="footer-base">
         <p>MIT · © 2026 Paymon Software</p>
-        <span class="ver" id="siteVersion">v0.2.0</span>
+        <span class="ver" id="siteVersion">v0.3.0</span>
       </div>
       <p>Demos rendered by ampline-claude <span id="ampVersion">0.6.0</span>'s own renderer · This page: 0 trackers, 0 third-party requests</p>
       <p class="disc">ampline is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anthropic, PBC. Claude and Claude Code are trademarks of Anthropic, PBC.</p>

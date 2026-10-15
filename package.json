@@ -1,6 +1,6 @@
 {
   "name": "ampline-website",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Website for ampline, the zero-dependency Node.js statusline for Claude Code. Live at ampline.js.org.",
   "type": "module",
