@@ -5,6 +5,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-15
+
 ### Added
 
 - Install demo section: a terminal that types `npx ampline-claude --install`, prints the installer's real output and lights the runtime statusline when it scrolls into view, with Replay. `test/install-transcript.test.mjs` keeps the copied output equal to the pinned installer's (D21).

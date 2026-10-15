@@ -97,4 +97,4 @@ checks each tour card against the renderer's real single-segment output. The pag
 contract (CSP-safe HTML, no third-party resources) is `html-contract.test.mjs`.
 
 ---
-_Last verified: 2026-10-12 · site 0.2.0_
+_Last verified: 2026-10-15 · site 0.3.0_

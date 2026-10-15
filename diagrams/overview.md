@@ -62,4 +62,4 @@ demo prints the installer's real output and then renders a statusline through th
 | How do I keep these diagrams current? | [`README.md`](README.md) |
 
 ---
-_Last verified: 2026-10-12 · site 0.2.0_
+_Last verified: 2026-10-15 · site 0.3.0_
