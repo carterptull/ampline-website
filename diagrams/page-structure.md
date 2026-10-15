@@ -59,7 +59,8 @@ in [`DECISIONS.md`](../DECISIONS.md).
 **Each statusline container has its own runtime instance** where it matters. The hero line
 cycles through models and efforts on a timer (paused while the tab is hidden and off under
 `prefers-reduced-motion`). The tour gets a wide instance that it reconfigures per card. The
-playground gets two of its own (one with colors, one for NO_COLOR, built on first use). See [`render-pipeline.md`](render-pipeline.md).
+playground gets two of its own (one with colors, one for NO_COLOR, built on first use). The install
+demo gets its own 120-column instance and plays a fixed script once. See [`render-pipeline.md`](render-pipeline.md).
 
 **Two pages outside the flow.** `og-card.html` is a render target: its `og-card.js` builds the
 social card from the same runtime, and `site/og.png` is a screenshot of it at 1200x630. It is

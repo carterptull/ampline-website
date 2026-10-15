@@ -15,12 +15,13 @@ const BIN = fileURLToPath(new URL('../node_modules/ampline-claude/bin/ampline-cl
 test('INSTALL_TRANSCRIPT equals the pinned installer output, run in a throwaway home', () => {
   const home = mkdtempSync(join(tmpdir(), 'ampline-install-'));
   try {
-    // Windows env keys are case-insensitive: drop every casing of the keys that locate the home or config dir.
-    const DROP = new Set(['CLAUDE_CONFIG_DIR', 'HOME', 'USERPROFILE', 'HOMEDRIVE', 'HOMEPATH']);
-    const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !DROP.has(k.toUpperCase())));
+    // An allowlist, so nothing that locates a real home or config dir can leak in. Windows env keys are
+    // case-insensitive, so match them that way; HOME and USERPROFILE point at the throwaway dir.
+    const KEEP = new Set(['PATH', 'SYSTEMROOT', 'TEMP', 'TMP']);
+    const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => KEEP.has(k.toUpperCase())));
     env.HOME = home;
     env.USERPROFILE = home;
-    const r = spawnSync(process.execPath, [BIN, '--install'], { env, encoding: 'utf8' });
+    const r = spawnSync(process.execPath, [BIN, '--install'], { env, cwd: home, timeout: 30000, encoding: 'utf8' });
     assert.equal(r.status, 0, `installer exited ${r.status}: ${r.stderr}`);
     assert.equal(r.stderr, '');
     const lines = r.stdout.replace(/\r\n/g, '\n').replace(/\n$/, '').split('\n');

@@ -125,7 +125,7 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
 .ctl .field { display: flex; flex-direction: column; gap: 7px }
 .ctl [hidden], .play [hidden] { display: none }
 .ctl .row { display: flex; justify-content: space-between }
-.ctl .row span:last-child, .ctl .row output { font-family: var(--mono); font-size: calc(1em * var(--mk)); color: var(--white) }
+.ctl .row output { font-family: var(--mono); font-size: calc(1em * var(--mk)); color: var(--white) }
 .ctl input[type=range] { accent-color: var(--white); width: 100% }
 .ctl select { background: var(--bg); color: var(--white); border: 1px solid var(--line-2); border-radius: 7px; padding: 7px; font: inherit }
 .seg-toggles { display: flex; flex-wrap: wrap; gap: 6px }

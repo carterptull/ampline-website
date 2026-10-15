@@ -206,7 +206,8 @@ test('index.html: the install section sits between the hero and the tour and car
   const at = html.indexOf('id="install"');
   assert.ok(at > html.indexOf('</header>') && at < html.indexOf('id="features"'));
   const section = html.slice(at, html.indexOf('</section>', at));
-  assert.match(section, /aria-labelledby="install-h"|<h2 id="install-h">One command\.<\/h2>/);
+  assert.match(section, /aria-labelledby="install-h"/);
+  assert.match(section, /<h2 id="install-h">One command\.<\/h2>/);
   assert.ok(section.includes(`<code>${INSTALL_COMMAND}</code>`));
   assert.ok(section.includes('id="installMount"'));
   assert.ok(section.includes('Undo any time: <code>npx ampline-claude uninstall</code> (backs up your settings first).'));

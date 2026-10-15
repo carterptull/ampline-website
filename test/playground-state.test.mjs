@@ -53,7 +53,7 @@ test('configFor: wide order, line2From, and the narrow list with toggles after t
   assert.equal(configFor({ ...base, noColor: true }, false).color, false);
 });
 
-test('same instance: stale preset then api-key preset leaves no H/W bars (Ruling L)', () => {
+test('same instance: stale preset then api-key preset leaves no H/W bars', () => {
   const inst = instances();
   const stale = text(inst, { ...base, fiveHour: 91, preset: 'stale' });
   assert.match(stale, /H91 /, 'the stale preset shows the last known usage');

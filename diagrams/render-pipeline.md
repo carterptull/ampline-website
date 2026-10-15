@@ -17,7 +17,7 @@ flowchart LR
     pay["payloads.js<br/>time-relative demo input"] --> rt
     rt -->|"ANSI string"| parse["ansi.js parseAnsi"]
     parse -->|"tokens"| dom["ansi.js renderAnsi<br/>DOM nodes + CSSOM colors"]
-    dom --> page["hero.js · tour.js · playground.js"]
+    dom --> page["hero.js · tour.js · playground.js ·<br/>install-demo.js"]
     dom --> card["og-card.js<br/>renders the social card"]
 
     style gen fill:transparent,stroke:#2E7D32,stroke-width:2px
@@ -43,7 +43,8 @@ own registry. These requests do not reach the vendored code as written:
 
 **The page uses several instances on purpose.** `main.js` makes a 120-column instance for the
 hero, a separate 500-column one for the tour (which reconfigures segments per card) and
-its own for the playground, so config set for one never leaks into another.
+its own for the playground and a fourth 120-column one for the install demo, so config set for
+one never leaks into another.
 `createAmpline({ noColor })` exists in the runtime API because `colors.js` reads `NO_COLOR`
 once when it loads, so no-color output needs its own instance. The playground creates one
 the first time NO_COLOR is switched on. Each playground render clears the instance's

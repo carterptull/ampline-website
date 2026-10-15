@@ -123,6 +123,8 @@ ampline-website/
     ├── payloads.test.mjs
     ├── html-contract.test.mjs   CSP-safety + required meta/disclaimer in site/*.html (og-card.html: CSP-safety only)
     ├── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
+    ├── playground-state.test.mjs  playground pure pipeline: config, presets, purity, JSON
+    ├── playground-mount.test.mjs  mountPlayground wiring on a fake DOM: presets, NO_COLOR, narrow mode, copy
     ├── install-demo.test.mjs    install demo script, reduced motion, Replay, hidden-tab pause (fake DOM)
     ├── install-transcript.test.mjs  runs the pinned installer in a throwaway HOME; stdout === INSTALL_TRANSCRIPT
     └── no-third-party-names.test.mjs  fails if a git-tracked text file names another statusline project
@@ -145,13 +147,16 @@ site/js/runtime/ampline.js createAmpline({ noColor?: boolean, columns?: number }
                              stripAnsi(s), safeLinkUrl(u) -> string|null, colors /* lib/colors exports */ }
 site/js/ansi.js            parseAnsi(str) -> Token[]   Token = { text, fg: [r,g,b]|null, bold, dim, href: string|null }
                            renderAnsi(tokens, doc, { safeLinkUrl }) -> DocumentFragment
-site/js/payloads.js        FAMILIES = ['haiku','sonnet','opus','fable'] · MODEL_NAMES
+site/js/payloads.js        FAMILIES = ['haiku','sonnet','opus','fable'] · EFFORTS · MODEL_NAMES
                            wheelIndex(family, effort) -> 0..19
                            statusPayload(opts) -> input object · subagentPayload(opts) -> {columns, tasks}
                            HERO_CYCLE: Array<[family, effort]>
+site/js/tour.js            watchOverflow(elements: () => Element[], onChange(el, over), win?) -> mark()
 site/js/equalizer.js       mountEqualizer(container, wheelRgbs: number[][], { size: 'hero'|'nav' }) -> { hold(i), release(), bars }
                            (hold(i) is used only by og-card.js for the still image; the hero and nav waves animate freely, D18)
 site/js/hero.js            startHero({ amp, body, line })   (no equalizer argument: the wave is not synced to the cycle)
+site/js/install-demo.js    INSTALL_COMMAND: string · INSTALL_TRANSCRIPT: string[]
+                           mountInstallDemo({ amp, mount, win?, doc? }) -> { play }
 site/js/copy.js            wireCopy(button, text: string | () => string, statusEl, opts?: { label, fallbackEl, copiedMessage, selectedMessage })
 site/js/playground.js      configFor(state, narrow) -> userConfig · buildPlaygroundInput(state, now) -> input
                            renderPlayground(state, { color, plain }, now, narrow) -> ansi string (pure: resets the cache, seeds it for `stale`)
