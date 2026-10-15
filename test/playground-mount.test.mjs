@@ -56,13 +56,24 @@ function setup(t, { narrow = false } = {}) {
     addEventListener() {}, requestAnimationFrame: (cb) => { cb(); return 1; },
     setTimeout: (...a) => globalThis.setTimeout(...a), clearTimeout: (...a) => globalThis.clearTimeout(...a),
   };
+  // Every instance is tagged with the noColor option it was created with, and each render records which one ran.
+  const made = [];
+  const renders = [];
+  const makeAmpline = (opts = {}) => {
+    const amp = createAmpline(opts);
+    const kind = opts.noColor ? 'plain' : 'color';
+    const render = amp.renderStatusline;
+    amp.renderStatusline = (input) => { renders.push(kind); return render(input); };
+    made.push(kind);
+    return amp;
+  };
   const mount = makeEl('div');
-  mountPlayground({ mount, makeAmpline: createAmpline, win });
+  mountPlayground({ mount, makeAmpline, win });
   const line = byId(mount, 'playLine');
   const pre = byId(mount, 'playJson');
   const colored = () => findAll(line, (n) => n.style.color).length;
   const widthField = () => { let p = null; walk(mount, (n, par) => { if (n.attrs && n.attrs.id === 'pg-width') p = par; }); return p; };
-  return { mount, line, pre, mq, clip, colored, widthField,
+  return { mount, line, pre, mq, clip, colored, widthField, made, renders,
     pressed: (label) => button(mount, label).attrs['aria-pressed'],
     slide: (id, v) => { const el = byId(mount, id); el.value = String(v); el.fire('input'); } };
 }
@@ -79,15 +90,20 @@ test('playground mount: moving a control clears the active preset', (t) => {
   assert.equal(d.pressed('85% edge'), 'false', 'a segment toggle clears it too');
 });
 
-test('playground mount: NO_COLOR keeps the preset and switches to the plain instance', (t) => {
+test('playground mount: NO_COLOR keeps the preset and renders through the noColor instance', (t) => {
   const d = setup(t);
+  assert.deepEqual(d.made, ['color'], 'the plain instance is built lazily');
   button(d.mount, 'API-key account').fire('click');
   assert.ok(d.colored() > 0, 'the colored instance paints colors');
+  assert.equal(d.renders.at(-1), 'color');
   button(d.mount, 'NO_COLOR').fire('click');
+  assert.deepEqual(d.made, ['color', 'plain'], 'a noColor: true instance was created on first use');
+  assert.equal(d.renders.at(-1), 'plain', 'the render came from the noColor instance');
   assert.equal(d.pressed('API-key account'), 'true', 'NO_COLOR is environment, not a manual edit');
   assert.equal(d.colored(), 0, 'plain output has no colors');
   assert.deepEqual(JSON.parse(d.pre.textContent).color, false);
   button(d.mount, 'NO_COLOR').fire('click');
+  assert.equal(d.renders.at(-1), 'color', 'switching back uses the colored instance again');
   assert.ok(d.colored() > 0);
 });
 
@@ -102,15 +118,18 @@ test('playground mount: wide and narrow modes, including a media-query change', 
   assert.ok(JSON.parse(d.pre.textContent).segments.includes('dir'), 'wide mode shows the full segment list');
 });
 
-test('playground mount: Copy .amplinerc.json copies exactly the JSON that matches the rendered config', async (t) => {
+test('playground mount: Copy .amplinerc.json copies the diff of the chosen config from the defaults', async (t) => {
   const d = setup(t);
-  d.slide('pg-width', 150);
   button(d.mount, 'NO_COLOR').fire('click');
   button(d.mount, 'Copy .amplinerc.json').fire('click');
   await Promise.resolve();
-  assert.equal(d.clip.length, 1);
-  assert.equal(d.clip[0], d.pre.textContent);
-  assert.equal(JSON.parse(d.clip[0]).color, false);
+  // Wide mode with git, cost and PR on and task off: that segment order, and color off, differ from the defaults.
+  const expected = JSON.stringify({
+    segments: ['dir', 'git', 'model', 'context', 'fiveHour', 'weekly', 'cost', 'pr'],
+    color: false,
+  }, null, 2);
+  assert.deepEqual(d.clip, [expected]);
+  assert.equal(d.pre.textContent, expected, 'the visible JSON is the same text');
 });
 
 test('playground mount: no literal "null" or "undefined" anywhere in the mounted tree', (t) => {

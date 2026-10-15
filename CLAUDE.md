@@ -119,7 +119,12 @@ ampline-website/
     ├── sync.test.mjs
     ├── runtime-parity.test.mjs  runtime output === real binary output, per payload
     ├── fakes.test.mjs           git/task fakes === real captured bytes
-    ├── ansi.test.mjs
+    ├── ansi.test.mjs            parseAnsi/renderAnsi on the SGR and OSC 8 subset ampline emits
+    ├── copy.test.mjs            wireCopy: clipboard, select fallback, label reset, aria-live messages
+    ├── equalizer.test.mjs       one bar per wheel stop, size classes, hold/release, colors set via setProperty only
+    ├── hero.test.mjs            hero typing, power-up and cycle; pauses while the tab is hidden
+    ├── serve.test.mjs           dev server applies the vercel.json headers (HSTS, CSP, cache) and answers 400/403/404 safely
+    ├── tour.test.mjs            tour cards, stable ids, overflow flags (watchOverflow/watchScrollable)
     ├── payloads.test.mjs
     ├── html-contract.test.mjs   CSP-safety + required meta/disclaimer in site/*.html (og-card.html: CSP-safety only)
     ├── seo-files.test.mjs       robots/sitemap/manifest/icon.svg contents, og/icon PNG dimensions
