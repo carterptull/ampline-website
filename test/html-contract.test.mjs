@@ -275,3 +275,13 @@ test('release version: top CHANGELOG heading, package.json and both footers agre
     assert.equal(footer, `v${top}`, `${name} footer version differs from the CHANGELOG`);
   }
 });
+
+// Lighthouse link-in-text-block: the preview's PR link is colored by the product, so the page distinguishes it
+// with an underline instead of changing the color.
+test('playground preview links are underlined (not distinguished by color alone)', () => {
+  const site = readFileSync(new URL('css/site.css', SITE), 'utf8');
+  const rule = site.match(/^\.play \.sl a \{([^}]*)\}/m);
+  assert.ok(rule, '.play .sl a rule missing');
+  assert.match(rule[1], /text-decoration:\s*underline/);
+  assert.doesNotMatch(rule[1], /\bcolor\s*:/, 'product colors stay untouched');
+});

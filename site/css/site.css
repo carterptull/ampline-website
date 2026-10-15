@@ -120,6 +120,7 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
 /* playground */
 .play { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; margin-top: 34px; align-items: start }
 .play .term { margin: 0; max-width: none }
+.play .sl a { text-decoration: underline; text-underline-offset: 3px } /* the demo PR link sits in text and its green is 1.54:1 against the line, so it must not rely on color alone */
 .ctl { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--surface); display: flex; flex-direction: column; gap: 16px; font-size: 13px; color: #aaa }
 .ctl label { display: flex; flex-direction: column; gap: 7px }
 .ctl .field { display: flex; flex-direction: column; gap: 7px }
