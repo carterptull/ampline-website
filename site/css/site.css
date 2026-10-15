@@ -109,24 +109,28 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
   padding: 9px 11px; white-space: pre; overflow-x: auto; color: #ddd }
 .span2 { grid-column: span 2 }
 
-/* playground: Phase 1 static preview (.term-play, .soon) and the Phase 2 controls */
-.term-play { margin: 34px 0 0; max-width: none }
-.soon { margin: 18px 0 0; font-family: var(--mono); font-size: calc(13px * var(--mk)); color: var(--white) }
-.soon + .note { margin-top: 6px }
-
-/* playground (Phase 2) */
+/* playground */
 .play { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; margin-top: 34px; align-items: start }
 .play .term { margin: 0; max-width: none }
 .ctl { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--surface); display: flex; flex-direction: column; gap: 16px; font-size: 13px; color: #aaa }
 .ctl label { display: flex; flex-direction: column; gap: 7px }
+.ctl .field { display: flex; flex-direction: column; gap: 7px }
+.ctl [hidden], .play [hidden] { display: none }
 .ctl .row { display: flex; justify-content: space-between }
-.ctl .row span:last-child { font-family: var(--mono); font-size: calc(1em * var(--mk)); color: var(--white) }
+.ctl .row span:last-child, .ctl .row output { font-family: var(--mono); font-size: calc(1em * var(--mk)); color: var(--white) }
 .ctl input[type=range] { accent-color: var(--white); width: 100% }
 .ctl select { background: var(--bg); color: var(--white); border: 1px solid var(--line-2); border-radius: 7px; padding: 7px; font: inherit }
 .seg-toggles { display: flex; flex-wrap: wrap; gap: 6px }
 .seg-toggles button { font: calc(12px * var(--mk)) var(--mono); color: #aaa; background: #0d0d0d; border: 1px solid var(--line-2); border-radius: 6px; padding: 4px 8px; cursor: pointer }
 .seg-toggles button[aria-pressed=true] { color: var(--bg); background: var(--white); border-color: var(--white) }
 .legend { font-family: var(--mono); font-size: calc(12px * var(--mk)); color: var(--quiet); margin-top: 12px; line-height: 1.6 }
+.legend p { margin: 0 }
+.legend p + p { margin-top: 6px }
+.play-after .copy { margin-top: 16px }
+.play-json { margin-top: 14px; font-size: 13px; color: #aaa }
+.play-json summary { cursor: pointer; width: fit-content }
+.play-json pre { margin: 10px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2);
+  font: calc(12px * var(--mk)) / 1.6 var(--mono); color: #ddd; overflow-x: auto }
 
 /* under the hood */
 .cards4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 34px }
@@ -176,9 +180,14 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
   .play { grid-template-columns: minmax(0, 1fr) }
   .cards4 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
   .sl { font-size: calc(11.5px * var(--mk)) }
-  /* live preview above the controls and pinned under the nav, so a slider change is visible */
-  .play > div:last-child { order: -1; position: sticky; top: var(--nav-h); z-index: 5 }
-  .play .term .term-body { display: none }
+  /* live preview above the controls and pinned under the nav, so a slider change is visible. .play-out
+     dissolves so the figure is a grid item of .play (sticky for the whole section); its hint sits right
+     under the preview, the note and the JSON after the controls. The chrome is dropped to keep it short. */
+  .play-out { display: contents }
+  .play .term { order: -1; position: sticky; top: var(--nav-h); z-index: 5 }
+  .play .term .chrome { display: none }
+  .play .ctl { order: 1 }
+  .play .play-after { order: 2 }
   .footer-row { grid-template-columns: 1fr; justify-items: center; gap: 16px }
   .footer-wm { justify-self: center }
   .footer-links { justify-self: center; justify-content: center }
@@ -201,6 +210,8 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
   .links a, .copy, .seg-toggles button, .ctl select, .btn, .learn a, .footer-links a, .brand {
     min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center }
   .card .s { min-height: 44px } /* a one-line sample that overflows is a focusable scroll region (42.4px tall otherwise) */
+  .play .sl a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center } /* PR / MR link in the preview */
+  .play-json summary { min-height: 44px; display: flex; align-items: center }
   .card .s a { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center } /* PR / MR links */
   .pill { min-height: 44px; padding: 0 18px }
   .ctl input[type=range] { height: 44px }

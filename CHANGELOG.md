@@ -5,6 +5,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Interactive playground on the real renderer: model and effort, context, 5-hour and weekly sliders, git, cost, PR and task toggles, NO_COLOR, a terminal-width slider that flips between one and two lines, and Stale cache, 85% edge and API-key account presets, with a copyable `.amplinerc.json`.
+
+### Changed
+
+- `wireCopy` takes a string or a function and an options object (label, fallback element, messages); the install button behaves as before.
+- `createAmpline` gains `resetCache()`, so a render can be made independent of earlier ones.
+- The playground's static preview and "coming soon" copy are replaced by the interactive controls.
+
 ## [0.2.0] - 2026-10-12
 
 ### Added

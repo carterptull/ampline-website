@@ -90,6 +90,7 @@ export function createAmpline({ noColor = false, columns = 120 } = {}) {
     setColumns(n) { env.COLUMNS = String(n); }, // layout.js reads COLUMNS on every call
     setConfig(user) { currentConfig = configModule.validateAndMerge(user || {}); return currentConfig; },
     getConfig: () => currentConfig,
+    resetCache() { mem.clear(); }, // drops the in-memory usage/git cache: output becomes a pure function of the input
     stripAnsi: (s) => colors.stripAnsi(s),
     safeLinkUrl: (u) => load('segments/pr').safeLinkUrl(u),
   };

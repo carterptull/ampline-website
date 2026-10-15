@@ -17,12 +17,10 @@ flowchart LR
     pay["payloads.js<br/>time-relative demo input"] --> rt
     rt -->|"ANSI string"| parse["ansi.js parseAnsi"]
     parse -->|"tokens"| dom["ansi.js renderAnsi<br/>DOM nodes + CSSOM colors"]
-    dom --> page["hero.js · tour.js · play-preview.js"]
+    dom --> page["hero.js · tour.js · playground.js"]
     dom --> card["og-card.js<br/>renders the social card"]
-    plan["playground.js<br/>planned (Phase 2)"] -.-> dom
 
     style gen fill:transparent,stroke:#2E7D32,stroke-width:2px
-    style plan fill:transparent,stroke:#888,stroke-width:1px,stroke-dasharray: 4 3
 ```
 
 **What `sync-ampline.mjs` copies.** Twelve files from `ampline-claude/lib`, byte for byte: `colors`,
@@ -44,11 +42,12 @@ own registry. These requests do not reach the vendored code as written:
 | `path`, `os`, `claudeDir` | small shims (`/home/you`, with `.claude` under it) |
 
 **The page uses several instances on purpose.** `main.js` makes a 120-column instance for the
-hero, a separate 500-column one for the tour (which reconfigures segments per card) and another
-120-column one for the playground preview, so config set for one never leaks into another.
+hero, a separate 500-column one for the tour (which reconfigures segments per card) and
+its own for the playground, so config set for one never leaks into another.
 `createAmpline({ noColor })` exists in the runtime API because `colors.js` reads `NO_COLOR`
-once when it loads, so no-color output needs its own instance. The site does not create one
-today.
+once when it loads, so no-color output needs its own instance. The playground creates one
+the first time NO_COLOR is switched on. Each playground render clears the instance's
+in-memory cache first (`resetCache()`), so the output depends only on the controls.
 
 **The wave logo uses the renderer's wheel but is not part of the render path.** `main.js` passes
 `amp.colors.WHEEL` (from the vendored `colors` module) to `equalizer.js`, which colors the 20 bars

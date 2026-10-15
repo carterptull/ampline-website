@@ -38,23 +38,15 @@ export function renderTour({ amp, mount, doc = document }) {
   mount.appendChild(card(doc, `tour-h-${n}`, 'Subagents get their own lines', "Shown in Claude Code's subagent panel while subagents run (the installer sets that up too). One row per subagent: arrow and label colored by status (running, queued, failed; done is dim), model colored by family.", [frag(sub)], true));
 }
 
-// Samples keep their exact columns and scroll inside their own box; flag the ones that overflow so the
-// CSS edge fade hints at the hidden part. Re-checked on resize (one pending frame at a time) and once the
-// mono font has loaded.
-export function watchScrollable(mount, win = window) {
+// Shared overflow watcher: `elements()` yields the scrollable boxes, `onChange(el, over)` applies the
+// element's own accessibility attributes. Re-checked on resize (one pending frame at a time) and once the mono
+// font has loaded. Returns `mark` so callers can re-measure after they change the content.
+export function watchOverflow(elements, onChange, win = window) {
   const mark = () => {
-    for (const s of mount.querySelectorAll('.s')) {
-      const over = s.scrollWidth > s.clientWidth;
-      s.classList.toggle('is-scrollable', over);
-      // A scrollable region must be keyboard-focusable and have an accessible name (the card's heading).
-      if (over) {
-        s.setAttribute('tabindex', '0');
-        s.setAttribute('role', 'group');
-        const h = s.previousElementSibling;
-        if (h && h.id) s.setAttribute('aria-labelledby', h.id);
-      } else {
-        for (const a of ['tabindex', 'role', 'aria-labelledby']) s.removeAttribute(a);
-      }
+    for (const el of elements()) {
+      const over = el.scrollWidth > el.clientWidth;
+      el.classList.toggle('is-scrollable', over);
+      onChange(el, over);
     }
   };
   let pending = false;
@@ -66,4 +58,21 @@ export function watchScrollable(mount, win = window) {
   mark();
   win.addEventListener('resize', onResize);
   if (win.document && win.document.fonts && win.document.fonts.ready) win.document.fonts.ready.then(mark);
+  return mark;
+}
+
+// Samples keep their exact columns and scroll inside their own box; flag the ones that overflow so the
+// CSS edge fade hints at the hidden part.
+export function watchScrollable(mount, win = window) {
+  return watchOverflow(() => mount.querySelectorAll('.s'), (s, over) => {
+    // A scrollable region must be keyboard-focusable and have an accessible name (the card's heading).
+    if (over) {
+      s.setAttribute('tabindex', '0');
+      s.setAttribute('role', 'group');
+      const h = s.previousElementSibling;
+      if (h && h.id) s.setAttribute('aria-labelledby', h.id);
+    } else {
+      for (const a of ['tabindex', 'role', 'aria-labelledby']) s.removeAttribute(a);
+    }
+  }, win);
 }

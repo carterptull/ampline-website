@@ -56,3 +56,12 @@ test('parity: subagent rows', () => {
   const amp = createAmpline({ columns: 200 });
   assert.equal(amp.renderSubagentLine(input), realRender(input, { columns: 200, args: ['--subagent'] }).replace(/\n$/, ''));
 });
+
+test('resetCache: stale usage is served from the in-memory cache until it is cleared', () => {
+  const amp = createAmpline({ columns: 200 });
+  amp.renderStatusline(statusPayload({ now, fiveHour: 91 })); // live payload seeds the cache
+  const noLimits = statusPayload({ now, rateLimits: false });
+  assert.match(amp.stripAnsi(amp.renderStatusline(noLimits)), /H91 /, 'served from the cache');
+  amp.resetCache();
+  assert.doesNotMatch(amp.stripAnsi(amp.renderStatusline(noLimits)), /\bH\d+|\bW\d+/, 'nothing cached after the reset');
+});

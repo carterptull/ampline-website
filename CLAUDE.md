@@ -110,10 +110,9 @@ ampline-website/
 │       ├── equalizer.js         mountEqualizer(el, wheel, opts) → { bars, hold(i), release() }; live waves never hold, only the OG card's still image does
 │       ├── hero.js              typed prompt + power-up + cycle; does not touch the hero wave (D18)
 │       ├── tour.js              renders tour cards from payloads
-│       ├── play-preview.js      Phase 1 static playground stand-in (replaced by playground.js in Phase 2)
 │       ├── og-card.js           renders the og-card.html statusline + frozen wave from the runtime
 │       ├── copy.js              copy-to-clipboard with fallback + aria-live
-│       ├── playground.js        (Phase 2)
+│       ├── playground.js        interactive playground: pure render pipeline (configFor, buildPlaygroundInput, renderPlayground) + mountPlayground DOM wiring
 │       └── install-demo.js      (Phase 2)
 └── test/
     ├── smoke.test.mjs
@@ -140,6 +139,7 @@ site/js/runtime/fakes.js   makeFakeGit(colors) -> { renderGitSegment(ctx) }
 site/js/runtime/ampline.js createAmpline({ noColor?: boolean, columns?: number }) -> {
                              version, renderStatusline(input) -> string, renderSubagentLine(input) -> string,
                              setColumns(n), setConfig(user) -> merged config, getConfig() -> config,
+                             resetCache() /* clears the in-memory usage cache */,
                              stripAnsi(s), safeLinkUrl(u) -> string|null, colors /* lib/colors exports */ }
 site/js/ansi.js            parseAnsi(str) -> Token[]   Token = { text, fg: [r,g,b]|null, bold, dim, href: string|null }
                            renderAnsi(tokens, doc, { safeLinkUrl }) -> DocumentFragment
@@ -150,7 +150,10 @@ site/js/payloads.js        FAMILIES = ['haiku','sonnet','opus','fable'] · MODEL
 site/js/equalizer.js       mountEqualizer(container, wheelRgbs: number[][], { size: 'hero'|'nav' }) -> { hold(i), release(), bars }
                            (hold(i) is used only by og-card.js for the still image; the hero and nav waves animate freely, D18)
 site/js/hero.js            startHero({ amp, body, line })   (no equalizer argument: the wave is not synced to the cycle)
-site/js/copy.js            wireCopy(button, text, statusEl)
+site/js/copy.js            wireCopy(button, text: string | () => string, statusEl, opts?: { label, fallbackEl, copiedMessage, selectedMessage })
+site/js/playground.js      configFor(state, narrow) -> userConfig · buildPlaygroundInput(state, now) -> input
+                           renderPlayground(state, { color, plain }, now, narrow) -> ansi string (pure: resets the cache, seeds it for `stale`)
+                           mountPlayground({ mount, makeAmpline, win })
 ```
 
 ## Never hand-edit `factories.generated.js`
