@@ -5,6 +5,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Playground PR link underlined so links don't rely on color alone (Lighthouse link-in-text-block).
+
 ## [0.3.0] - 2026-10-15
 
 ### Added
