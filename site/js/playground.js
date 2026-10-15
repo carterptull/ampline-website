@@ -38,10 +38,13 @@ export function defaultState(narrow = false) {
   };
 }
 
-// Presets are mutually exclusive: `null` (or the active key clicked again) leaves the state manual.
+// Presets are scenarios, not patches: the three numbers go back to the defaults before the preset's own
+// values apply, so Stale then 85% edge does not keep the stale 91%. Presets are mutually exclusive:
+// `null` (or the active key clicked again) leaves the state manual, values as they are.
 export function applyPreset(state, key) {
   if (!key || !PRESETS[key]) return { ...state, preset: null };
-  return { ...state, ...PRESETS[key].patch, preset: key };
+  const { context, fiveHour, weekly } = defaultState();
+  return { ...state, context, fiveHour, weekly, ...PRESETS[key].patch, preset: key };
 }
 
 export function configFor(state, narrow) {
@@ -138,9 +141,10 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
     fiveHour: { id: 'pg-fivehour', label: '5-hour limit used', input: range('pg-fivehour', 0, 100, 0.1) },
     weekly: { id: 'pg-weekly', label: 'Weekly limit used', input: range('pg-weekly', 0, 100, 0.1) },
   };
-  for (const s of Object.values(sliders)) s.output = h(doc, 'output', { for: s.id });
+  // aria-live off: <output> is implicitly a live region; only the debounced status region should speak.
+  for (const s of Object.values(sliders)) s.output = h(doc, 'output', { for: s.id, 'aria-live': 'off' });
   const widthInput = range('pg-width', 40, 200, 1);
-  const widthOutput = h(doc, 'output', { for: 'pg-width' });
+  const widthOutput = h(doc, 'output', { for: 'pg-width', 'aria-live': 'off' });
 
   const toggle = (text) => h(doc, 'button', { type: 'button', 'aria-pressed': 'false', text });
   const segButtons = {};
@@ -152,8 +156,12 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
   const select = (id, text, control) => h(doc, 'div', { class: 'field' }, h(doc, 'label', { for: id, text }), control);
   const slider = (s) => h(doc, 'div', { class: 'field' },
     h(doc, 'div', { class: 'row' }, h(doc, 'label', { for: s.id, text: s.label }), s.output), s.input);
-  const group = (id, title, ...buttons) => h(doc, 'div', { class: 'field', role: 'group', 'aria-labelledby': id },
-    h(doc, 'span', { id, text: title }), h(doc, 'div', { class: 'seg-toggles' }, ...buttons));
+  // The hint paragraph is always rendered (empty when nothing applies) with a reserved height, so choosing a
+  // preset never moves anything below it. It sits right under the buttons that cause it.
+  const group = (id, title, hint, ...buttons) => h(doc, 'div', { class: 'field', role: 'group', 'aria-labelledby': id },
+    h(doc, 'span', { id, text: title }), h(doc, 'div', { class: 'seg-toggles' }, ...buttons), hint);
+  const envHint = h(doc, 'p', { class: 'note play-hint' });
+  const presetHint = h(doc, 'p', { class: 'note play-hint' });
 
   const widthField = h(doc, 'div', { class: 'field' },
     h(doc, 'div', { class: 'row' }, h(doc, 'label', { for: 'pg-width', text: 'Terminal width' }), widthOutput), widthInput);
@@ -163,9 +171,9 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
     select(effortId, 'Effort', effort),
     slider(sliders.context), slider(sliders.fiveHour), slider(sliders.weekly),
     widthField,
-    group('pg-segs', 'Segments', ...SEGMENT_KEYS.map((k) => segButtons[k])),
-    group('pg-env', 'Environment', noColorBtn),
-    group('pg-presets', 'Edge cases', ...Object.keys(PRESETS).map((k) => presetButtons[k])));
+    group('pg-segs', 'Segments', null, ...SEGMENT_KEYS.map((k) => segButtons[k])),
+    group('pg-env', 'Environment', envHint, noColorBtn),
+    group('pg-presets', 'Edge cases', presetHint, ...Object.keys(PRESETS).map((k) => presetButtons[k])));
 
   // --- preview, hints, config JSON
   const line = h(doc, 'div', { class: 'sl', id: 'playLine', role: 'group', 'aria-label': 'ampline statusline preview' });
@@ -173,8 +181,6 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
     h(doc, 'i'), h(doc, 'i'), h(doc, 'i'), h(doc, 'span', { class: 'title', text: 'claude · ~/code/widgets' }));
   const figure = h(doc, 'figure', { class: 'term' }, chrome, line);
 
-  const legend = h(doc, 'div', { class: 'legend' });
-  legend.hidden = true;
   const liveStatus = h(doc, 'div', { class: 'sr-status', role: 'status', 'aria-live': 'polite' });
   const copyStatus = h(doc, 'div', { class: 'sr-status', role: 'status', 'aria-live': 'polite' });
 
@@ -182,10 +188,10 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
   const details = h(doc, 'details', { class: 'play-json' },
     h(doc, 'summary', { text: 'Show .amplinerc.json' }), pre);
   const copyBtn = h(doc, 'button', { type: 'button', class: 'copy', text: 'Copy .amplinerc.json' });
-  const after = h(doc, 'div', { class: 'play-after' },
-    h(doc, 'p', { class: 'note', text: SUBSCRIPTION_NOTE }), copyBtn, details, copyStatus);
+  const subscriptionNote = h(doc, 'p', { class: 'note play-note', text: SUBSCRIPTION_NOTE });
+  const after = h(doc, 'div', { class: 'play-after' }, copyBtn, details, copyStatus);
 
-  const out = h(doc, 'div', { class: 'play-out' }, figure, legend, after, liveStatus);
+  const out = h(doc, 'div', { class: 'play-out' }, figure, subscriptionNote, after, liveStatus);
   mount.replaceChildren(h(doc, 'div', { class: 'play' }, ctl, out));
 
   let json = '{}';
@@ -222,11 +228,8 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
     noColorBtn.setAttribute('aria-pressed', String(state.noColor));
     for (const k of Object.keys(PRESETS)) presetButtons[k].setAttribute('aria-pressed', String(state.preset === k));
 
-    const hints = [];
-    if (state.preset) hints.push(PRESETS[state.preset].hint);
-    if (state.noColor) hints.push(NO_COLOR_HINT);
-    legend.replaceChildren(...hints.map((t) => h(doc, 'p', { text: t })));
-    legend.hidden = hints.length === 0;
+    presetHint.textContent = state.preset ? PRESETS[state.preset].hint : '';
+    envHint.textContent = state.noColor ? NO_COLOR_HINT : '';
   }
 
   let quiet = true; // no announcement for the initial render

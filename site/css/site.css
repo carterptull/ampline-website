@@ -123,10 +123,10 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
 .seg-toggles { display: flex; flex-wrap: wrap; gap: 6px }
 .seg-toggles button { font: calc(12px * var(--mk)) var(--mono); color: #aaa; background: #0d0d0d; border: 1px solid var(--line-2); border-radius: 6px; padding: 4px 8px; cursor: pointer }
 .seg-toggles button[aria-pressed=true] { color: var(--bg); background: var(--white); border-color: var(--white) }
-.legend { font-family: var(--mono); font-size: calc(12px * var(--mk)); color: var(--quiet); margin-top: 12px; line-height: 1.6 }
-.legend p { margin: 0 }
-.legend p + p { margin-top: 6px }
-.play-after .copy { margin-top: 16px }
+.ctl .note { margin: 0 }
+.ctl .play-hint { min-height: 4.5em } /* three 1.5-line-height lines: the longest hint at 360px, so a preset shifts nothing */
+.play-out { position: sticky; top: calc(var(--nav-h) + 16px); align-self: start } /* desktop: the preview column stays beside the controls */
+.play-after .copy { margin-top: 16px; min-width: calc(21ch + 34px) } /* wide enough for the long label, so Copied/Selected do not shift the layout */
 .play-json { margin-top: 14px; font-size: 13px; color: #aaa }
 .play-json summary { cursor: pointer; width: fit-content }
 .play-json pre { margin: 10px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2);
@@ -181,13 +181,15 @@ h2 { font-weight: 700; letter-spacing: -.03em; color: var(--white); font-size: c
   .cards4 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
   .sl { font-size: calc(11.5px * var(--mk)) }
   /* live preview above the controls and pinned under the nav, so a slider change is visible. .play-out
-     dissolves so the figure is a grid item of .play (sticky for the whole section); its hint sits right
-     under the preview, the note and the JSON after the controls. The chrome is dropped to keep it short. */
-  .play-out { display: contents }
+     dissolves so the figure is a grid item of .play (sticky for the whole section); the subscription note
+     sits right under the preview, the JSON after the controls. Preset hints live inside .ctl with reserved
+     height, so nothing shifts. The chrome is dropped to keep the sticky preview short. */
+  .play-out { display: contents; position: static }
   .play .term { order: -1; position: sticky; top: var(--nav-h); z-index: 5 }
   .play .term .chrome { display: none }
   .play .ctl { order: 1 }
-  .play .play-after { order: 2 }
+  .play .play-note { margin: 0 }
+  .play .play-after { order: 2 } /* .play-note keeps order 0: it sits under the preview, above the controls */
   .footer-row { grid-template-columns: 1fr; justify-items: center; gap: 16px }
   .footer-wm { justify-self: center }
   .footer-links { justify-self: center; justify-content: center }

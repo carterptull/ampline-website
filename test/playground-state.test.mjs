@@ -104,6 +104,19 @@ test('applyPreset: patches state, clears the preset when toggled off, and preset
   assert.equal(PRESETS.edge85.hint, "84.9% reads C85 but isn't bold: the threshold uses the unrounded value.");
 });
 
+test('applyPreset: presets are scenarios, so stale then 85% edge resets the numbers first', () => {
+  const stale = applyPreset(defaultState(false), 'stale');
+  assert.equal(stale.fiveHour, 91);
+  const edge = applyPreset(stale, 'edge85');
+  assert.equal(edge.fiveHour, 37);
+  assert.equal(edge.weekly, 88);
+  assert.equal(edge.context, 84.9);
+  const apikey = applyPreset({ ...edge, family: 'sonnet' }, 'apikey');
+  assert.deepEqual([apikey.context, apikey.fiveHour, apikey.weekly], [63, 37, 88]);
+  assert.equal(apikey.family, 'sonnet', 'model and effort are not part of a scenario');
+  assert.equal(applyPreset(edge, null).context, 84.9, 'clearing a preset keeps the current values');
+});
+
 test('defaultState: wide shows git, cost and pr; narrow shows none', () => {
   assert.deepEqual(defaultState(false).segments, { git: true, cost: true, pr: true, task: false });
   assert.deepEqual(defaultState(true).segments, { git: false, cost: false, pr: false, task: false });
