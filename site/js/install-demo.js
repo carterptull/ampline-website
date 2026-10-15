@@ -36,7 +36,7 @@ export function mountInstallDemo({ amp, mount, win = window, doc = win.document 
     h(doc, 'div', { class: 'chrome' }, h(doc, 'i'), h(doc, 'i'), h(doc, 'i'), h(doc, 'span', { class: 'title', text: '~' })),
     body, sl);
   const summary = h(doc, 'p', { class: 'visually-hidden', text: spokenSummary() });
-  const replay = h(doc, 'button', { class: 'copy', type: 'button', text: 'Replay' });
+  const replay = h(doc, 'button', { class: 'copy', type: 'button', 'aria-label': 'Replay the install animation', text: 'Replay' });
   mount.replaceChildren(figure, summary, h(doc, 'div', { class: 'install-actions' }, replay));
 
   const reduce = () => !!(typeof win.matchMedia === 'function' && win.matchMedia('(prefers-reduced-motion: reduce)').matches);

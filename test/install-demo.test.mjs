@@ -106,6 +106,7 @@ test('install demo: the animated terminal is hidden from assistive tech and a st
   assert.equal(d.replay.className, 'copy');
   assert.equal(d.replay.attrs.type, 'button');
   assert.equal(d.replay.textContent, 'Replay');
+  assert.equal(d.replay.attrs['aria-label'], 'Replay the install animation');
 });
 
 test('install demo: reduced motion renders the final state at once, with no timers and no Replay', (t) => {
