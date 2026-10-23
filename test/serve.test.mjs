@@ -43,6 +43,12 @@ test('GET / is 200 with the CSP header', async () => {
   assert.equal(r.headers['cache-control'], 'no-store');
 });
 
+test('GET / lets only the portfolio frame the site', async () => {
+  const csp = (await get('/')).headers['content-security-policy'];
+  assert.ok(csp.includes('frame-ancestors https://cartertull.com https://www.cartertull.com'));
+  assert.ok(!csp.includes("frame-ancestors 'none'"));
+});
+
 test('path-specific vercel.json cache headers apply (fonts immutable, icons a day)', async () => {
   const font = await get('/assets/fonts/mono-400.v1.woff2');
   assert.equal(font.status, 200);
