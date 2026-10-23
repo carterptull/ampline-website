@@ -5,6 +5,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-23
+
+### Changed
+
+- `frame-ancestors` now allows `https://cartertull.com` and `https://www.cartertull.com` instead of `'none'`, so the portfolio can show the site in a window. Every other origin still cannot frame it (D23).
+
 ### Fixed
 
 - Playground PR link underlined so links don't rely on color alone (Lighthouse link-in-text-block).

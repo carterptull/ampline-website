@@ -190,3 +190,14 @@ considered instead. Reversing any of them is cheap unless noted.
 **Why:** The point of the playground is to show the real renderer's output, and those colors are the product's identity (see D16). The mitigations are structural: the preview text stays in the accessibility tree (it is a labelled group, not hidden), a debounced polite live region announces each change as plain text, and the NO_COLOR toggle gives a plain-text view of the same line. Lighthouse and axe only score the default state, which clears the threshold; they do not drive the sliders.
 
 **Alternatives:** lighten the low-contrast stops on the page (no longer the real output, and it would misstate the product); clamp the controls so only passing colors can be picked (hides part of the product and makes the demo dishonest); mark the preview `aria-hidden` like the hero (the playground is an interactive tool, so it must be readable).
+
+### D23. The portfolio at cartertull.com may frame the site
+
+**Decision:** The CSP's `frame-ancestors` is `https://cartertull.com https://www.cartertull.com`, replacing `'none'`. Nothing else in the CSP changes. `html-contract.test.mjs` pins the exact two origins and `serve.test.mjs` checks the served header.
+
+**Why:** The portfolio at cartertull.com shows this site inside a desktop window, which is an iframe, and `frame-ancestors 'none'` left it blank. Only the two origins that serve the portfolio (apex and www) are listed, with no `'self'` and no wildcard, so the allowance is the least that makes the embed work and every other site still cannot frame this one. `frame-ancestors` governs who may embed this page, not what it loads, so the "no remote host in the CSP" rule from D17 does not apply to it; the test that enforces that rule skips this one directive and still rejects `unsafe-` keywords there.
+
+**Alternatives:** keep `'none'` and have the portfolio link out (the window would be a bare link, and the embed is the point); `'self'` (does not help, since the framing page is on another origin); a wildcard or `https:` (lets anyone frame the site, which invites clickjacking for no gain).
+
+**Consequence:** The portfolio's own CSP `frame-src` must allow `https://ampline.js.org`. If the portfolio moves to another domain, this header has to change with it.
+

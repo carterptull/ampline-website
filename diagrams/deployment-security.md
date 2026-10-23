@@ -60,7 +60,7 @@ flowchart TB
     subgraph blocked["Blocked by the CSP"]
         direction TB
         net["fetch, XHR, WebSocket<br/>to any other origin<br/>connect-src self"]
-        frm["iframes, forms, plugins, base tag"]
+        frm["iframes it would load, forms, plugins, base tag"]
         inl["inline script, inline style,<br/>eval, third-party anything"]
     end
 
@@ -106,7 +106,7 @@ immutable` (filenames carry a version, such as `wordmark.v1.svg`), and `og.png`,
 | `manifest-src` | `'self'` | Own web manifest |
 | `base-uri` | `'none'` | No `<base>` rewriting |
 | `form-action` | `'none'` | The page has no forms |
-| `frame-ancestors` | `'none'` | Nobody can embed the site in a frame |
+| `frame-ancestors` | `https://cartertull.com https://www.cartertull.com` | Only the portfolio (apex and www) can embed the site in a frame; every other origin is refused (D23). Unlike the directives above it names remote hosts, because it controls who may frame this page, not what the page loads |
 | `object-src` | `'none'` | No plugins |
 | `upgrade-insecure-requests` | (flag) | Any `http:` subresource is upgraded to `https:` |
 
@@ -123,4 +123,4 @@ the header value. The outbound links are navigations the visitor chooses, not re
 page makes.
 
 ---
-_Last verified: 2026-10-15 · site 0.3.0_
+_Last verified: 2026-10-23 · site 0.3.1_
