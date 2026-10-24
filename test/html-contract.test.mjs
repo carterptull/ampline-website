@@ -166,15 +166,20 @@ const CSP = (() => {
   return Object.fromEntries(value.split(';').map((d) => d.trim()).filter(Boolean).map((d) => { const [name, ...vals] = d.split(/\s+/); return [name, vals]; }));
 })();
 
-test("CSP: connect-src is exactly 'self' and no directive allows a remote host or unsafe keyword", () => {
+test("CSP: connect-src is exactly 'self' and no directive but frame-ancestors allows a remote host or unsafe keyword", () => {
   assert.deepEqual(CSP['connect-src'], ["'self'"]);
   assert.deepEqual(CSP['default-src'], ["'none'"]);
   for (const [name, vals] of Object.entries(CSP)) {
     for (const v of vals) {
-      assert.doesNotMatch(v, /^(https?:|wss?:|\*)/i, `${name} allows ${v}`);
       assert.doesNotMatch(v, /unsafe-/i, `${name} allows ${v}`);
+      if (name === 'frame-ancestors') continue; // who may embed us, not what we load; pinned by the next test
+      assert.doesNotMatch(v, /^(https?:|wss?:|\*)/i, `${name} allows ${v}`);
     }
   }
+});
+
+test('CSP: frame-ancestors allows exactly the portfolio (cartertull.com, apex and www) to embed the site', () => {
+  assert.deepEqual(CSP['frame-ancestors'], ['https://cartertull.com', 'https://www.cartertull.com']);
 });
 
 test('site JS opens no connections (fetch, XHR, WebSocket, beacons, EventSource), so connect-src can stay on self', () => {
