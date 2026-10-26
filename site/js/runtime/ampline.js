@@ -4,6 +4,12 @@
 import { FACTORIES, VERSION } from './factories.generated.js';
 import { makeFakeGit, makeFakeTask } from './fakes.js';
 
+// Every module a vendored ampline file may require that is NOT vendored: replaced inside createAmpline.
+// test/sync.test.mjs fails when a vendored file requires something that is neither vendored nor listed here.
+export const STUBBED_MODULES = [
+  'path', 'os', 'fs', 'crypto', 'child_process', 'cache', 'claudeDir', 'segments/git', 'segments/task',
+];
+
 const BUILTIN_UNAVAILABLE = (name) => new Proxy({}, {
   get: (_, key) => () => { throw new Error(`${name}.${String(key)} is unavailable in the browser`); },
 });
@@ -24,6 +30,21 @@ function resolveId(fromId, request) {
     else if (seg !== '.') parts.push(seg);
   }
   return parts.join('/');
+}
+
+// ampline-claude 1.0.0 prints the subagent panel as one JSON line per row, {"id", "content"}, where content
+// is the ANSI row (Claude Code takes the content as-is). Returns the contents, in order. Pure; a blank or
+// malformed line, or one without a string content, is skipped rather than shown as raw JSON.
+export function subagentRows(raw) {
+  const rows = [];
+  for (const line of String(raw == null ? '' : raw).split('\n')) {
+    if (!line.trim()) continue;
+    try {
+      const row = JSON.parse(line);
+      if (row && typeof row.content === 'string') rows.push(row.content);
+    } catch { /* not a row */ }
+  }
+  return rows;
 }
 
 export function createAmpline({ noColor = false, columns = 120 } = {}) {

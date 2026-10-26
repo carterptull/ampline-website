@@ -52,13 +52,15 @@ export function statusPayload({
   return input;
 }
 
+// Each task needs a string id: ampline-claude 1.0.0 answers with one {id, content} JSON line per task and
+// leaves out a task without one.
 export function subagentPayload({ columns = 100 } = {}) {
   return {
     columns,
     tasks: [
-      { status: 'running', label: 'Explore the cache layer', model: 'claude-haiku-5-5', tokenCount: 8421 },
-      { status: 'running', label: 'Review the diff', model: 'claude-sonnet-5-5', tokenCount: 120400 },
-      { status: 'queued', label: 'Write tests', model: 'claude-opus-5-5' }, // not started yet: no tokens
+      { id: 'agent-1', status: 'running', label: 'Explore the cache layer', model: 'claude-haiku-5-5', tokenCount: 8421 },
+      { id: 'agent-2', status: 'running', label: 'Review the diff', model: 'claude-sonnet-5-5', tokenCount: 120400 },
+      { id: 'agent-3', status: 'queued', label: 'Write tests', model: 'claude-opus-5-5' }, // not started yet: no tokens
     ],
   };
 }

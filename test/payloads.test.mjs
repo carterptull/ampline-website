@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { statusPayload, subagentPayload, wheelIndex, HERO_CYCLE, FAMILIES } from '../site/js/payloads.js';
-import { createAmpline } from '../site/js/runtime/ampline.js';
+import { createAmpline, subagentRows } from '../site/js/runtime/ampline.js';
 
 test('wheelIndex maps family x effort onto the 20-step wheel', () => {
   assert.equal(wheelIndex('haiku', 'low'), 0);
@@ -37,4 +37,13 @@ test('subagent sample is believable: a task that has not started carries no toke
   assert.ok(waiting.length >= 1);
   for (const t of waiting) assert.equal(t.tokenCount, undefined);
   for (const t of tasks.filter((x) => x.status === 'running')) assert.ok(t.tokenCount > 0 && t.tokenCount < 1_000_000);
+});
+
+test('subagent tasks carry unique string ids (1.0.0 leaves a task without one out of the output)', () => {
+  const { tasks } = subagentPayload();
+  assert.ok(tasks.length >= 3);
+  for (const t of tasks) assert.ok(typeof t.id === 'string' && t.id !== '');
+  assert.equal(new Set(tasks.map((t) => t.id)).size, tasks.length);
+  const amp = createAmpline({ columns: 200 });
+  assert.equal(subagentRows(amp.renderSubagentLine(subagentPayload())).length, tasks.length);
 });

@@ -16,6 +16,6 @@
     "test": "node --test \"test/*.test.mjs\""
   },
   "devDependencies": {
-    "ampline-claude": "0.6.0"
+    "ampline-claude": "1.0.0"
   }
 }

@@ -11,7 +11,7 @@ strings).
 
 ```mermaid
 flowchart LR
-    npm["ampline-claude on npm<br/>pinned devDependency"] --> sync["scripts/sync-ampline.mjs<br/>pre-wraps 12 CommonJS<br/>files as factories"]
+    npm["ampline-claude on npm<br/>pinned devDependency"] --> sync["scripts/sync-ampline.mjs<br/>pre-wraps 13 CommonJS<br/>files as factories"]
     sync --> gen["runtime/factories.generated.js<br/>committed, CI-checked"]
     gen --> rt["runtime/ampline.js<br/>require registry + shims + fakes"]
     pay["payloads.js<br/>time-relative demo input"] --> rt
@@ -23,8 +23,8 @@ flowchart LR
     style gen fill:transparent,stroke:#2E7D32,stroke-width:2px
 ```
 
-**What `sync-ampline.mjs` copies.** Twelve files from `ampline-claude/lib`, byte for byte: `colors`,
-`bar`, `layout`, `usage`, `config`, `render` and the segments `model`, `context`, `rateLimits`,
+**What `sync-ampline.mjs` copies.** Thirteen files from `ampline-claude/lib`, byte for byte: `colors`,
+`bar`, `layout`, `usage`, `safeRead`, `config`, `render` and the segments `model`, `context`, `rateLimits`,
 `cost`, `pr`, `subagents`. It deliberately does not copy `git`, `task`, `cache`, `claudeDir` or
 `install`, because they need `fs` or `child_process`. `npm run sync:check` (run in CI) fails when
 the committed file differs from what the script would write now. Nothing hand-edits the

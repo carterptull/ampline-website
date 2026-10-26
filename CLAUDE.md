@@ -150,6 +150,12 @@ site/js/runtime/ampline.js createAmpline({ noColor?: boolean, columns?: number }
                              setColumns(n), setConfig(user) -> merged config, getConfig() -> config,
                              resetCache() /* clears the in-memory usage cache */,
                              stripAnsi(s), safeLinkUrl(u) -> string|null, colors /* lib/colors exports */ }
+                           subagentRows(raw) -> string[]   pure: renderSubagentLine prints one {"id","content"} JSON line
+                             per task (1.0.0); this splits on newlines, parses each line (a bad one is skipped) and returns
+                             the ANSI `content`s. The raw bytes stay the parity unit; tour.js renders the parsed rows.
+                             Every task in subagentPayload needs a string id, or the renderer leaves it out.
+                           STUBBED_MODULES: string[]   the modules a vendored file may require that are not vendored;
+                             test/sync.test.mjs fails on any other require (a new lib module must join VENDORED).
 site/js/ansi.js            parseAnsi(str) -> Token[]   Token = { text, fg: [r,g,b]|null, bold, dim, href: string|null }
                            renderAnsi(tokens, doc, { safeLinkUrl }) -> DocumentFragment
 site/js/payloads.js        FAMILIES = ['haiku','sonnet','opus','fable'] · EFFORTS · MODEL_NAMES

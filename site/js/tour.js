@@ -1,4 +1,5 @@
 import { parseAnsi, renderAnsi } from './ansi.js';
+import { subagentRows } from './runtime/ampline.js';
 import { statusPayload, subagentPayload } from './payloads.js';
 
 // Every sample below is real renderer output for a single-segment config. Only the prose is typed.
@@ -34,7 +35,8 @@ export function renderTour({ amp, mount, doc = document }) {
     mount.appendChild(card(doc, `tour-h-${n++}`, def.title, def.desc, payloads.map((p) => frag(amp.renderStatusline(statusPayload(p))))));
   }
   amp.setConfig({});
-  const sub = amp.renderSubagentLine(subagentPayload({ columns: 100 }));
+  // The renderer answers with JSON lines; the rows' ANSI content is what Claude Code shows.
+  const sub = subagentRows(amp.renderSubagentLine(subagentPayload({ columns: 100 }))).join('\n');
   mount.appendChild(card(doc, `tour-h-${n}`, 'Subagents get their own lines', "Shown in Claude Code's subagent panel while subagents run (the installer sets that up too). One row per subagent: arrow and label colored by status (running, queued, failed; done is dim), model colored by family.", [frag(sub)], true));
 }
 

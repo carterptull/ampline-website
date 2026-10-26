@@ -9,6 +9,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PKG = join(ROOT, 'node_modules', 'ampline-claude');
 const OUT = join(ROOT, 'site', 'js', 'runtime', 'factories.generated.js');
 
+// Dependencies come before their dependents (safeRead before config). Add a new lib module here when a vendored
+// file starts to require it; test/sync.test.mjs fails on any require that is neither vendored nor stubbed.
 // git.js / task.js / cache.js / claudeDir.js / install.js are deliberately NOT vendored:
 // they need fs/child_process. The browser gets fakes (runtime/fakes.js) or stubs instead.
 export const VENDORED = [
@@ -16,6 +18,7 @@ export const VENDORED = [
   'lib/bar.js',
   'lib/layout.js',
   'lib/usage.js',
+  'lib/safeRead.js',
   'lib/config.js',
   'lib/render.js',
   'lib/segments/model.js',
