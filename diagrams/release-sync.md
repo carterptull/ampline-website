@@ -42,9 +42,9 @@ sequenceDiagram
 | Gate | Where | Fails when |
 | --- | --- | --- |
 | `npm run sync:check` | CI `test` job, and `sync.test.mjs` | the committed `factories.generated.js` differs from what `scripts/sync-ampline.mjs` writes from the installed package |
-| `sync.test.mjs` | `npm test` | a vendored file is not embedded verbatim, or `VERSION` does not match the installed package |
+| `sync.test.mjs` | `npm test` | a vendored file is not embedded verbatim, `VERSION` does not match the installed package, or a vendored file requires a module that is neither vendored nor stubbed (a new lib module in a release) |
 | `runtime-parity.test.mjs` | `npm test` | the browser runtime's output differs from the real ampline-claude binary for any demo payload (a new release changed rendering in a way the shims or payloads no longer match) |
-| `fakes.test.mjs` | `npm test` | the git or task fakes no longer match the captured real bytes |
+| `fakes.test.mjs` | `npm test` | the git or task fakes no longer print what the real binary prints for a real throwaway git repo and todo file (the git cases are skipped when git is missing) |
 | `html-contract.test.mjs` | `npm test` | the static `#ampVersion` text in `index.html` or `404.html` does not equal the pinned devDependency |
 | `tour.test.mjs` | `npm test` | a tour card's sample no longer matches what the real renderer prints for that segment |
 

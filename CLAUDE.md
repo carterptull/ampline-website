@@ -118,7 +118,7 @@ ampline-website/
     ├── smoke.test.mjs
     ├── sync.test.mjs
     ├── runtime-parity.test.mjs  runtime output === real binary output, per payload
-    ├── fakes.test.mjs           git/task fakes === real captured bytes
+    ├── fakes.test.mjs           git/task fakes === the real binary run on a throwaway git repo and todo file (HOME), plus pinned bytes
     ├── ansi.test.mjs            parseAnsi/renderAnsi on the SGR and OSC 8 subset ampline emits
     ├── copy.test.mjs            wireCopy: clipboard, select fallback, label reset, aria-live messages
     ├── equalizer.test.mjs       one bar per wheel stop, size classes, hold/release, colors set via setProperty only

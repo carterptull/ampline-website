@@ -63,19 +63,20 @@ flowchart TB
     subgraph tests["test/ (node:test, run by npm test and CI)"]
         direction TB
         parity["runtime-parity.test.mjs<br/>runtime output must equal<br/>the real binary's output"]
-        fakes["fakes.test.mjs<br/>git and task fakes must equal<br/>bytes captured from the real binary"]
-        syncT["sync.test.mjs<br/>generated file is current and<br/>every vendored file is verbatim"]
+        fakes["fakes.test.mjs<br/>git and task fakes must equal the<br/>real binary run on a real repo<br/>and a real todo file"]
+        syncT["sync.test.mjs<br/>generated file is current and<br/>every vendored file is verbatim,<br/>every require vendored or stubbed"]
     end
 
     bin["node_modules/ampline-claude/bin<br/>the real binary, run per payload"]
     rt["createAmpline()<br/>the browser runtime under test"]
-    cap["Captured real bytes<br/>inline in fakes.test.mjs"]
+    fix["Throwaway HOME<br/>git repo + todo file"]
     fk["runtime/fakes.js"]
     gen["runtime/factories.generated.js"]
 
     parity --> bin
     parity --> rt
-    fakes --> cap
+    fakes --> fix
+    fakes --> bin
     fakes --> fk
     syncT --> gen
 
@@ -87,10 +88,20 @@ binary from `node_modules` with the payload on stdin, renders the same payload t
 `createAmpline()`, and asserts the two strings are identical. The demo-only `__demo` field is
 stripped first, because the real binary has no repo or todo file to read in that sandbox.
 
-**Fakes are pinned separately.** Because parity cannot cover the git and task segments, the
-output format of the two fakes is pinned to bytes captured from the real binary in
-`fakes.test.mjs`. If ampline-claude changes how those segments render, the test fails and the
-fakes get updated by hand.
+**Fakes are compared with the binary too.** Parity cannot cover the git and task segments (the
+payload cannot carry a repository or a todo file), so `fakes.test.mjs` builds them for real in a
+throwaway HOME: a git repository (clean, dirty, ahead and behind a bare origin, a long branch name)
+and `~/.claude/todos/<session>.json`. It runs the real binary from `node_modules` there, with only
+the `git` or the `task` segment configured, and requires the fake to print the same bytes. If
+ampline-claude changes how those segments render, the test fails and the fakes get updated by hand.
+The git cases are skipped when git is not installed. One known difference is documented in
+`fakes.js`: the real git segment omits the marker when git's state is unknown, and the demo data
+never is.
+
+**The subagent rows are checked for real output, not for emptiness.** The 1.0.0 renderer prints one
+`{"id","content"}` JSON line per task and skips a task without an id. The parity test asserts the
+output is non-empty, byte-equal to the binary's, and that every line parses; `subagentRows()` turns
+those lines into the rows the tour card shows.
 
 **The last step has its own tests.** `ansi.test.mjs` covers `parseAnsi` and `renderAnsi`,
 `payloads.test.mjs` covers the wheel index and the demo payload builders, and `tour.test.mjs`
