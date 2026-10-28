@@ -133,7 +133,7 @@ ampline-website/
     ├── playground-state.test.mjs  playground pure pipeline: config, presets, purity, JSON
     ├── playground-mount.test.mjs  mountPlayground wiring on a fake DOM: presets, NO_COLOR, narrow mode, copy
     ├── install-demo.test.mjs    install demo script, reduced motion, Replay, hidden-tab pause (fake DOM)
-    ├── install-transcript.test.mjs  runs the pinned installer in a throwaway HOME; stdout === INSTALL_TRANSCRIPT
+    ├── install-transcript.test.mjs  runs the pinned installer in a throwaway HOME; stdout === INSTALL_TRANSCRIPT (the Node line and re-run note a version-managed Node adds are masked)
     └── no-third-party-names.test.mjs  fails if a git-tracked text file names another statusline project
 ```
 
@@ -163,6 +163,8 @@ site/js/ansi.js            parseAnsi(str) -> Token[]   Token = { text, fg: [r,g,
 site/js/payloads.js        FAMILIES = ['haiku','sonnet','opus','fable'] · EFFORTS · MODEL_NAMES
                            wheelIndex(family, effort) -> 0..19
                            statusPayload(opts) -> input object · subagentPayload(opts) -> {columns, tasks}
+                           (statusPayload's fiveHourElapsed / weeklyElapsed, fractions 0..1 of the 5-hour / 7-day window already gone,
+                           set resets_at = now + (1 - f) * window in whole seconds; left out, the fixed demo offsets apply)
                            HERO_CYCLE: Array<[family, effort]>
 site/js/tour.js            watchOverflow(elements: () => Element[], onChange(el, over), win?) -> mark()
 site/js/equalizer.js       mountEqualizer(container, wheelRgbs: number[][], { size: 'hero'|'nav' }) -> { hold(i), release(), bars }
@@ -173,6 +175,8 @@ site/js/install-demo.js    INSTALL_COMMAND: string · INSTALL_TRANSCRIPT: string
 site/js/copy.js            wireCopy(button, text: string | () => string, statusEl, opts?: { label, fallbackEl, copiedMessage, selectedMessage })
 site/js/playground.js      configFor(state, narrow) -> userConfig · buildPlaygroundInput(state, now) -> input
                            renderPlayground(state, { color, plain }, now, narrow) -> ansi string (pure: resets the cache, seeds it for `stale`)
+                           state also holds fiveHourElapsed / weeklyElapsed (percent of the window gone) and paceColors (off); configFor writes
+                           `paceColors: true` only when on, so the copied .amplinerc.json stays `{}` by default
                            mountPlayground({ mount, makeAmpline, win })
 ```
 

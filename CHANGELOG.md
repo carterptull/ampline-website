@@ -7,11 +7,16 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- The tour's 5-hour and weekly card now explains the `┃` pace marker (how much of the window has passed, assuming 5-hour and 7-day windows), and the `.amplinerc.json` note mentions opt-in pace colors.
+- The playground has a `paceColors` toggle (off by default; the copied `.amplinerc.json` shows `"paceColors": true` only when it is on) and two "window elapsed" sliders that move the pace marker on the 5-hour and weekly bars, with a short accuracy note. `statusPayload` takes `fiveHourElapsed` / `weeklyElapsed`.
 - `test/font-coverage.test.mjs`: parses both mono woff2 files and fails if the renderer or the site draws a glyph they lack, and checks that every file under `/assets/` exists and carries a `.vN.` version in its name (the assets are served `immutable`).
 - `scripts/fonts/README.md` and D24: the exact recipe for rebuilding the mono subset from Iosevka Fixed v34.9.0.
 
 ### Changed
 
+- The stale-cache preset's hint now says the pace marker is left out on dimmed stale bars.
+- `test/install-transcript.test.mjs` ignores the Node line and re-run note that the installer prints when Node lives in a version-named directory (nvm, Homebrew, fnm, volta, asdf, snap), so it passes on developer machines with a version manager. The six normal lines are still compared exactly.
+- README "Updating to a new ampline release" and `diagrams/release-sync.md` list every step: the font glyph check and `.vN` rename, re-capturing the install transcript, tour copy and tests, diagram stamps and the CHANGELOG.
 - The self-hosted mono font is now `mono-400.v2.woff2` / `mono-700.v2.woff2`, adding `┃` (U+2503, the pace marker ampline-claude 1.0.0 draws in the usage bars) and `≥` (U+2265, the hero meta line). The v1 files are removed; the new filename is needed because `/assets/` is cached for a year (D24).
 
 ## [0.3.1] - 2026-10-23
