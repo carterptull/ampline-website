@@ -126,6 +126,9 @@ test('descriptions state the accuracy rules', () => {
   assert.match(d[0], /20-step wheel/); assert.match(d[0], /only max goes bold/);
   assert.match(d[1], /last completed API call/); assert.match(d[1], /85%/); assert.match(d[1], /95%/);
   assert.match(d[2], /Claude\.ai subscription/); assert.match(d[2], /countdown/);
+  assert.match(d[2], /┃ pace marker/); assert.match(d[2], /how much of the window has passed/);
+  assert.match(d[2], /5-hour and 7-day windows/);
+  assert.doesNotMatch(d[2], /always|exact|guarantee/i, 'the marker copy stays descriptive');
   assert.match(d[4], /estimate/); assert.match(d[4], /not your bill/i);
   assert.match(d[5], /Claude Code/); assert.match(d[5], /gh/); assert.match(d[5], /glab/); assert.match(d[5], /mergeable/);
   assert.match(d[6], /in-progress item/); assert.match(d[6], /40 characters/); assert.match(d[6], /Hidden when/);
