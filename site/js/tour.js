@@ -1,11 +1,12 @@
 import { parseAnsi, renderAnsi } from './ansi.js';
+import { subagentRows } from './runtime/ampline.js';
 import { statusPayload, subagentPayload } from './payloads.js';
 
 // Every sample below is real renderer output for a single-segment config. Only the prose is typed.
 const CARDS = [
   { seg: 'model', title: 'Model · effort', desc: 'Colored by model and effort from a 20-step wheel (4 model families × 5 efforts). Identity, not urgency: only max goes bold.', payload: { family: 'opus', effort: 'xhigh' } },
   { seg: 'context', title: 'Context window', desc: 'Percent used as of the last completed API call, on its own green to red danger scale. Bold from 85%, a warning sign from 95%.', payload: { context: 63 } },
-  { seg: ['fiveHour', 'weekly'], title: '5-hour + weekly limits', desc: 'Plan usage with a live reset countdown. Needs a Claude.ai subscription.', payload: { fiveHour: 24, weekly: 41 } },
+  { seg: ['fiveHour', 'weekly'], title: '5-hour + weekly limits', desc: 'Plan usage with a live reset countdown. The ┃ pace marker shows how much of the window has passed, assuming 5-hour and 7-day windows (left out when the reset time is unknown or the bar is stale). Needs a Claude.ai subscription.', payload: { fiveHour: 24, weekly: 41 } },
   { seg: 'git', title: 'Git', desc: 'Branch, ahead / behind and dirty state, from one cached git call.', payload: {} },
   { seg: 'cost', title: 'Cost + lines', desc: "Claude Code's own client-side estimate of the session cost, plus lines changed. Not your bill.", payload: {} },
   { seg: 'pr', title: 'PR / MR', desc: 'PR/MR data comes from Claude Code (ampline runs neither gh nor glab). Colored by review state, clickable in terminals that support links; on a GitLab MR, green means mergeable.', payloads: [{ pr: { number: 1234, review_state: 'approved' } }, { pr: { kind: 'mr', number: 42, review_state: 'pending' } }] },
@@ -34,7 +35,8 @@ export function renderTour({ amp, mount, doc = document }) {
     mount.appendChild(card(doc, `tour-h-${n++}`, def.title, def.desc, payloads.map((p) => frag(amp.renderStatusline(statusPayload(p))))));
   }
   amp.setConfig({});
-  const sub = amp.renderSubagentLine(subagentPayload({ columns: 100 }));
+  // The renderer answers with JSON lines; the rows' ANSI content is what Claude Code shows.
+  const sub = subagentRows(amp.renderSubagentLine(subagentPayload({ columns: 100 }))).join('\n');
   mount.appendChild(card(doc, `tour-h-${n}`, 'Subagents get their own lines', "Shown in Claude Code's subagent panel while subagents run (the installer sets that up too). One row per subagent: arrow and label colored by status (running, queued, failed; done is dim), model colored by family.", [frag(sub)], true));
 }
 

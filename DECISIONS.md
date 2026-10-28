@@ -71,9 +71,9 @@ considered instead. Reversing any of them is cheap unless noted.
 
 ### D9. Self-hosted, subset Iosevka Fixed (exposed as "ampline mono")
 
-**Decision:** The monospace face is Iosevka Fixed Regular and Bold v34.9.0 (SIL OFL), subset to Latin plus the statusline glyphs, self-hosted as `mono-400.v1.woff2` and `mono-700.v1.woff2` and exposed as the `"ampline mono"` family.
+**Decision:** The monospace face is Iosevka Fixed Regular and Bold v34.9.0 (SIL OFL), subset to Latin plus the statusline glyphs, self-hosted as `mono-400.v2.woff2` and `mono-700.v2.woff2` (the v1 files lacked the 1.0.0 pace marker; see D24) and exposed as the `"ampline mono"` family.
 
-**Why:** Every glyph in the bars must come from one font, or the bars misalign; iOS has no suitable mono, so it has to be shipped. JetBrains Mono v2.304 was the first choice but lacks `↺` (U+21BA), `⎇` (U+2387) and `↳` (U+21B3); DejaVu Sans Mono has `↺` and `↳` but not `⎇`. Iosevka Fixed has all 14 statusline glyphs at the same advance as `M`. Subsetting keeps each file near 12 KB, and self-hosting keeps the page at zero third-party requests.
+**Why:** Every glyph in the bars must come from one font, or the bars misalign; iOS has no suitable mono, so it has to be shipped. JetBrains Mono v2.304 was the first choice but lacks `↺` (U+21BA), `⎇` (U+2387) and `↳` (U+21B3); DejaVu Sans Mono has `↺` and `↳` but not `⎇`. Iosevka Fixed has all the statusline glyphs (14 when this was decided, 15 since ampline-claude 1.0.0 added `┃`) at the same advance as `M`. Subsetting keeps each file near 12 KB, and self-hosting keeps the page at zero third-party requests.
 
 **Alternatives:** JetBrains Mono (three glyphs would fall back to another font and break alignment); DejaVu Sans Mono (no `⎇`); a system monospace stack (glyph fallback breaks bar alignment); a font CDN (a third-party request). Iosevka is narrower than JetBrains Mono, so `ch`-based widths are 500/1000 em instead of 600/1000.
 
@@ -201,3 +201,36 @@ considered instead. Reversing any of them is cheap unless noted.
 
 **Consequence:** The portfolio's own CSP `frame-src` must allow `https://ampline.js.org`. If the portfolio moves to another domain, this header has to change with it.
 
+### D24. Font v2: the pace marker `┃` and `≥`, rebuilt from the Iosevka source, and a new filename
+
+**Decision:** The two mono files are rebuilt as `mono-400.v2.woff2` and `mono-700.v2.woff2` from Iosevka Fixed Regular and Bold v34.9.0 (SIL OFL, `site/assets/fonts/OFL.txt` unchanged apart from the file names it lists). The subset is ASCII U+0020-007E plus `· … ↑ ↓ ↗ ↳ ↺ ⎇ │ █ ░ ● ⚠ ✓` (the 14 glyphs of v1) plus `┃` U+2503 (ampline-claude 1.0.0's pace marker, `MARKER` in `lib/bar.js`) and `≥` U+2265 (the hero meta line, "Node.js ≥ 24"). `test/font-coverage.test.mjs` reads both files' cmap and fails if the renderer or the site draws a glyph the fonts lack. The v1 files are deleted.
+
+**Recipe** (also in `scripts/fonts/README.md`; tooling lives in a throwaway venv outside the repo, nothing is added to `package.json`):
+
+- Source: `PkgTTF-IosevkaFixed-34.9.0.zip` from <https://github.com/be5invis/Iosevka/releases/tag/v34.9.0> (sha256 `c3204f46863af9e7f0ae06f0bd0b3414697c424dba8573daf37c3053a76213b7`), the hinted TTFs `IosevkaFixed-Regular.ttf` (sha256 `c90a6bcec3c3c5aa8e32c08a1e22db528185c53606604e1d1fcd30401a59312e`) and `IosevkaFixed-Bold.ttf` (sha256 `b7a2e8ca12dc4cd81e451ed008d76591e7278f3cbda10718b4b40a087b8bee16`). Their name tables read "Iosevka Fixed" and "Version 34.9.0". The licence in the repo matches the upstream `LICENSE.md` at v34.9.0.
+- Tools: Python 3.13.1, fonttools 4.68.0, brotli 1.2.1.
+- Command, once per weight (`pyftsubset` from fonttools):
+  `pyftsubset IosevkaFixed-Regular.ttf --unicodes="U+0020-007E,U+00B7,U+2026,U+2191,U+2193,U+2197,U+21B3,U+21BA,U+2265,U+2387,U+2502,U+2503,U+2588,U+2591,U+25CF,U+26A0,U+2713" --flavor=woff2 --output-file=mono-400.v2.woff2`, and the same with `IosevkaFixed-Bold.ttf` and `mono-700.v2.woff2`.
+- Output sha256: `mono-400.v2.woff2` `7df6bd7c671ea6bab0b79e6b7fed8142a22fa7b8658b9ae372743f2f5d71174c` (12,320 bytes), `mono-700.v2.woff2` `4cf9092826b5c046d66d0a46c4e0b472ab099438727bb362b66dcbb4981c4f6b` (12,260 bytes).
+- Check on the recipe: the same command with the v1 unicode list (no U+2265, no U+2503) reproduces the committed v1 files byte for byte (sha256 `10ceabe4...` and `c970cdac...`), so v2 differs from v1 only by the added code points.
+
+**Layout features:** the default `pyftsubset` feature set, not `'*'`. The default is exactly what v1 shipped (GSUB `dnom frac locl numr`, no GPOS) and keeps each file at about 12 KB; `--layout-features='*'` pulls in every `cv`/`ss`/`VS` stylistic set and the glyph closure grows to about 2,100 glyphs and 85 KB. Iosevka Fixed has no `liga` or `calt`, so no ligatures can appear in mono text either way. Hinting tables (`cvt`, `fpgm`, `prep`, `gasp`) are kept, as in v1. Adding `≥` also brings U+2264 `≤` into the files through the glyph closure; it is unused and costs a few bytes.
+
+**Why `.v2`:** everything under `/assets/` is served `public, max-age=31536000, immutable` (`vercel.json`), so a browser that has `mono-*.v1.woff2` never asks again for a year. Overwriting the v1 name would leave returning visitors on a font without `┃`, so the bars would misalign on every one of them. A changed asset therefore gets a new filename; `font-coverage.test.mjs` enforces that every file under `site/assets/` carries a `.vN.` token and that CSS, HTML and preloads reference files that exist. Why a new subset at all: with the v1 files every usage bar drew `┃` from the next font in the `--mono` stack (usually 0.6em wide against Iosevka's 0.5em), which is the failure D9 exists to prevent.
+
+**Alternatives:** keep the v1 filename and add `no-cache` to `/assets/` (loses the one-year cache for everything else and does not help visitors who already cached it); a query string such as `?v=2` on the URL (works, but the name-based `.vN.` rule is simpler to test and is the pattern the wordmark already uses); drawing `┃` as CSS or inline SVG (the marker comes out of the real renderer's text, so the glyph has to exist in the font); `--layout-features='*'` (7x the size for features the page never turns on).
+
+### D25. The 1.0.0 version policy: the site version, the exact pin, and the release checklist
+
+**Decision:** The site's own version (`package.json`, the `#siteVersion` footer span, the top `CHANGELOG.md` heading) tracks releases of the site, not of ampline-claude. The pinned ampline-claude version is shown separately in the footer (`#ampVersion`, filled from the runtime's `VERSION`, with the same number written statically as the no-JavaScript fallback). The devDependency stays an exact pin, with no `^` or `~`. 1.0.0 is the first stable release of the site and the first to pin ampline-claude 1.0.0; later site releases carry their own number whether or not the pin moved. A release is a commit `chore: release <version>` made last, after the content it releases, and it is complete only when this checklist has been done:
+
+1. `package.json` and `package-lock.json` carry the new version (`npm install --package-lock-only` changes only the version lines).
+2. `#siteVersion` reads `v<version>` in `site/index.html` and `site/404.html`, and `#ampVersion` matches the pin.
+3. `CHANGELOG.md` turns `[Unreleased]` into `## [<version>] - <date>`, with a fresh empty `[Unreleased]` above it.
+4. Every footer in `diagrams/` is restamped to `site <version>` and the date, even where the content did not change (`diagrams/README.md`).
+5. `site/og.png` is re-rendered if the statusline output changed.
+6. `npm test` and `npm run sync:check` pass. `test/html-contract.test.mjs` ties the package version, both footers and the top CHANGELOG heading together; `test/smoke.test.mjs` pins the exact-pin format; `test/sync.test.mjs` ties `VERSION` to the installed package.
+
+**Why:** The two numbers mean different things. A visitor who sees "v1.0.0" and "ampline-claude 1.0.0" side by side could read them as one, so the pin has its own label and the policy says they move independently. The pin is exact because the generated runtime is a byte copy of one specific release: a range could install different source than the committed `factories.generated.js`, and `sync:check` would then fail for no reason in the site's own code. The checklist is written down because the steps are spread across several places, and some of them (the diagram stamps, `og.png`) are not enforced by any test.
+
+**Alternatives:** version the site in lockstep with ampline-claude (a site-only fix would then need an ampline-claude release, or a number that lies); a caret range on the pin (see above); generating the footer version and the stamps with a script (a build step, see D3, for a handful of lines changed once per release); no version on the site at all (loses the "which build am I looking at" answer that bug reports need).

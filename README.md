@@ -40,11 +40,15 @@ Tests use `node:test` and `node:assert/strict` only. `npm run sync:check` verifi
 
 ## Updating to a new ampline release
 
-1. Bump the `ampline-claude` devDependency in `package.json` (exact version, no `^`).
+1. `npm install ampline-claude@<new> --save-dev --save-exact` (this updates `package.json` and the lockfile from the registry; the pin is exact, no `^`).
 2. `npm run sync`
 3. Update the two static ampline-claude version spans (`#ampVersion`) in `site/index.html` and `site/404.html` to the new version. The tests enforce that they match the pinned devDependency.
-4. `npm test`
+4. `npm test`, then fix whatever it flags:
+   - **A glyph the font lacks** (`test/font-coverage.test.mjs`): rebuild the mono subset with the new code point, following [`scripts/fonts/README.md`](scripts/fonts/README.md), and rename the files to the next `.vN` (`mono-400.v3.woff2`, ...). `/assets/` is served `immutable` for a year, so a changed file needs a new name (D24); update `tokens.css`, the preloads, `OFL.txt` and the other references the font README lists.
+   - **A different installer output** (`test/install-transcript.test.mjs`): re-capture `INSTALL_TRANSCRIPT` in `site/js/install-demo.js` from a real run of the pinned installer in a throwaway home. The test already ignores the Node line and re-run note that the installer prints for a version-managed Node.
+   - **Tour samples or copy** (`test/tour.test.mjs`, `test/payloads.test.mjs`, `test/playground-*.test.mjs`): update the expected text deliberately, and read the new release's README for behavior the copy describes (tour cards, the playground notes and hints, the `.amplinerc.json` note) so the prose stays accurate.
 5. If the statusline output changed, re-render `site/og.png`. It is a 1200x630 screenshot of `site/og-card.html` and is not covered by CI.
+6. Restamp the footers of the files in `diagrams/` (`Last verified: <date> · site <version>`, see [`diagrams/README.md`](diagrams/README.md)) and add a `CHANGELOG.md` entry.
 
 ## Deploy
 

@@ -4,8 +4,8 @@ Start here. The ampline website is a plain static site: HTML, CSS and native ES 
 `site/`, served by Vercel with no build step. There is no server code, no database, no API and
 no analytics. The visitor's browser downloads the files from one origin and runs everything
 locally, including the real ampline renderer that draws the demo statuslines. Every box below
-is expanded in its own diagram (see the table at the bottom). The Vercel and js.org setup shown
-here is the **intended** deployment, not a claim that the site is live yet. See
+is expanded in its own diagram (see the table at the bottom). The site is live at
+<https://ampline.js.org>, served by Vercel (the js.org name is a CNAME to Vercel). See
 [`deployment-security.md`](deployment-security.md).
 
 ```mermaid
@@ -62,4 +62,4 @@ demo prints the installer's real output and then renders a statusline through th
 | How do I keep these diagrams current? | [`README.md`](README.md) |
 
 ---
-_Last verified: 2026-10-15 · site 0.3.0_
+_Last verified: 2026-10-28 · site 1.0.0_

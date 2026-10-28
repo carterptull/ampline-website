@@ -4,14 +4,14 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(/assets/fonts/mono-400.v1.woff2) format("woff2");
+  src: url(/assets/fonts/mono-400.v2.woff2) format("woff2");
 }
 @font-face {
   font-family: "ampline mono";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(/assets/fonts/mono-700.v1.woff2) format("woff2");
+  src: url(/assets/fonts/mono-700.v2.woff2) format("woff2");
 }
 
 :root {

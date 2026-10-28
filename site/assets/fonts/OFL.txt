@@ -1,5 +1,5 @@
 Iosevka Fixed (https://github.com/be5invis/Iosevka), release v34.9.0.
-The files in this directory (mono-400.v1.woff2, mono-700.v1.woff2) are subsets of
+The files in this directory (mono-400.v2.woff2, mono-700.v2.woff2) are subsets of
 IosevkaFixed-Regular and IosevkaFixed-Bold, used under the license below.
 License text copied from https://github.com/be5invis/Iosevka/blob/v34.9.0/LICENSE.md
 

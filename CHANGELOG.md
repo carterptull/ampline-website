@@ -5,6 +5,38 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-28
+
+The first stable release of the site. It renders ampline-claude 1.0.0 (the pace marker, opt-in pace
+colors and the subagent rows), serves a mono font that has the new glyph, and its tests now compare
+the browser runtime and its stand-ins with the real binary instead of with bytes copied once.
+
+### Added
+
+- The tour's 5-hour and weekly card now explains the `┃` pace marker (how much of the window has passed, assuming 5-hour and 7-day windows), and the `.amplinerc.json` note mentions opt-in pace colors.
+- The playground has a `paceColors` toggle (off by default; the copied `.amplinerc.json` shows `"paceColors": true` only when it is on) and two "window elapsed" sliders that move the pace marker on the 5-hour and weekly bars, with a short accuracy note. `statusPayload` takes `fiveHourElapsed` / `weeklyElapsed`.
+- The subagent tour card shows the rows from ampline-claude 1.0.0's JSON output: one `{"id","content"}` line per task, parsed by a new pure `subagentRows()` helper.
+- `test/font-coverage.test.mjs`: parses both mono woff2 files and fails if the renderer or the site draws a glyph they lack, and checks that every file under `/assets/` exists and carries a `.vN.` version in its name (the assets are served `immutable`).
+- `scripts/fonts/README.md` and D24: the exact recipe for rebuilding the mono subset from Iosevka Fixed v34.9.0.
+- D25 records the version policy: the site version, the exact ampline-claude pin and the release checklist.
+
+### Changed
+
+- ampline-claude 0.6.0 -> 1.0.0 (still an exact pin). The sync script now also vendors `lib/safeRead.js`, which `config.js` requires, and `test/sync.test.mjs` fails if a vendored file requires a module that is neither vendored nor stubbed.
+- The self-hosted mono font is now `mono-400.v2.woff2` / `mono-700.v2.woff2`, adding `┃` (U+2503, the pace marker ampline-claude 1.0.0 draws in the usage bars) and `≥` (U+2265, the hero meta line). The v1 files are removed; the new filename is needed because `/assets/` is cached for a year (D24).
+- The task fake trims its text and drops a blank one, like the real 1.0.0 task segment.
+- The stale-cache preset's hint now says the pace marker is left out on dimmed stale bars, and the NO_COLOR hint says pace colors have no effect while the marker still shows.
+- `test/install-transcript.test.mjs` ignores the Node line and re-run note that the installer prints when Node lives in a version-named directory (nvm, Homebrew, fnm, volta and similar), so it passes on developer machines with a version manager. The six normal lines are still compared exactly.
+- README "Updating to a new ampline release" and `diagrams/release-sync.md` list every step: the font glyph check and `.vN` rename, re-capturing the install transcript, tour copy and tests, diagram stamps and the CHANGELOG.
+- The diagrams describe the site as live on Vercel (they said it was not connected yet) and count the five runtime instances correctly. They, and `SECURITY.md`, note the `Access-Control-Allow-Origin: *` header that Vercel adds on its own.
+- `main.js` takes the install command from `install-demo.js` instead of repeating the string.
+- CI: the checkout step no longer persists credentials, and the job times out after 10 minutes.
+
+### Fixed
+
+- The usage bars' pace marker `┃` was missing from the self-hosted font, so with ampline-claude 1.0.0 every bar would have drawn it from a fallback font and misaligned.
+- Tests that could pass without testing anything: the parity test now fails on empty output and checks that every subagent line parses, and `test/fakes.test.mjs` runs the real binary on a throwaway git repository and todo file instead of comparing against bytes copied once.
+
 ## [0.3.1] - 2026-10-23
 
 ### Changed

@@ -20,8 +20,9 @@ flowchart TB
 
 The Install section plays once when it scrolls into view: it types the install command, prints the
 installer's real output and lights a statusline from the runtime, with a Replay button. The Playground
-section is fully interactive: model, effort, three sliders, segment toggles, NO_COLOR, a terminal-width
-slider and three edge-case presets, all re-rendering the real renderer.
+section is fully interactive: model, effort, three usage sliders, two window-elapsed sliders (they move the pace marker), segment
+toggles, opt-in pace colors, NO_COLOR, a terminal-width slider and three edge-case presets, all
+re-rendering the real renderer.
 
 ## Which module fills which container
 
@@ -67,4 +68,4 @@ social card from the same runtime, and `site/og.png` is a screenshot of it at 12
 marked `noindex` and disallowed in `robots.txt`.
 
 ---
-_Last verified: 2026-10-15 · site 0.3.0_
+_Last verified: 2026-10-28 · site 1.0.0_

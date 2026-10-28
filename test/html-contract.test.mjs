@@ -290,3 +290,11 @@ test('playground preview links are underlined (not distinguished by color alone)
   assert.match(rule[1], /text-decoration:\s*underline/);
   assert.doesNotMatch(rule[1], /\bcolor\s*:/, 'product colors stay untouched');
 });
+
+test('index.html: the customize note mentions opt-in pace colors', () => {
+  const html = pages.find(([n]) => n === 'index.html')[1];
+  const note = html.match(/<p class="learn-note">([\s\S]*?)<\/p>/)?.[1] || '';
+  assert.match(note, /<code>\.amplinerc\.json<\/code>/);
+  assert.match(note, /whether color is on or off/);
+  assert.match(note, /opt-in pace colors/);
+});

@@ -1,6 +1,11 @@
 // Browser stand-ins for the two segments that need fs/child_process.
 // Output format is copied from lib/segments/git.js and lib/segments/task.js;
-// test/fakes.test.mjs pins it to bytes captured from the real binary.
+// test/fakes.test.mjs runs the real binary (real git repo, real todo file, throwaway HOME) and
+// compares the bytes, so a format change upstream fails that test.
+//
+// Known difference (git): the real segment prints no ✓/● marker when git state is unknown (git
+// missing or failing, or a repository whose own config is untrusted). The demo data always has a
+// state, so the fake always prints one.
 export function makeFakeGit({ DIM, RESET, fg, sanitize }) {
   function truncate(name, max) {
     const limit = Number.isFinite(max) && max > 4 ? max : 24;
@@ -32,7 +37,10 @@ export function makeFakeTask({ DIM, RESET, sanitize }) {
         const t = ctx && ctx.input && ctx.input.__demo && ctx.input.__demo.task;
         if (!t || typeof t !== 'string') return null;
         const config = (ctx && ctx.config) || {};
-        const clean = sanitize(t);
+        // Like the real task.js decorate(): text that is blank after cleaning (control characters
+        // only, or whitespace) is no task, and the segment is left out instead of printed empty.
+        const clean = sanitize(t).trim();
+        if (!clean) return null;
         const limit = Number.isFinite(config.maxTaskLength) && config.maxTaskLength > 4 ? config.maxTaskLength : 40;
         const chars = Array.from(clean);
         const shown = chars.length > limit ? chars.slice(0, limit - 1).join('') + '…' : clean;

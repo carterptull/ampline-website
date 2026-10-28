@@ -50,7 +50,7 @@ stubs for the Node-only parts. Its ANSI output is turned into DOM nodes, never H
 ## Rules that apply everywhere
 
 - Node `>=24` (matches ampline-claude's `engines`).
-- `package.json` has **no `dependencies`**. The only devDependency is `"ampline-claude": "0.6.0"` (exact pin, no `^`).
+- `package.json` has **no `dependencies`**. The only devDependency is `"ampline-claude": "1.0.0"` (exact pin, no `^`).
 - Tests use `node:test` and `node:assert/strict` only. No jsdom, Jest, Playwright or Puppeteer. Browser checks use Google Chrome via the Chrome DevTools MCP. The test script is `node --test "test/*.test.mjs"` (quoted glob; bare `node --test test/` is broken on Node 24).
 - Everything the browser loads is served from the site's own origin. Zero third-party requests.
 - No `style=` attributes and no `on*=` attributes in any HTML, and no `innerHTML` with markup, in `site/`.
@@ -90,14 +90,15 @@ ampline-website/
 ├── scripts/
 │   ├── sync-ampline.mjs         node_modules/ampline-claude/lib → site/js/runtime/factories.generated.js
 │   ├── serve.mjs                zero-dep static server for site/ that applies vercel.json headers
-│   └── make-wordmark.mjs        one-off: Michroma TTF → site/assets/wordmark.v1.svg (uses a temp opentype.js)
+│   ├── make-wordmark.mjs        one-off: Michroma TTF → site/assets/wordmark.v1.svg (uses a temp opentype.js)
+│   └── fonts/README.md          how the two mono woff2 subsets are rebuilt from Iosevka Fixed (temp venv, pyftsubset, D24)
 ├── site/                        ← Vercel output directory (the website)
 │   ├── index.html
 │   ├── 404.html
 │   ├── og-card.html             1200x630 social-card render target (noindex, Disallowed in robots.txt); site/og.png is its screenshot
 │   ├── robots.txt  sitemap.xml  site.webmanifest
 │   ├── favicon.ico  icon.svg  apple-touch-icon.png  og.png
-│   ├── assets/  wordmark.v1.svg  fonts/mono-400.v1.woff2  fonts/mono-700.v1.woff2  fonts/OFL.txt
+│   ├── assets/  wordmark.v1.svg  fonts/mono-400.v2.woff2  fonts/mono-700.v2.woff2  fonts/OFL.txt
 │   ├── css/  tokens.css  site.css  og-card.css
 │   └── js/
 │       ├── main.js              entry: wires everything after DOMContentLoaded
@@ -118,11 +119,12 @@ ampline-website/
     ├── smoke.test.mjs
     ├── sync.test.mjs
     ├── runtime-parity.test.mjs  runtime output === real binary output, per payload
-    ├── fakes.test.mjs           git/task fakes === real captured bytes
+    ├── fakes.test.mjs           git/task fakes === the real binary run on a throwaway git repo and todo file (HOME), plus pinned bytes
     ├── ansi.test.mjs            parseAnsi/renderAnsi on the SGR and OSC 8 subset ampline emits
     ├── copy.test.mjs            wireCopy: clipboard, select fallback, label reset, aria-live messages
     ├── equalizer.test.mjs       one bar per wheel stop, size classes, hold/release, colors set via setProperty only
     ├── hero.test.mjs            hero typing, power-up and cycle; pauses while the tab is hidden
+    ├── font-coverage.test.mjs   both mono woff2 map every glyph the renderer and the site draw in mono (incl. ┃ U+2503, ≥ U+2265); every /assets/ file exists and carries a .vN. version
     ├── serve.test.mjs           dev server applies the vercel.json headers (HSTS, CSP, cache) and answers 400/403/404 safely
     ├── tour.test.mjs            tour cards, stable ids, overflow flags (watchOverflow/watchScrollable)
     ├── payloads.test.mjs
@@ -131,7 +133,7 @@ ampline-website/
     ├── playground-state.test.mjs  playground pure pipeline: config, presets, purity, JSON
     ├── playground-mount.test.mjs  mountPlayground wiring on a fake DOM: presets, NO_COLOR, narrow mode, copy
     ├── install-demo.test.mjs    install demo script, reduced motion, Replay, hidden-tab pause (fake DOM)
-    ├── install-transcript.test.mjs  runs the pinned installer in a throwaway HOME; stdout === INSTALL_TRANSCRIPT
+    ├── install-transcript.test.mjs  runs the pinned installer in a throwaway HOME; stdout === INSTALL_TRANSCRIPT (the Node line and re-run note a version-managed Node adds are masked)
     └── no-third-party-names.test.mjs  fails if a git-tracked text file names another statusline project
 ```
 
@@ -150,11 +152,19 @@ site/js/runtime/ampline.js createAmpline({ noColor?: boolean, columns?: number }
                              setColumns(n), setConfig(user) -> merged config, getConfig() -> config,
                              resetCache() /* clears the in-memory usage cache */,
                              stripAnsi(s), safeLinkUrl(u) -> string|null, colors /* lib/colors exports */ }
+                           subagentRows(raw) -> string[]   pure: renderSubagentLine prints one {"id","content"} JSON line
+                             per task (1.0.0); this splits on newlines, parses each line (a bad one is skipped) and returns
+                             the ANSI `content`s. The raw bytes stay the parity unit; tour.js renders the parsed rows.
+                             Every task in subagentPayload needs a string id, or the renderer leaves it out.
+                           STUBBED_MODULES: string[]   the modules a vendored file may require that are not vendored;
+                             test/sync.test.mjs fails on any other require (a new lib module must join VENDORED).
 site/js/ansi.js            parseAnsi(str) -> Token[]   Token = { text, fg: [r,g,b]|null, bold, dim, href: string|null }
                            renderAnsi(tokens, doc, { safeLinkUrl }) -> DocumentFragment
 site/js/payloads.js        FAMILIES = ['haiku','sonnet','opus','fable'] · EFFORTS · MODEL_NAMES
                            wheelIndex(family, effort) -> 0..19
                            statusPayload(opts) -> input object · subagentPayload(opts) -> {columns, tasks}
+                           (statusPayload's fiveHourElapsed / weeklyElapsed, fractions 0..1 of the 5-hour / 7-day window already gone,
+                           set resets_at = now + (1 - f) * window in whole seconds; left out, the fixed demo offsets apply)
                            HERO_CYCLE: Array<[family, effort]>
 site/js/tour.js            watchOverflow(elements: () => Element[], onChange(el, over), win?) -> mark()
 site/js/equalizer.js       mountEqualizer(container, wheelRgbs: number[][], { size: 'hero'|'nav' }) -> { hold(i), release(), bars }
@@ -165,6 +175,8 @@ site/js/install-demo.js    INSTALL_COMMAND: string · INSTALL_TRANSCRIPT: string
 site/js/copy.js            wireCopy(button, text: string | () => string, statusEl, opts?: { label, fallbackEl, copiedMessage, selectedMessage })
 site/js/playground.js      configFor(state, narrow) -> userConfig · buildPlaygroundInput(state, now) -> input
                            renderPlayground(state, { color, plain }, now, narrow) -> ansi string (pure: resets the cache, seeds it for `stale`)
+                           state also holds fiveHourElapsed / weeklyElapsed (percent of the window gone) and paceColors (off); configFor writes
+                           `paceColors: true` only when on, so the copied .amplinerc.json stays `{}` by default
                            mountPlayground({ mount, makeAmpline, win })
 ```
 

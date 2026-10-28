@@ -141,3 +141,120 @@ test('playground mount: no literal "null" or "undefined" anywhere in the mounted
   });
   assert.doesNotMatch(d.mount.textContent, /\bnull\b|\bundefined\b/);
 });
+
+// ---- pace marker and paceColors controls ----
+
+const hSpan = (d) => findAll(d.line, (n) => n.tag === 'span' && n.textContent.startsWith('H37'))[0];
+const markerCell = (d, label) => d.line.textContent.match(new RegExp(`${label}\\d+ (.{8})`))[1].indexOf('┃');
+
+test('playground mount: the pace controls are labelled, start where the demo sat, and paceColors starts off', (t) => {
+  const d = setup(t);
+  assert.equal(d.pressed('paceColors'), 'false');
+  for (const [id, label, text] of [['pg-fivehour-elapsed', '5-hour window elapsed', '56%'], ['pg-weekly-elapsed', 'Weekly window elapsed', '55%']]) {
+    const input = byId(d.mount, id);
+    assert.equal(input.attrs.type, 'range');
+    assert.deepEqual([input.attrs.min, input.attrs.max, input.attrs.step], ['0', '99', '1']);
+    assert.equal(findAll(d.mount, (n) => n.tag === 'label' && n.attrs.for === id)[0].textContent, label);
+    const out = findAll(d.mount, (n) => n.tag === 'output' && n.attrs.for === id)[0];
+    assert.equal(out.attrs['aria-live'], 'off');
+    assert.equal(out.textContent, text);
+  }
+  assert.ok(d.line.textContent.includes('┃'), 'the marker is already visible in the default state');
+  const notes = findAll(d.mount, (n) => n.tag === 'p' && n.className === 'note' && /paceColors, opt-in/.test(n.textContent));
+  assert.equal(notes.length, 1);
+  assert.match(notes[0].textContent, /5-hour and 7-day/);
+  assert.match(notes[0].textContent, /first 10%/);
+  assert.match(notes[0].textContent, /never bold or ⚠/);
+  assert.match(notes[0].textContent, /not a third scale/);
+  assert.ok(notes[0].textContent.length < 300, 'short enough for the 280px column');
+  assert.equal(findAll(d.mount, (n) => 'style' in n.attrs).length, 0, 'no style attribute');
+});
+
+test('playground mount: the window-elapsed sliders move the marker and update their output', (t) => {
+  const d = setup(t);
+  d.slide('pg-fivehour-elapsed', 10);
+  d.slide('pg-weekly-elapsed', 90);
+  assert.equal(markerCell(d, 'H'), 0);
+  assert.equal(markerCell(d, 'W'), 7);
+  const out = (id) => findAll(d.mount, (n) => n.tag === 'output' && n.attrs.for === id)[0].textContent;
+  assert.equal(out('pg-fivehour-elapsed'), '10%');
+  assert.equal(out('pg-weekly-elapsed'), '90%');
+  assert.deepEqual(JSON.parse(d.pre.textContent).paceColors, undefined, 'sliders alone do not touch the config');
+});
+
+test('playground mount: the paceColors toggle re-renders the bar color and writes the config key', (t) => {
+  const d = setup(t);
+  assert.equal(hSpan(d).style.color, 'rgb(96, 200, 120)', '37% used reads green on the plain ramp');
+  assert.equal('paceColors' in JSON.parse(d.pre.textContent), false, 'absent while off');
+  button(d.mount, 'paceColors').fire('click');
+  assert.equal(d.pressed('paceColors'), 'true');
+  assert.equal(hSpan(d).style.color, 'rgb(245, 196, 61)', '56% of the window gone projects to yellow');
+  assert.equal(JSON.parse(d.pre.textContent).paceColors, true);
+  button(d.mount, 'paceColors').fire('click');
+  assert.equal(d.pressed('paceColors'), 'false');
+  assert.equal(hSpan(d).style.color, 'rgb(96, 200, 120)');
+  assert.equal('paceColors' in JSON.parse(d.pre.textContent), false, 'gone again, not left behind');
+});
+
+test('playground mount: early in the window (under 10%) paceColors changes nothing', (t) => {
+  const d = setup(t);
+  d.slide('pg-fivehour-elapsed', 5);
+  const before = hSpan(d).style.color;
+  button(d.mount, 'paceColors').fire('click');
+  assert.equal(hSpan(d).style.color, before);
+  d.slide('pg-fivehour-elapsed', 40);
+  assert.notEqual(hSpan(d).style.color, before, 'past the 10% dead zone it applies');
+});
+
+test('playground mount: pace controls clear the active preset, and presets reset them', (t) => {
+  const d = setup(t);
+  button(d.mount, '85% edge').fire('click');
+  button(d.mount, 'paceColors').fire('click');
+  assert.equal(d.pressed('85% edge'), 'false', 'toggling paceColors is a manual edit');
+  d.slide('pg-weekly-elapsed', 20);
+  button(d.mount, 'Stale cache').fire('click');
+  assert.equal(d.pressed('Stale cache'), 'true');
+  d.slide('pg-fivehour-elapsed', 70);
+  assert.equal(d.pressed('Stale cache'), 'false', 'so does an elapsed slider');
+  button(d.mount, 'paceColors').fire('click');
+  button(d.mount, 'API-key account').fire('click');
+  assert.equal(d.pressed('paceColors'), 'false', 'a preset puts paceColors back to off');
+  assert.equal(byId(d.mount, 'pg-fivehour-elapsed').value, '56');
+  assert.equal(byId(d.mount, 'pg-weekly-elapsed').value, '55');
+  assert.equal('paceColors' in JSON.parse(d.pre.textContent), false);
+});
+
+test('playground mount: the stale preset shows its hint about the pace marker and draws none', (t) => {
+  const d = setup(t);
+  button(d.mount, 'Stale cache').fire('click');
+  assert.ok(d.line.textContent.includes('H91'));
+  assert.ok(!d.line.textContent.includes('┃'), 'dimmed stale bars carry no marker');
+  assert.ok(findAll(d.mount, (n) => n.tag === 'p' && /no pace marker/.test(n.textContent)).length === 1);
+});
+
+test('playground mount: narrow mode keeps two preview lines and the pace controls render without a literal null', (t) => {
+  const d = setup(t, { narrow: true });
+  assert.equal(d.line.textContent.split('\n').length, 2);
+  button(d.mount, 'paceColors').fire('click');
+  d.slide('pg-fivehour-elapsed', 30);
+  assert.equal(d.line.textContent.split('\n').length, 2, 'the controls add nothing to the preview');
+  assert.equal(JSON.parse(d.pre.textContent).paceColors, true);
+  walk(d.mount, (n) => {
+    if (n.tag === '#text') assert.doesNotMatch(n.data, /\bnull\b|\bundefined\b/);
+    else for (const v of Object.values(n.attrs)) assert.doesNotMatch(v, /^(null|undefined)$/);
+  });
+  assert.doesNotMatch(d.mount.textContent, /\bnull\b|\bundefined\b/);
+});
+
+test('playground mount: with NO_COLOR the hint says pace colors do nothing while the marker shows, and the key is still written', (t) => {
+  const d = setup(t);
+  const hint = () => findAll(d.mount, (n) => n.tag === 'p' && /^NO_COLOR is set/.test(n.textContent))[0];
+  assert.equal(hint(), undefined, 'no hint until NO_COLOR is on');
+  button(d.mount, 'NO_COLOR').fire('click');
+  button(d.mount, 'paceColors').fire('click');
+  assert.match(hint().textContent, /Pace colors have no effect/);
+  assert.match(hint().textContent, /┃ marker still shows/);
+  assert.ok(d.line.textContent.includes('┃'), 'the marker is plain text, so it still shows');
+  assert.equal(d.colored(), 0, 'and nothing is colored');
+  assert.equal(JSON.parse(d.pre.textContent).paceColors, true, 'the copied config still carries the key');
+});

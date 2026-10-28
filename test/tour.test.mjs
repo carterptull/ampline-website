@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createAmpline } from '../site/js/runtime/ampline.js';
+import { createAmpline, subagentRows } from '../site/js/runtime/ampline.js';
 import { renderTour, watchScrollable } from '../site/js/tour.js';
 import { parseAnsi } from '../site/js/ansi.js';
 import { statusPayload, subagentPayload } from '../site/js/payloads.js';
@@ -76,12 +76,22 @@ test('each card sample is exactly what the real renderer prints for that single 
   const texts = mount.children.map((c) => byClass(c, 's')[0].textContent);
   assert.match(texts[0], /^Opus 5\.5 · xhigh$/);
   assert.equal(texts[1], 'C63 █████░░░');
-  assert.match(texts[2], /^H24 ██░░░░░░ ↺ 2h1\dm │ W41 ███░░░░░ ↺ 3d4h$/);
+  // 1.0.0 draws a ┃ pace marker where the window's elapsed share falls: 55.5% of 5h and 54.8% of 7d, both cell 4.
+  assert.match(texts[2], /^H24 ██░░┃░░░ ↺ 2h1\dm │ W41 ███░┃░░░ ↺ 3d4h$/);
   assert.equal(texts[3], '⎇ feat/cache-layer ↑2↓1 ●');
   assert.equal(texts[4], '$1.87 +156/-23');
   assert.equal(texts[5], '#1234   !42');
   assert.equal(texts[6], 'Refactor the bar renderer');
   assert.equal(texts[7], '↳ Explore the cache layer haiku 8.4k\n↳ Review the diff sonnet 120.4k\n↳ Write tests opus');
+});
+
+test('the subagent card shows the rows parsed from the JSON lines, never raw JSON', () => {
+  const { mount } = run();
+  const text = byClass(mount.children[7], 's')[0].textContent;
+  assert.doesNotMatch(text, /[{}"]|\\u001b|content/);
+  assert.equal(text.split('\n').length, subagentPayload().tasks.length, 'one row per task');
+  const spans = find(byClass(mount.children[7], 's')[0], (e) => e.tag === 'span');
+  assert.ok(spans.length >= 3, 'rows keep their colors');
 });
 
 test('PR and MR render as safe, colored links; no other card has links', () => {
@@ -116,6 +126,10 @@ test('descriptions state the accuracy rules', () => {
   assert.match(d[0], /20-step wheel/); assert.match(d[0], /only max goes bold/);
   assert.match(d[1], /last completed API call/); assert.match(d[1], /85%/); assert.match(d[1], /95%/);
   assert.match(d[2], /Claude\.ai subscription/); assert.match(d[2], /countdown/);
+  assert.match(d[2], /┃ pace marker/); assert.match(d[2], /how much of the window has passed/);
+  assert.match(d[2], /5-hour and 7-day windows/);
+  assert.match(d[2], /left out when the reset time is unknown or the bar is stale/);
+  assert.doesNotMatch(d[2], /always|exact|guarantee/i, 'the marker copy stays descriptive');
   assert.match(d[4], /estimate/); assert.match(d[4], /not your bill/i);
   assert.match(d[5], /Claude Code/); assert.match(d[5], /gh/); assert.match(d[5], /glab/); assert.match(d[5], /mergeable/);
   assert.match(d[6], /in-progress item/); assert.match(d[6], /40 characters/); assert.match(d[6], /Hidden when/);
@@ -144,10 +158,11 @@ test('no tour card has a token that is both dim and colored (dim is a solid clas
   seg(['model'], { family: 'opus', effort: 'xhigh' }); seg(['context'], { context: 63 }); seg(['fiveHour', 'weekly'], { fiveHour: 24, weekly: 41 });
   seg(['git'], {}); seg(['cost'], {}); seg(['pr'], { pr: { number: 1234, review_state: 'approved' } });
   seg(['pr'], { pr: { kind: 'mr', number: 42, review_state: 'pending' } }); seg(['task'], {});
-  amp.setConfig({}); lines.push(amp.renderSubagentLine(subagentPayload({ columns: 100 })));
+  amp.setConfig({}); lines.push(...subagentRows(amp.renderSubagentLine(subagentPayload({ columns: 100 }))));
   let tokens = 0;
   for (const l of lines) for (const t of parseAnsi(l)) { tokens++; assert.ok(!(t.dim && t.fg), `dim+fg token: ${JSON.stringify(t)}`); }
   assert.ok(tokens > 20);
+  assert.equal(lines.length, 8 + 3, 'eight single-segment samples plus three subagent rows (the rows are parsed, not skipped)');
 });
 
 test('watchScrollable flags overflowing samples (fade, focus, name) and re-checks on resize, one frame at a time', () => {
