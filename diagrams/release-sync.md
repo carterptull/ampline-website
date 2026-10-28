@@ -66,4 +66,4 @@ Carter's own PR. The Dependabot config also watches `github-actions`, and those 
 same rule.
 
 ---
-_Last verified: 2026-10-15 · site 0.3.0_
+_Last verified: 2026-10-28 · site 1.0.0_
