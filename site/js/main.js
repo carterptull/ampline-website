@@ -5,7 +5,7 @@ import { wireCopy } from './copy.js';
 import { startHero } from './hero.js';
 import { renderTour, watchScrollable } from './tour.js';
 import { mountPlayground } from './playground.js';
-import { mountInstallDemo } from './install-demo.js';
+import { mountInstallDemo, INSTALL_COMMAND } from './install-demo.js';
 
 const amp = createAmpline({ columns: 120 });
 document.getElementById('ampVersion').textContent = amp.version;
@@ -16,7 +16,7 @@ mountEqualizer(document.getElementById('navVu'), wheel, { size: 'nav' });
 // Both waves animate freely; the hero wave is not tied to the cycling model line (DECISIONS.md D18).
 mountEqualizer(document.getElementById('heroVu'), wheel, { size: 'hero' });
 
-wireCopy(document.getElementById('copyBtn'), 'npx ampline-claude --install', document.getElementById('copyStatus'));
+wireCopy(document.getElementById('copyBtn'), INSTALL_COMMAND, document.getElementById('copyStatus'));
 startHero({ amp, body: document.getElementById('heroBody'), line: document.getElementById('heroSl') });
 
 // The tour reconfigures segments/columns per card, so it gets its own instance: shared mutable config would leak into the hero's cycling line.
