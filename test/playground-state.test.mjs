@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   configFor, buildPlaygroundInput, renderPlayground, instanceFor, defaultState, applyPreset,
-  captureDefaults, amplinercJson, PRESETS, NARROW_COLUMNS, h,
+  captureDefaults, amplinercJson, PRESETS, NARROW_COLUMNS, NO_COLOR_HINT, h,
 } from '../site/js/playground.js';
 import { createAmpline } from '../site/js/runtime/ampline.js';
 import { parseAnsi } from '../site/js/ansi.js';
@@ -201,6 +201,9 @@ test('h() skips null, undefined and false children (append would render the text
 
 const paced = { ...base, fiveHourElapsed: 56, weeklyElapsed: 55, paceColors: false };
 const bar = (txt, label) => txt.match(new RegExp(`${label}\\d+ (.{8})`))[1];
+// The renderer reads Date.now() itself (countdown, elapsed share), so two renders only compare equal when the
+// clock is the same for both. Pinned, a whole-minute countdown cannot flip between them.
+const pinClock = (t) => { const at = Date.now(); t.mock.method(Date, 'now', () => at); return at; };
 const colorOf = (inst, state, label) => {
   const tok = parseAnsi(renderPlayground(state, inst, Date.now())).find((t) => t.text.startsWith(label));
   return tok && { fg: tok.fg, bold: tok.bold, text: tok.text };
@@ -234,7 +237,8 @@ test('configFor: paceColors is written only when it is on', () => {
     'the real validateAndMerge keeps it');
 });
 
-test('paceColors changes the bytes when the projection warrants it, and only the usage bar color', () => {
+test('paceColors changes the bytes when the projection warrants it, and only the usage bar color', (t) => {
+  const now = pinClock(t);
   const inst = instances();
   // 37% used with 56% of the window gone projects to 66%: yellow instead of the plain green.
   const off = colorOf(inst, paced, 'H37');
@@ -242,9 +246,9 @@ test('paceColors changes the bytes when the projection warrants it, and only the
   assert.deepEqual(off.fg, [96, 200, 120]);
   assert.deepEqual(on.fg, [245, 196, 61]);
   assert.equal(on.text, off.text, 'the percentage, bar and marker are the same text');
-  assert.notEqual(renderPlayground(paced, inst, Date.now()), renderPlayground({ ...paced, paceColors: true }, inst, Date.now()));
-  assert.equal(inst.color.stripAnsi(renderPlayground({ ...paced, paceColors: true }, inst, Date.now())),
-    inst.color.stripAnsi(renderPlayground(paced, inst, Date.now())), 'only the color differs');
+  assert.notEqual(renderPlayground(paced, inst, now), renderPlayground({ ...paced, paceColors: true }, inst, now));
+  assert.equal(inst.color.stripAnsi(renderPlayground({ ...paced, paceColors: true }, inst, now)),
+    inst.color.stripAnsi(renderPlayground(paced, inst, now)), 'only the color differs');
 });
 
 test('paceColors never leaves orange: no bold, no warning sign, and never calmer than the plain ramp', () => {
@@ -260,12 +264,13 @@ test('paceColors never leaves orange: no bold, no warning sign, and never calmer
   assert.deepEqual(withPace, plain);
 });
 
-test('paceColors does not apply in the first 10% of a window', () => {
+test('paceColors does not apply in the first 10% of a window', (t) => {
+  const now = pinClock(t);
   const inst = instances();
   const early = { ...paced, fiveHour: 37, fiveHourElapsed: 5, weekly: 30, weeklyElapsed: 8 };
-  assert.equal(renderPlayground({ ...early, paceColors: true }, inst, Date.now()), renderPlayground(early, inst, Date.now()));
+  assert.equal(renderPlayground({ ...early, paceColors: true }, inst, now), renderPlayground(early, inst, now));
   const justPast = { ...early, fiveHourElapsed: 12 };
-  assert.notEqual(renderPlayground({ ...justPast, paceColors: true }, inst, Date.now()), renderPlayground(justPast, inst, Date.now()));
+  assert.notEqual(renderPlayground({ ...justPast, paceColors: true }, inst, now), renderPlayground(justPast, inst, now));
 });
 
 test('stale preset: dimmed bars, no pace marker, and no pace color', () => {
@@ -296,4 +301,11 @@ test('copy JSON: paceColors appears only when toggled, and the default stays {}'
   // Turning it back off: setConfig starts from the defaults each time, so nothing sticks.
   amp.setConfig(configFor({ ...defaultState(false), segments: { git: true, cost: true, pr: true, task: true } }, false));
   assert.equal(amplinercJson(amp.getConfig(), defaults), '{}');
+});
+
+test('the NO_COLOR hint fits the reserved .play-hint height (no longer than the longest preset hint by more than a few characters)', () => {
+  const longest = Math.max(...Object.values(PRESETS).map((p) => p.hint.length));
+  assert.ok(NO_COLOR_HINT.length <= longest + 5, `${NO_COLOR_HINT.length} vs ${longest}`);
+  assert.match(NO_COLOR_HINT, /Pace colors have no effect/);
+  assert.match(NO_COLOR_HINT, /┃ marker still shows/);
 });

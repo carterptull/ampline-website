@@ -160,11 +160,13 @@ test('playground mount: the pace controls are labelled, start where the demo sat
     assert.equal(out.textContent, text);
   }
   assert.ok(d.line.textContent.includes('┃'), 'the marker is already visible in the default state');
-  const notes = findAll(d.mount, (n) => n.tag === 'p' && n.className === 'note' && /paceColors is opt-in/.test(n.textContent));
+  const notes = findAll(d.mount, (n) => n.tag === 'p' && n.className === 'note' && /paceColors, opt-in/.test(n.textContent));
   assert.equal(notes.length, 1);
   assert.match(notes[0].textContent, /5-hour and 7-day/);
   assert.match(notes[0].textContent, /first 10%/);
-  assert.match(notes[0].textContent, /never reaches bold or the warning sign/);
+  assert.match(notes[0].textContent, /never bold or ⚠/);
+  assert.match(notes[0].textContent, /not a third scale/);
+  assert.ok(notes[0].textContent.length < 300, 'short enough for the 280px column');
   assert.equal(findAll(d.mount, (n) => 'style' in n.attrs).length, 0, 'no style attribute');
 });
 
@@ -242,4 +244,17 @@ test('playground mount: narrow mode keeps two preview lines and the pace control
     else for (const v of Object.values(n.attrs)) assert.doesNotMatch(v, /^(null|undefined)$/);
   });
   assert.doesNotMatch(d.mount.textContent, /\bnull\b|\bundefined\b/);
+});
+
+test('playground mount: with NO_COLOR the hint says pace colors do nothing while the marker shows, and the key is still written', (t) => {
+  const d = setup(t);
+  const hint = () => findAll(d.mount, (n) => n.tag === 'p' && /^NO_COLOR is set/.test(n.textContent))[0];
+  assert.equal(hint(), undefined, 'no hint until NO_COLOR is on');
+  button(d.mount, 'NO_COLOR').fire('click');
+  button(d.mount, 'paceColors').fire('click');
+  assert.match(hint().textContent, /Pace colors have no effect/);
+  assert.match(hint().textContent, /┃ marker still shows/);
+  assert.ok(d.line.textContent.includes('┃'), 'the marker is plain text, so it still shows');
+  assert.equal(d.colored(), 0, 'and nothing is colored');
+  assert.equal(JSON.parse(d.pre.textContent).paceColors, true, 'the copied config still carries the key');
 });

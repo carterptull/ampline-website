@@ -6,7 +6,7 @@ import { statusPayload, subagentPayload } from './payloads.js';
 const CARDS = [
   { seg: 'model', title: 'Model · effort', desc: 'Colored by model and effort from a 20-step wheel (4 model families × 5 efforts). Identity, not urgency: only max goes bold.', payload: { family: 'opus', effort: 'xhigh' } },
   { seg: 'context', title: 'Context window', desc: 'Percent used as of the last completed API call, on its own green to red danger scale. Bold from 85%, a warning sign from 95%.', payload: { context: 63 } },
-  { seg: ['fiveHour', 'weekly'], title: '5-hour + weekly limits', desc: 'Plan usage with a live reset countdown. The ┃ pace marker shows how much of the window has passed, assuming 5-hour and 7-day windows. Needs a Claude.ai subscription.', payload: { fiveHour: 24, weekly: 41 } },
+  { seg: ['fiveHour', 'weekly'], title: '5-hour + weekly limits', desc: 'Plan usage with a live reset countdown. The ┃ pace marker shows how much of the window has passed, assuming 5-hour and 7-day windows (left out when the reset time is unknown or the bar is stale). Needs a Claude.ai subscription.', payload: { fiveHour: 24, weekly: 41 } },
   { seg: 'git', title: 'Git', desc: 'Branch, ahead / behind and dirty state, from one cached git call.', payload: {} },
   { seg: 'cost', title: 'Cost + lines', desc: "Claude Code's own client-side estimate of the session cost, plus lines changed. Not your bill.", payload: {} },
   { seg: 'pr', title: 'PR / MR', desc: 'PR/MR data comes from Claude Code (ampline runs neither gh nor glab). Colored by review state, clickable in terminals that support links; on a GitLab MR, green means mergeable.', payloads: [{ pr: { number: 1234, review_state: 'approved' } }, { pr: { kind: 'mr', number: 42, review_state: 'pending' } }] },

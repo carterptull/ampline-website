@@ -27,12 +27,12 @@ export const PRESETS = {
     hint: 'API-key accounts get no 5-hour or weekly data from Claude Code, so there are no H/W bars.',
   },
 };
-export const NO_COLOR_HINT = 'NO_COLOR is set: ampline emits no color codes and no hyperlinks, only the plain text.';
+export const NO_COLOR_HINT = 'NO_COLOR is set: plain text, no color or links. Pace colors have no effect; the ┃ marker still shows.';
 export const SUBSCRIPTION_NOTE = '5-hour and weekly bars need a Claude.ai subscription.';
 // Beside the pace controls. Descriptive on purpose: ampline-claude may retune pace coloring in a minor release.
-export const PACE_NOTE = 'The ┃ marker shows how much of the window has passed, assuming 5-hour and 7-day windows. '
-  + 'paceColors is opt-in and projects your current pace in a straight line (not in the first 10% of a window): '
-  + 'it can raise a bar to orange early, never colors it calmer than the plain ramp, and never reaches bold or the warning sign. '
+export const PACE_NOTE = 'The ┃ marks how much of the window has passed (assumes 5-hour and 7-day windows). '
+  + 'paceColors, opt-in, projects your pace in a straight line after the first 10% of a window: '
+  + 'it can turn a bar orange early, never calmer than the plain ramp, never bold or ⚠. '
   + 'Same usage colors, not a third scale.';
 
 export function defaultState(narrow = false) {

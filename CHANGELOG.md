@@ -25,8 +25,8 @@ the browser runtime and its stand-ins with the real binary instead of with bytes
 - ampline-claude 0.6.0 -> 1.0.0 (still an exact pin). The sync script now also vendors `lib/safeRead.js`, which `config.js` requires, and `test/sync.test.mjs` fails if a vendored file requires a module that is neither vendored nor stubbed.
 - The self-hosted mono font is now `mono-400.v2.woff2` / `mono-700.v2.woff2`, adding `┃` (U+2503, the pace marker ampline-claude 1.0.0 draws in the usage bars) and `≥` (U+2265, the hero meta line). The v1 files are removed; the new filename is needed because `/assets/` is cached for a year (D24).
 - The task fake trims its text and drops a blank one, like the real 1.0.0 task segment.
-- The stale-cache preset's hint now says the pace marker is left out on dimmed stale bars.
-- `test/install-transcript.test.mjs` ignores the Node line and re-run note that the installer prints when Node lives in a version-named directory (nvm, Homebrew, fnm, volta, asdf, snap), so it passes on developer machines with a version manager. The six normal lines are still compared exactly.
+- The stale-cache preset's hint now says the pace marker is left out on dimmed stale bars, and the NO_COLOR hint says pace colors have no effect while the marker still shows.
+- `test/install-transcript.test.mjs` ignores the Node line and re-run note that the installer prints when Node lives in a version-named directory (nvm, Homebrew, fnm, volta and similar), so it passes on developer machines with a version manager. The six normal lines are still compared exactly.
 - README "Updating to a new ampline release" and `diagrams/release-sync.md` list every step: the font glyph check and `.vN` rename, re-capturing the install transcript, tour copy and tests, diagram stamps and the CHANGELOG.
 - The diagrams describe the site as live on Vercel (they said it was not connected yet) and count the five runtime instances correctly. They, and `SECURITY.md`, note the `Access-Control-Allow-Origin: *` header that Vercel adds on its own.
 - `main.js` takes the install command from `install-demo.js` instead of repeating the string.
