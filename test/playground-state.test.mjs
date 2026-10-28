@@ -196,3 +196,104 @@ test('h() skips null, undefined and false children (append would render the text
   assert.deepEqual(el.kids, [child]);
   assert.equal(h(doc, 'div', {}, null).kids.length, 0, 'append is not called for only-empty children');
 });
+
+// ---- pace marker and paceColors (ampline-claude 1.0.0) ----
+
+const paced = { ...base, fiveHourElapsed: 56, weeklyElapsed: 55, paceColors: false };
+const bar = (txt, label) => txt.match(new RegExp(`${label}\\d+ (.{8})`))[1];
+const colorOf = (inst, state, label) => {
+  const tok = parseAnsi(renderPlayground(state, inst, Date.now())).find((t) => t.text.startsWith(label));
+  return tok && { fg: tok.fg, bold: tok.bold, text: tok.text };
+};
+
+test('defaultState: the window-elapsed sliders start where the demo payload sat, pace colors start off', () => {
+  const d = defaultState(false);
+  assert.deepEqual([d.fiveHourElapsed, d.weeklyElapsed, d.paceColors], [56, 55, false]);
+  assert.deepEqual([defaultState(true).fiveHourElapsed, defaultState(true).paceColors], [56, false]);
+});
+
+test('the pace marker moves with the window-elapsed sliders', () => {
+  const inst = instances();
+  const cell = (fiveHourElapsed, weeklyElapsed, label) =>
+    bar(text(inst, { ...paced, fiveHourElapsed, weeklyElapsed }), label).indexOf('┃');
+  assert.deepEqual([10, 50, 90].map((f) => cell(f, 50, 'H')), [0, 4, 7]);
+  assert.deepEqual([10, 50, 90].map((f) => cell(50, f, 'W')), [0, 4, 7]);
+});
+
+test('state without the elapsed fields still renders (payload offsets apply)', () => {
+  const inst = instances();
+  assert.match(text(inst, base), /H37 .*┃.* │ W88 .*┃/);
+});
+
+test('configFor: paceColors is written only when it is on', () => {
+  assert.equal('paceColors' in configFor(paced, false), false);
+  assert.equal('paceColors' in configFor(paced, true), false);
+  assert.equal(configFor({ ...paced, paceColors: true }, false).paceColors, true);
+  assert.equal(configFor({ ...paced, paceColors: true }, true).paceColors, true);
+  assert.equal(createAmpline().setConfig(configFor({ ...paced, paceColors: true }, false)).paceColors, true,
+    'the real validateAndMerge keeps it');
+});
+
+test('paceColors changes the bytes when the projection warrants it, and only the usage bar color', () => {
+  const inst = instances();
+  // 37% used with 56% of the window gone projects to 66%: yellow instead of the plain green.
+  const off = colorOf(inst, paced, 'H37');
+  const on = colorOf(inst, { ...paced, paceColors: true }, 'H37');
+  assert.deepEqual(off.fg, [96, 200, 120]);
+  assert.deepEqual(on.fg, [245, 196, 61]);
+  assert.equal(on.text, off.text, 'the percentage, bar and marker are the same text');
+  assert.notEqual(renderPlayground(paced, inst, Date.now()), renderPlayground({ ...paced, paceColors: true }, inst, Date.now()));
+  assert.equal(inst.color.stripAnsi(renderPlayground({ ...paced, paceColors: true }, inst, Date.now())),
+    inst.color.stripAnsi(renderPlayground(paced, inst, Date.now())), 'only the color differs');
+});
+
+test('paceColors never leaves orange: no bold, no warning sign, and never calmer than the plain ramp', () => {
+  const inst = instances();
+  // 40% used with a fifth of the window gone projects to 200%, capped below the bold steps.
+  const hot = colorOf(inst, { ...paced, fiveHour: 40, fiveHourElapsed: 20, paceColors: true }, 'H40');
+  assert.deepEqual(hot.fg, [239, 159, 39]);
+  assert.equal(hot.bold, false);
+  assert.doesNotMatch(inst.color.stripAnsi(renderPlayground({ ...paced, fiveHour: 40, fiveHourElapsed: 20, paceColors: true }, inst, Date.now())), /⚠/);
+  // Already past the bold step: the plain ramp wins, pace cannot soften it.
+  const plain = colorOf(inst, { ...paced, weekly: 88, weeklyElapsed: 90 }, 'W88');
+  const withPace = colorOf(inst, { ...paced, weekly: 88, weeklyElapsed: 90, paceColors: true }, 'W88');
+  assert.deepEqual(withPace, plain);
+});
+
+test('paceColors does not apply in the first 10% of a window', () => {
+  const inst = instances();
+  const early = { ...paced, fiveHour: 37, fiveHourElapsed: 5, weekly: 30, weeklyElapsed: 8 };
+  assert.equal(renderPlayground({ ...early, paceColors: true }, inst, Date.now()), renderPlayground(early, inst, Date.now()));
+  const justPast = { ...early, fiveHourElapsed: 12 };
+  assert.notEqual(renderPlayground({ ...justPast, paceColors: true }, inst, Date.now()), renderPlayground(justPast, inst, Date.now()));
+});
+
+test('stale preset: dimmed bars, no pace marker, and no pace color', () => {
+  const inst = instances();
+  const out = renderPlayground({ ...paced, fiveHour: 91, preset: 'stale', paceColors: true }, inst, Date.now());
+  assert.match(out, /\u001b\[2mH91 /);
+  assert.doesNotMatch(inst.color.stripAnsi(out), /┃/);
+  assert.match(PRESETS.stale.hint, /pace marker/);
+});
+
+test('applyPreset: presets put the elapsed sliders and paceColors back to their defaults', () => {
+  const dirty = { ...defaultState(false), fiveHourElapsed: 5, weeklyElapsed: 95, paceColors: true };
+  for (const key of Object.keys(PRESETS)) {
+    const s = applyPreset(dirty, key);
+    assert.deepEqual([s.fiveHourElapsed, s.weeklyElapsed, s.paceColors], [56, 55, false], key);
+  }
+  const cleared = applyPreset(dirty, null);
+  assert.deepEqual([cleared.fiveHourElapsed, cleared.weeklyElapsed, cleared.paceColors], [5, 95, true], 'clearing keeps the values');
+});
+
+test('copy JSON: paceColors appears only when toggled, and the default stays {}', () => {
+  const amp = createAmpline();
+  const defaults = captureDefaults(amp);
+  amp.setConfig(configFor({ ...defaultState(false), segments: { git: true, cost: true, pr: true, task: true } }, false));
+  assert.equal(amplinercJson(amp.getConfig(), defaults), '{}');
+  amp.setConfig(configFor({ ...defaultState(false), segments: { git: true, cost: true, pr: true, task: true }, paceColors: true }, false));
+  assert.deepEqual(JSON.parse(amplinercJson(amp.getConfig(), defaults)), { paceColors: true });
+  // Turning it back off: setConfig starts from the defaults each time, so nothing sticks.
+  amp.setConfig(configFor({ ...defaultState(false), segments: { git: true, cost: true, pr: true, task: true } }, false));
+  assert.equal(amplinercJson(amp.getConfig(), defaults), '{}');
+});

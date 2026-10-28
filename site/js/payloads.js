@@ -20,14 +20,24 @@ export function wheelIndex(family, effort) {
   return f * 5 + (e < 0 ? 2 : e);
 }
 
+// The renderer assumes a 5-hour and a 7-day window (the payload only carries resets_at), so the demo's reset
+// times are built from the same lengths.
+const FIVE_HOUR_S = 5 * 3600;
+const WEEKLY_S = 7 * 86400;
+
+// `fiveHourElapsed` / `weeklyElapsed` are fractions 0..1 of the window already gone: resets_at = now +
+// (1 - f) * window, in whole seconds. Left out, the reset times keep the demo's fixed offsets (2h13m30s and
+// 3d4h30s from now, about 55% of each window elapsed).
 export function statusPayload({
   family = 'opus', effort = 'xhigh', context = 63, fiveHour = 24, weekly = 41,
   rateLimits = true, pr = { number: 1234, review_state: 'approved' },
   git = { branch: 'feat/cache-layer', ahead: 2, behind: 1, dirty: true },
   task = 'Refactor the bar renderer', cost = 1.87, added = 156, removed = 23,
-  now = Date.now(),
+  fiveHourElapsed, weeklyElapsed, now = Date.now(),
 } = {}) {
   const s = Math.floor(now / 1000);
+  const resetIn = (elapsed, windowS, fallbackS) =>
+    s + (Number.isFinite(elapsed) ? Math.round((1 - elapsed) * windowS) : fallbackS);
   const m = MODEL_NAMES[family];
   const input = {
     workspace: { current_dir: '/home/you/widgets', repo: { name: 'widgets' } },
@@ -39,8 +49,8 @@ export function statusPayload({
   if (effort) input.effort = { level: effort };
   if (rateLimits) {
     input.rate_limits = {
-      five_hour: { used_percentage: fiveHour, resets_at: s + 2 * 3600 + 13 * 60 + 30 },
-      seven_day: { used_percentage: weekly, resets_at: s + 3 * 86400 + 4 * 3600 + 30 },
+      five_hour: { used_percentage: fiveHour, resets_at: resetIn(fiveHourElapsed, FIVE_HOUR_S, 2 * 3600 + 13 * 60 + 30) },
+      seven_day: { used_percentage: weekly, resets_at: resetIn(weeklyElapsed, WEEKLY_S, 3 * 86400 + 4 * 3600 + 30) },
     };
   }
   if (pr) {

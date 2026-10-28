@@ -14,7 +14,7 @@ export const PRESETS = {
   stale: {
     label: 'Stale cache',
     patch: { fiveHour: 91 },
-    hint: 'No rate_limits in this payload, so ampline shows the last known usage from its cache, dimmed.',
+    hint: 'No rate_limits, so ampline shows the last known usage from its cache: dimmed, with no pace marker.',
   },
   edge85: {
     label: '85% edge',
@@ -29,22 +29,32 @@ export const PRESETS = {
 };
 export const NO_COLOR_HINT = 'NO_COLOR is set: ampline emits no color codes and no hyperlinks, only the plain text.';
 export const SUBSCRIPTION_NOTE = '5-hour and weekly bars need a Claude.ai subscription.';
+// Beside the pace controls. Descriptive on purpose: ampline-claude may retune pace coloring in a minor release.
+export const PACE_NOTE = 'The ┃ marker shows how much of the window has passed, assuming 5-hour and 7-day windows. '
+  + 'paceColors is opt-in and projects your current pace in a straight line (not in the first 10% of a window): '
+  + 'it can raise a bar to orange early, never colors it calmer than the plain ramp, and never reaches bold or the warning sign. '
+  + 'Same usage colors, not a third scale.';
 
 export function defaultState(narrow = false) {
   return {
     family: 'opus', effort: 'high', context: 63, fiveHour: 37, weekly: 88,
+    fiveHourElapsed: 56, weeklyElapsed: 55, paceColors: false, // elapsed: percent of each window already gone
     segments: { git: !narrow, cost: !narrow, pr: !narrow, task: false },
     noColor: false, columns: 120, preset: null,
   };
 }
 
-// Presets are scenarios, not patches: the three numbers go back to the defaults before the preset's own
-// values apply, so Stale then 85% edge does not keep the stale 91%. Presets are mutually exclusive:
-// `null` (or the active key clicked again) leaves the state manual, values as they are.
+// Presets are scenarios, not patches: the usage numbers, the window-elapsed sliders and paceColors go back to
+// the defaults before the preset's own values apply, so Stale then 85% edge does not keep the stale 91%.
+// Presets are mutually exclusive: `null` (or the active key clicked again) leaves the state manual, values as
+// they are.
 export function applyPreset(state, key) {
   if (!key || !PRESETS[key]) return { ...state, preset: null };
-  const { context, fiveHour, weekly } = defaultState();
-  return { ...state, context, fiveHour, weekly, ...PRESETS[key].patch, preset: key };
+  const { context, fiveHour, weekly, fiveHourElapsed, weeklyElapsed, paceColors } = defaultState();
+  return {
+    ...state, context, fiveHour, weekly, fiveHourElapsed, weeklyElapsed, paceColors,
+    ...PRESETS[key].patch, preset: key,
+  };
 }
 
 export function configFor(state, narrow) {
@@ -55,6 +65,7 @@ export function configFor(state, narrow) {
       ...['cost', 'task', 'pr'].filter((k) => on.includes(k))];
   const config = { segments, line2From: 'fiveHour' };
   if (state.noColor) config.color = false; // the real .amplinerc.json equivalent of NO_COLOR
+  if (state.paceColors) config.paceColors = true; // opt-in: absent while off, so the copied JSON stays `{}`
   return config;
 }
 
@@ -65,6 +76,9 @@ export function buildPlaygroundInput(state, now) {
   return statusPayload({
     family: state.family, effort: state.effort,
     context: state.context, fiveHour: state.fiveHour, weekly: state.weekly,
+    // The sliders hold percent of the window gone; a state without them gets the payload's own offsets.
+    fiveHourElapsed: state.fiveHourElapsed === undefined ? undefined : state.fiveHourElapsed / 100,
+    weeklyElapsed: state.weeklyElapsed === undefined ? undefined : state.weeklyElapsed / 100,
     rateLimits: withLimits, now,
   });
 }
@@ -144,8 +158,14 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
     fiveHour: { id: 'pg-fivehour', label: '5-hour limit used', input: range('pg-fivehour', 0, 100, 0.1) },
     weekly: { id: 'pg-weekly', label: 'Weekly limit used', input: range('pg-weekly', 0, 100, 0.1) },
   };
+  // The pace marker's position: percent of each window already gone. Capped at 99 because a window that is
+  // 100% gone has no reset time left to draw a marker or countdown from.
+  const elapsed = {
+    fiveHourElapsed: { id: 'pg-fivehour-elapsed', label: '5-hour window elapsed', input: range('pg-fivehour-elapsed', 0, 99, 1) },
+    weeklyElapsed: { id: 'pg-weekly-elapsed', label: 'Weekly window elapsed', input: range('pg-weekly-elapsed', 0, 99, 1) },
+  };
   // aria-live off: <output> is implicitly a live region; only the debounced status region should speak.
-  for (const s of Object.values(sliders)) s.output = h(doc, 'output', { for: s.id, 'aria-live': 'off' });
+  for (const s of [...Object.values(sliders), ...Object.values(elapsed)]) s.output = h(doc, 'output', { for: s.id, 'aria-live': 'off' });
   const widthInput = range('pg-width', 40, 200, 1);
   const widthOutput = h(doc, 'output', { for: 'pg-width', 'aria-live': 'off' });
 
@@ -153,6 +173,7 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
   const segButtons = {};
   for (const k of SEGMENT_KEYS) segButtons[k] = toggle(k);
   const noColorBtn = toggle('NO_COLOR');
+  const paceBtn = toggle('paceColors');
   const presetButtons = {};
   for (const [k, p] of Object.entries(PRESETS)) presetButtons[k] = toggle(p.label);
 
@@ -165,6 +186,7 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
     h(doc, 'span', { id, text: title }), h(doc, 'div', { class: 'seg-toggles' }, ...buttons), hint);
   const envHint = h(doc, 'p', { class: 'note play-hint' });
   const presetHint = h(doc, 'p', { class: 'note play-hint' });
+  const paceNote = h(doc, 'p', { class: 'note', text: PACE_NOTE });
 
   const widthField = h(doc, 'div', { class: 'field' },
     h(doc, 'div', { class: 'row' }, h(doc, 'label', { for: 'pg-width', text: 'Terminal width' }), widthOutput), widthInput);
@@ -173,6 +195,8 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
     select(modelId, 'Model', model),
     select(effortId, 'Effort', effort),
     slider(sliders.context), slider(sliders.fiveHour), slider(sliders.weekly),
+    slider(elapsed.fiveHourElapsed), slider(elapsed.weeklyElapsed),
+    group('pg-pace', 'Pace coloring', [paceBtn], paceNote),
     widthField,
     group('pg-segs', 'Segments', SEGMENT_KEYS.map((k) => segButtons[k])),
     group('pg-env', 'Environment', [noColorBtn], envHint),
@@ -224,6 +248,11 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
       s.input.value = String(state[k]);
       s.output.textContent = fmtPct(state[k]);
     }
+    for (const [k, s] of Object.entries(elapsed)) {
+      s.input.value = String(state[k]);
+      s.output.textContent = `${state[k]}%`;
+    }
+    paceBtn.setAttribute('aria-pressed', String(state.paceColors));
     widthInput.value = String(state.columns);
     widthOutput.textContent = `${state.columns} cols`;
     widthField.hidden = narrow;
@@ -266,6 +295,10 @@ export function mountPlayground({ mount, makeAmpline, win = window }) {
   for (const [k, s] of Object.entries(sliders)) {
     s.input.addEventListener('input', () => change({ [k]: Number(s.input.value) }));
   }
+  for (const [k, s] of Object.entries(elapsed)) {
+    s.input.addEventListener('input', () => change({ [k]: Number(s.input.value) }));
+  }
+  paceBtn.addEventListener('click', () => change({ paceColors: !state.paceColors }));
   widthInput.addEventListener('input', () => change({ columns: Number(widthInput.value) }));
   for (const k of SEGMENT_KEYS) {
     segButtons[k].addEventListener('click', () => {
