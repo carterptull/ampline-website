@@ -40,7 +40,7 @@ Tests use `node:test` and `node:assert/strict` only. `npm run sync:check` verifi
 
 ## Updating to a new ampline release
 
-1. Bump the `ampline-claude` devDependency in `package.json` (exact version, no `^`).
+1. `npm install ampline-claude@<new> --save-dev --save-exact` (this updates `package.json` and the lockfile from the registry; the pin is exact, no `^`).
 2. `npm run sync`
 3. Update the two static ampline-claude version spans (`#ampVersion`) in `site/index.html` and `site/404.html` to the new version. The tests enforce that they match the pinned devDependency.
 4. `npm test`, then fix whatever it flags:

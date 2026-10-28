@@ -264,7 +264,7 @@ test('the NOT_MONO allowlist has no stale entries', () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Versioned assets (S-M4): /assets/ is served `public, max-age=31536000, immutable`
+// Versioned assets: /assets/ is served `public, max-age=31536000, immutable`
 
 test('vercel.json still serves /assets/ immutable (the premise of the naming rule)', () => {
   const cfg = JSON.parse(readFileSync(join(ROOT, 'vercel.json'), 'utf8'));
