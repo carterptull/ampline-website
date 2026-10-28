@@ -50,7 +50,7 @@ test('GET / lets only the portfolio frame the site', async () => {
 });
 
 test('path-specific vercel.json cache headers apply (fonts immutable, icons a day)', async () => {
-  const font = await get('/assets/fonts/mono-400.v1.woff2');
+  const font = await get('/assets/fonts/mono-400.v2.woff2');
   assert.equal(font.status, 200);
   assert.equal(font.headers['cache-control'], 'public, max-age=31536000, immutable');
   assert.ok(font.headers['content-security-policy']);

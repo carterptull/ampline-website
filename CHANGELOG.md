@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `test/font-coverage.test.mjs`: parses both mono woff2 files and fails if the renderer or the site draws a glyph they lack, and checks that every file under `/assets/` exists and carries a `.vN.` version in its name (the assets are served `immutable`).
+- `scripts/fonts/README.md` and D24: the exact recipe for rebuilding the mono subset from Iosevka Fixed v34.9.0.
+
+### Changed
+
+- The self-hosted mono font is now `mono-400.v2.woff2` / `mono-700.v2.woff2`, adding `┃` (U+2503, the pace marker ampline-claude 1.0.0 draws in the usage bars) and `≥` (U+2265, the hero meta line). The v1 files are removed; the new filename is needed because `/assets/` is cached for a year (D24).
+
 ## [0.3.1] - 2026-10-23
 
 ### Changed

@@ -90,14 +90,15 @@ ampline-website/
 ├── scripts/
 │   ├── sync-ampline.mjs         node_modules/ampline-claude/lib → site/js/runtime/factories.generated.js
 │   ├── serve.mjs                zero-dep static server for site/ that applies vercel.json headers
-│   └── make-wordmark.mjs        one-off: Michroma TTF → site/assets/wordmark.v1.svg (uses a temp opentype.js)
+│   ├── make-wordmark.mjs        one-off: Michroma TTF → site/assets/wordmark.v1.svg (uses a temp opentype.js)
+│   └── fonts/README.md          how the two mono woff2 subsets are rebuilt from Iosevka Fixed (temp venv, pyftsubset, D24)
 ├── site/                        ← Vercel output directory (the website)
 │   ├── index.html
 │   ├── 404.html
 │   ├── og-card.html             1200x630 social-card render target (noindex, Disallowed in robots.txt); site/og.png is its screenshot
 │   ├── robots.txt  sitemap.xml  site.webmanifest
 │   ├── favicon.ico  icon.svg  apple-touch-icon.png  og.png
-│   ├── assets/  wordmark.v1.svg  fonts/mono-400.v1.woff2  fonts/mono-700.v1.woff2  fonts/OFL.txt
+│   ├── assets/  wordmark.v1.svg  fonts/mono-400.v2.woff2  fonts/mono-700.v2.woff2  fonts/OFL.txt
 │   ├── css/  tokens.css  site.css  og-card.css
 │   └── js/
 │       ├── main.js              entry: wires everything after DOMContentLoaded
@@ -123,6 +124,7 @@ ampline-website/
     ├── copy.test.mjs            wireCopy: clipboard, select fallback, label reset, aria-live messages
     ├── equalizer.test.mjs       one bar per wheel stop, size classes, hold/release, colors set via setProperty only
     ├── hero.test.mjs            hero typing, power-up and cycle; pauses while the tab is hidden
+    ├── font-coverage.test.mjs   both mono woff2 map every glyph the renderer and the site draw in mono (incl. ┃ U+2503, ≥ U+2265); every /assets/ file exists and carries a .vN. version
     ├── serve.test.mjs           dev server applies the vercel.json headers (HSTS, CSP, cache) and answers 400/403/404 safely
     ├── tour.test.mjs            tour cards, stable ids, overflow flags (watchOverflow/watchScrollable)
     ├── payloads.test.mjs
