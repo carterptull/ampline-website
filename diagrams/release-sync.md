@@ -3,9 +3,9 @@
 The site vendors a specific ampline-claude release, so every release of the package needs a
 matching update here. Dependabot notices the new version and opens a PR, but that PR is never
 merged: merging a bot PR would add the bot as a contributor. Instead the same bump is re-applied
-on a branch of Carter's, which is what gets merged. Vercel deploys are Carter's to run, and the
-Vercel project is not connected yet. The Vercel steps below are the **intended** flow: once
-Carter connects the project, PRs get preview deploys and `main` deploys to production.
+on a branch of Carter's, which is what gets merged. The site is live on Vercel at
+<https://ampline.js.org>: PRs get preview deploys and `main` deploys to production. The Vercel
+project settings and deploys are Carter's to run.
 
 ## Bump to production
 
@@ -31,11 +31,10 @@ sequenceDiagram
     ME->>GH: open a PR into main
     GH->>GH: test job runs npm ci, sync:check, npm test<br/>including the parity tests against the real binary
     GH-->>ME: required test check is green
-    Note over GH,VER: Intended, once the Vercel project is connected
     GH->>VER: preview deploy of the PR branch
     ME->>VER: check the preview in a browser
     ME->>GH: merge the PR with a merge commit
-    GH->>VER: production deploy of main, once connected
+    GH->>VER: production deploy of main
     ME->>GH: comment on the bot PR that it is superseded, close it
 ```
 

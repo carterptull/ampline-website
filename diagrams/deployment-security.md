@@ -1,9 +1,8 @@
 # Deployment and security
 
-How a visitor's request is meant to reach the static files, and what the response headers let
-the page do once it is in the browser. This describes the **intended** deployment: the site is
-built for `ampline.js.org` on Vercel, but the js.org entry and the Vercel project are set up by
-Carter outside this repo, so this file does not claim they are live. The only server-side
+How a visitor's request reaches the static files, and what the response headers let the page do
+once it is in the browser. The site is live at <https://ampline.js.org> on Vercel. The js.org
+entry and the Vercel project are set up by Carter outside this repo; the only server-side
 configuration the repo controls is [`../vercel.json`](../vercel.json). The policy summary is in
 [`../SECURITY.md`](../SECURITY.md).
 
@@ -24,8 +23,8 @@ flowchart LR
 
 **Why `noCF`.** js.org normally proxies records through Cloudflare. Vercel needs to answer the
 request itself so it can issue the certificate and serve the headers, so the record is marked
-`// noCF` and stays DNS-only. See D2 in [`../DECISIONS.md`](../DECISIONS.md). The js.org PR goes
-to a third-party repo and is Carter's to open.
+`// noCF` and stays DNS-only. See D2 in [`../DECISIONS.md`](../DECISIONS.md). The js.org entry
+lives in a third-party repo, so changes to it are Carter's to make.
 
 **Where each control lives.** DNS and the CNAME are js.org's. TLS and the edge are Vercel's.
 The headers, the clean URLs (`/og-card` serves `og-card.html`, no trailing slash) and the cache
@@ -35,10 +34,9 @@ CSP violation shows up before deploy. `vercel.json` sets `Strict-Transport-Secur
 in the CSP upgrades any stray `http:` subresource. Browsers ignore HSTS over plain `http://`, so the
 dev server sending it on `127.0.0.1` is harmless.
 
-**Ordering.** Create the Vercel project and add the domain `ampline.js.org` to it in Vercel
-**before** the js.org DNS entry goes live. A CNAME pointing at Vercel that no project claims can be
-taken over by another Vercel account. If the project is ever deleted, remove the js.org record
-first. Keep Vercel Web Analytics and Speed Insights off: they would add third-party requests, and
+**Ordering.** The Vercel project already claims `ampline.js.org`. Keep it that way: a CNAME
+pointing at Vercel that no project claims can be taken over by another Vercel account. If the
+project is ever deleted or the domain removed from it, remove the js.org record first. Keep Vercel Web Analytics and Speed Insights off: they would add third-party requests, and
 the Vercel preview toolbar loads from `vercel.live`, so `*.vercel.app` previews show CSP errors
 for signed-in team members. Production visitors are not affected.
 
@@ -89,8 +87,14 @@ Sent on every path (`/(.*)`):
 | `Cross-Origin-Opener-Policy` | `same-origin` | No shared browsing context with pages opened from here |
 | `Strict-Transport-Security` | `max-age=31536000` | HTTPS only for a year on this host. No `includeSubDomains` (ampline.js.org has no subdomains to cover) and no `preload` (a hard-to-undo browser-list commitment on a name under js.org, which we do not own) |
 
+**Added by the platform, not by `vercel.json`.** Vercel adds `Access-Control-Allow-Origin: *` to
+the static responses on its own (seen on the live `/`). It is harmless for a public site that
+sets no cookies and takes no credentials: any page may read these files, which are public anyway.
+It is a platform default, not a policy of this repo, and it does not affect who may frame the page
+(that is `frame-ancestors`, below) or what the page may load. The dev server does not send it.
+
 Cache rules (separate entries, only `Cache-Control`): `/assets/*` is `public, max-age=31536000,
-immutable` (filenames carry a version, such as `wordmark.v1.svg`), and `og.png`, `favicon.ico`,
+immutable` (filenames carry a version, such as `wordmark.v1.svg` or `mono-400.v2.woff2`; a changed asset gets a new name), and `og.png`, `favicon.ico`,
 `icon.svg` and `apple-touch-icon.png` are `public, max-age=86400`.
 
 ## CSP directives

@@ -41,13 +41,14 @@ own registry. These requests do not reach the vendored code as written:
 | `fs`, `crypto`, `child_process` | stubs that throw if anything calls them |
 | `path`, `os`, `claudeDir` | small shims (`/home/you`, with `.claude` under it) |
 
-**The page uses several instances on purpose.** `main.js` makes a 120-column instance for the
-hero, a separate 500-column one for the tour (which reconfigures segments per card) and
-its own for the playground and a fourth 120-column one for the install demo, so config set for
-one never leaks into another.
+**The page uses several instances on purpose.** The hero, the tour and the install demo each get
+their own: a 120-column instance for the hero, a separate 500-column one for the tour (which
+reconfigures segments per card) and a 120-column one for the install demo. The playground owns two
+more, a colored one and a NO_COLOR one, so the page runs five in all and config set on one never
+leaks into another.
 `createAmpline({ noColor })` exists in the runtime API because `colors.js` reads `NO_COLOR`
-once when it loads, so no-color output needs its own instance. The playground creates one
-the first time NO_COLOR is switched on. Each playground render clears the instance's
+once when it loads, so no-color output needs its own instance. The playground creates its NO_COLOR
+instance the first time NO_COLOR is switched on. Each playground render clears the instance's
 in-memory cache first (`resetCache()`), so the output depends only on the controls.
 
 **The wave logo uses the renderer's wheel but is not part of the render path.** `main.js` passes

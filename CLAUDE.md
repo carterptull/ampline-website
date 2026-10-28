@@ -50,7 +50,7 @@ stubs for the Node-only parts. Its ANSI output is turned into DOM nodes, never H
 ## Rules that apply everywhere
 
 - Node `>=24` (matches ampline-claude's `engines`).
-- `package.json` has **no `dependencies`**. The only devDependency is `"ampline-claude": "0.6.0"` (exact pin, no `^`).
+- `package.json` has **no `dependencies`**. The only devDependency is `"ampline-claude": "1.0.0"` (exact pin, no `^`).
 - Tests use `node:test` and `node:assert/strict` only. No jsdom, Jest, Playwright or Puppeteer. Browser checks use Google Chrome via the Chrome DevTools MCP. The test script is `node --test "test/*.test.mjs"` (quoted glob; bare `node --test test/` is broken on Node 24).
 - Everything the browser loads is served from the site's own origin. Zero third-party requests.
 - No `style=` attributes and no `on*=` attributes in any HTML, and no `innerHTML` with markup, in `site/`.

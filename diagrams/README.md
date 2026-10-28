@@ -9,7 +9,7 @@ each decision. The decision log explains the reasoning behind it.
 | [`overview.md`](overview.md) | Start here: the visitor, the static site on Vercel, and the only places the page ever links out to |
 | [`render-pipeline.md`](render-pipeline.md) | How ampline-claude's real renderer ends up running in the browser: sync, runtime, payloads, ANSI to DOM, and the tests that keep it honest |
 | [`page-structure.md`](page-structure.md) | The sections of `index.html` in order, and which JS module fills which container |
-| [`deployment-security.md`](deployment-security.md) | The intended path from a browser to the static files (js.org DNS, Vercel edge), the response headers, the CSP, and the zero-third-party-origins rule |
+| [`deployment-security.md`](deployment-security.md) | The path from a browser to the static files (js.org DNS, Vercel edge), the response headers, the CSP, and the zero-third-party-origins rule |
 | [`release-sync.md`](release-sync.md) | What happens when a new ampline-claude version ships: Dependabot, the sync script, CI, preview, and production |
 
 ## Keeping these current
