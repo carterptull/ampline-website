@@ -6,7 +6,7 @@ export const MODEL_NAMES = {
   haiku: { id: 'claude-haiku-5-5', name: 'Haiku 5.5' },
   sonnet: { id: 'claude-sonnet-5-5', name: 'Sonnet 5.5' },
   opus: { id: 'claude-opus-5-5', name: 'Opus 5.5' },
-  fable: { id: 'claude-fable-5-1', name: 'Fable 5.1' },
+  fable: { id: 'claude-fable-5-2', name: 'Fable 5.2' },
 };
 
 export const HERO_CYCLE = [

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { statusPayload, subagentPayload, wheelIndex, HERO_CYCLE, FAMILIES } from '../site/js/payloads.js';
+import { statusPayload, subagentPayload, wheelIndex, HERO_CYCLE, FAMILIES, MODEL_NAMES } from '../site/js/payloads.js';
 import { createAmpline, subagentRows } from '../site/js/runtime/ampline.js';
 
 test('wheelIndex maps family x effort onto the 20-step wheel', () => {
@@ -76,4 +76,17 @@ test('statusPayload: the pace marker moves with the elapsed fraction (through th
   const at = (f, w) => cell(w, statusPayload({ fiveHourElapsed: f, weeklyElapsed: f }));
   assert.deepEqual([0.1, 0.5, 0.9].map((f) => at(f, 'H')), [0, 4, 7]);
   assert.deepEqual([0.1, 0.5, 0.9].map((f) => at(f, 'W')), [0, 4, 7]);
+});
+
+test('each demo model renders with its own name and its family color', () => {
+  const amp = createAmpline({ columns: 200 });
+  for (const fam of FAMILIES) {
+    const { id, name } = MODEL_NAMES[fam];
+    assert.ok(id.includes(fam), `${id} belongs to the ${fam} family`);
+    const out = amp.renderStatusline(statusPayload({ family: fam, effort: 'high' }));
+    assert.ok(amp.stripAnsi(out).includes(`${name} · high`), `${name} shows as sent`);
+    const wheel = amp.colors.WHEEL[wheelIndex(fam, 'high')];
+    assert.ok(out.includes(`\u001b[38;2;${wheel.join(';')}m`), `${name} uses the ${fam} wheel color`);
+  }
+  assert.equal(MODEL_NAMES.fable.name, 'Fable 5.2');
 });
