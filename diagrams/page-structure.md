@@ -68,4 +68,4 @@ social card from the same runtime, and `site/og.png` is a screenshot of it at 12
 marked `noindex` and disallowed in `robots.txt`.
 
 ---
-_Last verified: 2026-10-28 · site 1.0.0_
+_Last verified: 2026-11-10 · site 1.0.1_

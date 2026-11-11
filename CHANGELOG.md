@@ -5,6 +5,17 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-10
+
+The demos now show the Fable 5.2 model, and the site renders ampline-claude 1.0.1.
+
+### Changed
+- The demo Fable model is Fable 5.2 (it was Fable 5.1) in the hero cycle, tour, playground model list and install demo.
+- `ampline-claude` pinned at 1.0.1 (a docs and tests release; the renderer did not change).
+
+### Added
+- A test that every demo model renders with its own name and its family color.
+
 ## [1.0.0] - 2026-10-28
 
 The first stable release of the site. It renders ampline-claude 1.0.0 (the pace marker, opt-in pace
