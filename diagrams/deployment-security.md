@@ -127,4 +127,4 @@ the header value. The outbound links are navigations the visitor chooses, not re
 page makes.
 
 ---
-_Last verified: 2026-10-28 · site 1.0.0_
+_Last verified: 2026-11-10 · site 1.0.1_
